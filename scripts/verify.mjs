@@ -300,6 +300,64 @@ function phase3() {
   summary('phase3');
 }
 
+// ────────── Phase 4A.1 — terminal vendor + PTY skeleton ──────────
+function phase4a1() {
+  logRun('phase4a.1');
+
+  check('vendored terminal main.ts SHA matches STATE', () => {
+    const state = JSON.parse(readFile('STATE.json'));
+    const expected = state.decisions.vendored_terminal_main_sha256;
+    const actual = sha256('src/vendor/terminal/main.ts');
+    if (actual !== expected) {
+      throw new Error(`SHA mismatch: expected ${expected.slice(0, 12)}… got ${actual.slice(0, 12)}…`);
+    }
+    return actual.slice(0, 12) + '…';
+  });
+
+  check('vendored main.ts preserves required class declarations', () => {
+    const src = readFile('src/vendor/terminal/main.ts');
+    const required = ['class TerminalSession', 'class WikiLinkAutocomplete', 'class FullscreenManager', 'PTY_HELPER_PY'];
+    for (const r of required) {
+      if (!src.includes(r)) throw new Error(`missing token: ${r}`);
+    }
+    return `${required.length} tokens present`;
+  });
+
+  check('vendored LICENSE present', () => {
+    if (!exists('src/vendor/terminal/LICENSE')) throw new Error('missing src/vendor/terminal/LICENSE');
+    const txt = readFile('src/vendor/terminal/LICENSE');
+    if (!txt.includes('MIT')) throw new Error('LICENSE does not look like MIT');
+    return '';
+  });
+
+  check('TypeScript strict compiles', () => {
+    const r = spawnSync('npx', ['--no-install', 'tsc', '-p', 'tsconfig.json', '--noEmit'], {
+      cwd: root,
+      encoding: 'utf8',
+    });
+    if (r.status !== 0) throw new Error(`tsc exit ${r.status}: ${(r.stderr || r.stdout || '').slice(0, 400)}`);
+    return '';
+  });
+
+  check('pnpm build', () => {
+    const r = spawnSync('pnpm', ['build'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`pnpm build exit ${r.status}: ${(r.stderr || r.stdout || '').slice(0, 400)}`);
+    if (!exists('main.js')) throw new Error('main.js missing');
+    return '';
+  });
+
+  check('vitest phase4a.1 suite', () => {
+    const r = spawnSync('npx', ['--no-install', 'vitest', 'run', 'tests/phase4a-1.spec.ts'], {
+      cwd: root,
+      encoding: 'utf8',
+    });
+    if (r.status !== 0) throw new Error(`vitest exit ${r.status}: ${(r.stdout || r.stderr || '').slice(-600)}`);
+    return '';
+  });
+
+  summary('phase4a.1');
+}
+
 // ────────── Fail-closed stubs for later phases ──────────
 function unimplemented(p) {
   throw new Error(
@@ -312,7 +370,7 @@ const dispatch = {
   phase1,
   phase2,
   phase3,
-  'phase4a.1': () => unimplemented('4a.1'),
+  'phase4a.1': phase4a1,
   'phase4a.2': () => unimplemented('4a.2'),
   phase4b: () => unimplemented('4b'),
   phase5a: () => unimplemented('5a'),

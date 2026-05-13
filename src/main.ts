@@ -1,9 +1,15 @@
 import { Plugin } from 'obsidian';
-import { PLUGIN_ID, VIEW_TYPE_WORKDESK_HTML, VIEW_TYPE_WORKDESK_ZONE } from './constants';
+import {
+  PLUGIN_ID,
+  VIEW_TYPE_WORKDESK_HTML,
+  VIEW_TYPE_WORKDESK_TERMINAL,
+  VIEW_TYPE_WORKDESK_ZONE,
+} from './constants';
 import { DEFAULT_SETTINGS, WorkdeskSettings } from './settings';
 import { WorkdeskRibbon } from './views/RibbonControl';
 import { ZoneView } from './views/ZoneView';
 import { HtmlView } from './views/HtmlView';
+import { TerminalView } from './views/TerminalView';
 import { mountShell } from './layout/shell';
 import { wikilinkAndTagDecorations } from './editor/wikilink-ext';
 import type { ZoneId } from './types';
@@ -33,6 +39,8 @@ export default class WorkdeskosPlugin extends Plugin {
 
     this.registerView(VIEW_TYPE_WORKDESK_HTML, (leaf) => new HtmlView(leaf, this));
     this.registerExtensions(['html', 'htm'], VIEW_TYPE_WORKDESK_HTML);
+
+    this.registerView(VIEW_TYPE_WORKDESK_TERMINAL, (leaf) => new TerminalView(leaf, this));
 
     this.registerEditorExtension(wikilinkAndTagDecorations);
   }

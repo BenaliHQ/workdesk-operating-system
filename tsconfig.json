@@ -19,5 +19,5 @@
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],
-  "exclude": ["node_modules", "tests", "_inputs", "scripts"]
+  "exclude": ["node_modules", "tests", "_inputs", "scripts", "src/vendor/**/*"]
 }

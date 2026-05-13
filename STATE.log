@@ -99,3 +99,28 @@
   - [ok] TypeScript strict compiles
   - [ok] pnpm build
   - [ok] vitest phase3 suite
+## 2026-05-13T14:54:57.524Z  verify phase4a.1
+  - [ok] vendored terminal main.ts SHA matches STATE — ec705c8c50dd…
+  - [ok] vendored main.ts preserves required class declarations — 4 tokens present
+  - [ok] vendored LICENSE present
+  - [ok] TypeScript strict compiles
+  - [FAIL] pnpm build — pnpm build exit 1: ✘ [ERROR] Could not resolve "fs"
+
+    src/terminal/session.ts:11:20:
+      11 │ import * as fs from 'fs';
+         ╵                     ~~~~
+
+  The package "fs" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "os"
+
+    src/terminal/session.ts:12:20:
+    
+  - [ok] vitest phase4a.1 suite
+## 2026-05-13T14:55:08.478Z  verify phase4a.1
+  - [ok] vendored terminal main.ts SHA matches STATE — ec705c8c50dd…
+  - [ok] vendored main.ts preserves required class declarations — 4 tokens present
+  - [ok] vendored LICENSE present
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase4a.1 suite
