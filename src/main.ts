@@ -1,20 +1,50 @@
 import { Plugin } from 'obsidian';
 import { PLUGIN_ID } from './constants';
 import { DEFAULT_SETTINGS, WorkdeskSettings } from './settings';
+import { WorkdeskRibbon } from './views/RibbonControl';
+import { mountShell } from './layout/shell';
+import type { ZoneId } from './types';
 
 export default class WorkdeskosPlugin extends Plugin {
   settings!: WorkdeskSettings;
+  ribbon: WorkdeskRibbon | null = null;
+  activeZone: ZoneId = 'atlas';
 
   async onload(): Promise<void> {
     console.log(`[${PLUGIN_ID}] loaded`);
     await this.loadSettings();
-    // Phase 1 wires the four-pane shell + ribbon + splitters here.
+
+    const appEl = document.body.querySelector('.app') as HTMLElement | null
+      ?? document.body;
+    await mountShell(this, {
+      appEl,
+      settings: this.settings,
+      saveSettings: () => this.saveSettings(),
+    });
+
+    this.ribbon = new WorkdeskRibbon(this);
+    this.ribbon.mount(appEl);
+    this.ribbon.onSlot((slot) => this.handleSlot(slot));
+
     // Phase 2 registers VIEW_TYPE_WORKDESK_ZONE.
     // Phase 3 registers VIEW_TYPE_WORKDESK_HTML + editor extensions.
   }
 
   async onunload(): Promise<void> {
+    this.ribbon?.unmount();
     console.log(`[${PLUGIN_ID}] unloaded`);
+  }
+
+  private handleSlot(slot: string): void {
+    const zones: ZoneId[] = ['atlas', 'gtd', 'intel', 'personal', 'system', 'config', 'files'];
+    if (zones.includes(slot as ZoneId)) {
+      this.activeZone = slot as ZoneId;
+      this.ribbon?.setActiveZone(this.activeZone);
+    } else if (slot === 'focus') {
+      const next = !document.body.classList.contains('focus-on');
+      document.body.classList.toggle('focus-on', next);
+      this.ribbon?.setFocus(next);
+    }
   }
 
   async loadSettings(): Promise<void> {

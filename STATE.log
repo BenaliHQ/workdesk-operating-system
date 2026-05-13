@@ -87,3 +87,7 @@
   - [ok] pnpm build → main.js + styles.css — build ok
   - [ok] fonts/ contains ≥ 8 .woff2 with SHAs in STATE.decisions.font_shas — 8 fonts verified
   - [ok] prompts/S*.md absent (mega-spec mode) — no prompts/S*.md
+## 2026-05-13T14:43:05.633Z  verify phase1
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase1 suite
