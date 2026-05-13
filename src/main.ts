@@ -1,7 +1,8 @@
 import { Plugin } from 'obsidian';
-import { PLUGIN_ID } from './constants';
+import { PLUGIN_ID, VIEW_TYPE_WORKDESK_ZONE } from './constants';
 import { DEFAULT_SETTINGS, WorkdeskSettings } from './settings';
 import { WorkdeskRibbon } from './views/RibbonControl';
+import { ZoneView } from './views/ZoneView';
 import { mountShell } from './layout/shell';
 import type { ZoneId } from './types';
 
@@ -26,7 +27,8 @@ export default class WorkdeskosPlugin extends Plugin {
     this.ribbon.mount(appEl);
     this.ribbon.onSlot((slot) => this.handleSlot(slot));
 
-    // Phase 2 registers VIEW_TYPE_WORKDESK_ZONE.
+    this.registerView(VIEW_TYPE_WORKDESK_ZONE, (leaf) => new ZoneView(leaf, this));
+
     // Phase 3 registers VIEW_TYPE_WORKDESK_HTML + editor extensions.
   }
 

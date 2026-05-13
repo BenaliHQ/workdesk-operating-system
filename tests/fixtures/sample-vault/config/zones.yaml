@@ -1,56 +1,66 @@
 zones:
-  atlas:
+  - id: atlas
     name: atlas
     sub: people, companies, projects
     icon: globe
+    root: atlas
     objects:
       - id: projects
         title: projects
         sub: active work
         icon: badge
-        path: atlas/projects
+        folder: atlas/projects
       - id: people
         title: people
         sub: relationships
         icon: person
-        path: atlas/people
-  gtd:
+        folder: atlas/people
+
+  - id: gtd
     name: gtd
     sub: inbox, actions, projects
     icon: check
+    root: gtd
     objects:
       - id: inbox
         title: inbox
         sub: unprocessed
         icon: inbox
-        path: gtd/inbox
+        folder: gtd/inbox
+        empty: caught-up
       - id: projects
         title: projects
         sub: active work
         icon: badge
-        path: gtd/projects
-  intel:
+        folder: gtd/projects
+
+  - id: intel
     name: intel
-    sub: concepts, syntheses, reference
+    sub: concepts, syntheses
     icon: signal
+    root: intel
     objects:
       - id: concepts
         title: concepts
         sub: named frameworks
         icon: book
-        path: intel/concepts
-  system:
+        folder: intel/concepts
+
+  - id: system
     name: system
-    sub: logs, intake
+    sub: logs
     icon: layers
+    root: system
     objects:
       - id: log
         title: log
         sub: append-only
         icon: list
-        path: system/log.md
-  config:
+        file: system/log.md
+
+  - id: config
     name: config
     sub: rules, tools, zones
     icon: gear
+    root: config
     objects: []
