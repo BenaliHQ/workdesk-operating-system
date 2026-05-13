@@ -65,9 +65,9 @@
       "checkpoint": null
     },
     "6b": {
-      "status": "PENDING",
-      "commit": null,
-      "verified_at": null,
+      "status": "PASS",
+      "commit": "00eaa80d3f2875c5d0a93a4d114b4a337e42c9a3",
+      "verified_at": "2026-05-13T17:35:00.000Z",
       "checkpoint": null
     }
   },
