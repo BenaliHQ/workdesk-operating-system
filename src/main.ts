@@ -1,5 +1,6 @@
 import { Plugin } from 'obsidian';
 import {
+  COMMAND_ID_PREFIX,
   PLUGIN_ID,
   VIEW_TYPE_WORKDESK_HTML,
   VIEW_TYPE_WORKDESK_TERMINAL,
@@ -12,6 +13,8 @@ import { HtmlView } from './views/HtmlView';
 import { TerminalView } from './views/TerminalView';
 import { mountShell } from './layout/shell';
 import { wikilinkAndTagDecorations } from './editor/wikilink-ext';
+import { CommandPalette } from './modals/CommandPalette';
+import { WorkdeskSettingTab } from './settings/tab';
 import type { ZoneId } from './types';
 
 export default class WorkdeskosPlugin extends Plugin {
@@ -43,11 +46,55 @@ export default class WorkdeskosPlugin extends Plugin {
     this.registerView(VIEW_TYPE_WORKDESK_TERMINAL, (leaf) => new TerminalView(leaf, this));
 
     this.registerEditorExtension(wikilinkAndTagDecorations);
+
+    this.addSettingTab(new WorkdeskSettingTab(this.app, this));
+
+    this.addCommand({
+      id: `${COMMAND_ID_PREFIX}:open-palette`,
+      name: 'Open command palette',
+      hotkeys: [{ modifiers: ['Mod'], key: 'k' }],
+      callback: () => new CommandPalette(this.app).open(),
+    });
+
+    this.addCommand({
+      id: `${COMMAND_ID_PREFIX}:terminal:toggle`,
+      name: 'Toggle terminal pane',
+      callback: () => this.toggleTerminalPane(),
+    });
+
+    this.addCommand({
+      id: `${COMMAND_ID_PREFIX}:terminal:new-tab`,
+      name: 'New terminal tab',
+      callback: () => this.openNewTerminalTab(),
+    });
+
+    this.addCommand({
+      id: `${COMMAND_ID_PREFIX}:capture:triage`,
+      name: 'Triage capture inbox',
+      callback: () => this.triageCaptureInbox(),
+    });
   }
 
   async onunload(): Promise<void> {
     this.ribbon?.unmount();
     console.log(`[${PLUGIN_ID}] unloaded`);
+  }
+
+  private toggleTerminalPane(): void {
+    const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKDESK_TERMINAL);
+    if (leaves.length > 0) {
+      this.app.workspace.revealLeaf(leaves[0]!);
+    }
+  }
+
+  private async openNewTerminalTab(): Promise<void> {
+    const leaf = this.app.workspace.getLeaf('tab');
+    await leaf.setViewState({ type: VIEW_TYPE_WORKDESK_TERMINAL, active: true });
+    this.app.workspace.revealLeaf(leaf);
+  }
+
+  private triageCaptureInbox(): void {
+    // Phase 5A registers the command surface; the capture inbox flow lands in M3.
   }
 
   private handleSlot(slot: string): void {

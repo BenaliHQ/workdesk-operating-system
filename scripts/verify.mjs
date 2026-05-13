@@ -424,6 +424,39 @@ function phase4b() {
   summary('phase4b');
 }
 
+// ────────── Phase 5A — command palette + settings ──────────
+function phase5a() {
+  logRun('phase5a');
+
+  check('vendored terminal main.ts SHA still matches STATE', () => {
+    const state = JSON.parse(readFile('STATE.json'));
+    const expected = state.decisions.vendored_terminal_main_sha256;
+    const actual = sha256('src/vendor/terminal/main.ts');
+    if (actual !== expected) throw new Error(`SHA drift`);
+    return actual.slice(0, 12) + '…';
+  });
+
+  check('TypeScript strict compiles', () => {
+    const r = spawnSync('npx', ['--no-install', 'tsc', '-p', 'tsconfig.json', '--noEmit'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`tsc exit ${r.status}: ${(r.stderr || r.stdout || '').slice(0, 400)}`);
+    return '';
+  });
+
+  check('pnpm build', () => {
+    const r = spawnSync('pnpm', ['build'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`pnpm build exit ${r.status}`);
+    return '';
+  });
+
+  check('vitest phase5a suite', () => {
+    const r = spawnSync('npx', ['--no-install', 'vitest', 'run', 'tests/phase5a.spec.ts'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`vitest exit ${r.status}: ${(r.stdout || r.stderr || '').slice(-600)}`);
+    return '';
+  });
+
+  summary('phase5a');
+}
+
 // ────────── Fail-closed stubs for later phases ──────────
 function unimplemented(p) {
   throw new Error(
@@ -439,7 +472,7 @@ const dispatch = {
   'phase4a.1': phase4a1,
   'phase4a.2': phase4a2,
   phase4b,
-  phase5a: () => unimplemented('5a'),
+  phase5a,
   phase5b: () => unimplemented('5b'),
   phase6a: () => unimplemented('6a'),
   phase6b: () => unimplemented('6b'),
