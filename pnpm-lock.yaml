@@ -21,6 +21,12 @@ importers:
         specifier: 4.1.0
         version: 4.1.0
     devDependencies:
+      '@codemirror/state':
+        specifier: 6.4.1
+        version: 6.4.1
+      '@codemirror/view':
+        specifier: 6.34.1
+        version: 6.34.1
       '@fontsource-variable/dm-sans':
         specifier: 5.2.5
         version: 5.2.5
@@ -47,7 +53,7 @@ importers:
         version: 15.11.0
       obsidian:
         specifier: 1.11.4
-        version: 1.11.4(@codemirror/state@6.5.0)(@codemirror/view@6.38.6)
+        version: 1.11.4(@codemirror/state@6.4.1)(@codemirror/view@6.34.1)
       typescript:
         specifier: 5.4.5
         version: 5.4.5
@@ -60,11 +66,11 @@ importers:
 
 packages:
 
-  '@codemirror/state@6.5.0':
-    resolution: {integrity: sha512-MwBHVK60IiIHDcoMet78lxt6iw5gJOGSbNbOIVBHWVXIH4/Nq1+GQgLLGgI1KlnN86WDXsPudVaqYHKBIx7Eyw==}
+  '@codemirror/state@6.4.1':
+    resolution: {integrity: sha512-QkEyUiLhsJoZkbumGZlswmAhA7CBU02Wrz7zvH4SrcifbsqwlXShVXg65f3v/ts57W3dqyamEriMhij1Z3Zz4A==}
 
-  '@codemirror/view@6.38.6':
-    resolution: {integrity: sha512-qiS0z1bKs5WOvHIAC0Cybmv4AJSkAXgX5aD6Mqd2epSLlVJsQl8NG23jCVouIgkh4All/mrbdsf2UOLFnJw0tw==}
+  '@codemirror/view@6.34.1':
+    resolution: {integrity: sha512-t1zK/l9UiRqwUNPm+pdIT0qzJlzuVckbTEMVNFhfWkGiBQClstzg+78vedCvLSX0xJEZ6lwZbPpnljL7L6iwMQ==}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -366,9 +372,6 @@ packages:
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
 
-  '@marijn/find-cluster-break@1.0.2':
-    resolution: {integrity: sha512-l0h88YhZFyKdXIFNfSWpyjStDjGHwZ/U7iobcK1cQQD8sejsONdQtTVU+1wVN1PBw40PiiHB1vA5S7VTfQiP9g==}
-
   '@rollup/rollup-android-arm-eabi@4.60.3':
     resolution: {integrity: sha512-x35CNW/ANXG3hE/EZpRU8MXX1JDN86hBb2wMGAtltkz7pc6cxgjpy1OMMfDosOQ+2hWqIkag/fGok1Yady9nGw==}
     cpu: [arm]
@@ -587,9 +590,6 @@ packages:
   check-error@2.1.3:
     resolution: {integrity: sha512-PAJdDJusoxnwm1VwW07VWwUN1sl7smmC3OKggvndJFadxxDRyFJBX/ggnu/KE4kQAB7a3Dp8f/YXC1FlUprWmA==}
     engines: {node: '>= 16'}
-
-  crelt@1.0.6:
-    resolution: {integrity: sha512-VQ2MBenTq1fWZUH9DJNGti7kKv6EeAuYr3cLwxUWhIu1baTaXh4Ib5W2CqHVqib4/MqbYGJqiL3Zb8GJZr3l4g==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -811,14 +811,11 @@ packages:
 
 snapshots:
 
-  '@codemirror/state@6.5.0':
-    dependencies:
-      '@marijn/find-cluster-break': 1.0.2
+  '@codemirror/state@6.4.1': {}
 
-  '@codemirror/view@6.38.6':
+  '@codemirror/view@6.34.1':
     dependencies:
-      '@codemirror/state': 6.5.0
-      crelt: 1.0.6
+      '@codemirror/state': 6.4.1
       style-mod: 4.1.3
       w3c-keyname: 2.2.8
 
@@ -973,8 +970,6 @@ snapshots:
   '@fontsource-variable/manrope@5.2.5': {}
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
-
-  '@marijn/find-cluster-break@1.0.2': {}
 
   '@rollup/rollup-android-arm-eabi@4.60.3':
     optional: true
@@ -1137,8 +1132,6 @@ snapshots:
 
   check-error@2.1.3: {}
 
-  crelt@1.0.6: {}
-
   debug@4.4.3:
     dependencies:
       ms: 2.1.3
@@ -1236,10 +1229,10 @@ snapshots:
 
   nanoid@3.3.12: {}
 
-  obsidian@1.11.4(@codemirror/state@6.5.0)(@codemirror/view@6.38.6):
+  obsidian@1.11.4(@codemirror/state@6.4.1)(@codemirror/view@6.34.1):
     dependencies:
-      '@codemirror/state': 6.5.0
-      '@codemirror/view': 6.38.6
+      '@codemirror/state': 6.4.1
+      '@codemirror/view': 6.34.1
       '@types/codemirror': 5.60.8
       moment: 2.29.4
 

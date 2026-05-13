@@ -106,7 +106,22 @@
     "first_run_gate": "settings.onboarding.completed",
     "stt_key_api": "obsidian-secret-storage-and-component-since-1.11.4",
     "min_app_version": "1.11.4",
-    "added_deps": [],
+    "added_deps": [
+      {
+        "name": "@codemirror/view",
+        "version": "6.34.1",
+        "reason": "phase 3 wikilink/tag ViewPlugin needs CM6 types; Obsidian bundles CM6 at runtime so external in esbuild",
+        "added_in_session": "M1",
+        "added_in_phase": "3"
+      },
+      {
+        "name": "@codemirror/state",
+        "version": "6.4.1",
+        "reason": "phase 3 RangeSetBuilder + Decoration shape; CM6 state peer of @codemirror/view",
+        "added_in_session": "M1",
+        "added_in_phase": "3"
+      }
+    ],
     "context7_available": false
   },
   "runtime": {

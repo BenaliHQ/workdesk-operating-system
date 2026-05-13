@@ -29,6 +29,8 @@
     "zod": "3.23.8",
     "@fontsource-variable/dm-sans": "5.2.5",
     "@fontsource-variable/manrope": "5.2.5",
-    "@fontsource-variable/geist-mono": "5.2.5"
+    "@fontsource-variable/geist-mono": "5.2.5",
+    "@codemirror/view": "6.34.1",
+    "@codemirror/state": "6.4.1"
   }
 }
