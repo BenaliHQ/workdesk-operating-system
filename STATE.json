@@ -47,9 +47,9 @@
       "checkpoint": null
     },
     "5a": {
-      "status": "PENDING",
-      "commit": null,
-      "verified_at": null,
+      "status": "PASS",
+      "commit": "fb100808bce373e74bd4e18f5b8ec33dff6d3aa1",
+      "verified_at": "2026-05-13T15:40:00.000Z",
       "checkpoint": null
     },
     "5b": {
