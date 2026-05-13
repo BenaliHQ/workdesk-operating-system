@@ -23,9 +23,9 @@
       "checkpoint": null
     },
     "3": {
-      "status": "PENDING",
-      "commit": null,
-      "verified_at": null,
+      "status": "PASS",
+      "commit": "b13511f1fac6fc767211fab0bcfc1082632234f4",
+      "verified_at": "2026-05-13T14:47:48.100Z",
       "checkpoint": null
     },
     "4a.1": {

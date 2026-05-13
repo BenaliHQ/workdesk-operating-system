@@ -12,7 +12,7 @@
 | 0 | **PASS** | `62e73f693` | 2026-05-13T14:41:32.260Z |
 | 1 | **PASS** | `b21337a62` | 2026-05-13T14:43:21.941Z |
 | 2 | **PASS** | `ad4714dc0` | 2026-05-13T14:45:55.476Z |
-| 3 | **PENDING** | — | — |
+| 3 | **PASS** | `b13511f1f` | 2026-05-13T14:47:48.100Z |
 | 4a.1 | **PENDING** | — | — |
 | 4a.2 | **PENDING** | — | — |
 | 4b | **PENDING** | — | — |
@@ -48,8 +48,8 @@
 - `first_run_gate`: `"settings.onboarding.completed"`
 - `stt_key_api`: `obsidian-secret-stor…since-1.11.4`
 - `min_app_version`: `"1.11.4"`
-- `added_deps`: 0 entries
+- `added_deps`: 2 entries
 - `context7_available`: `false`
 
 ---
-_Rendered at 2026-05-13T14:45:55.521Z from `STATE.json`._
+_Rendered at 2026-05-13T14:47:48.145Z from `STATE.json`._
