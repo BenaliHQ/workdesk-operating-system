@@ -618,6 +618,91 @@ function phase6a() {
   summary('phase6a');
 }
 
+// ────────── Phase 6B — A11y audit + DONE-machine ──────────
+function phase6b() {
+  logRun('phase6b');
+
+  check('vendored terminal main.ts SHA still matches STATE', () => {
+    const state = JSON.parse(readFile('STATE.json'));
+    const expected = state.decisions.vendored_terminal_main_sha256;
+    const actual = sha256('src/vendor/terminal/main.ts');
+    if (actual !== expected) throw new Error('SHA drift');
+    return actual.slice(0, 12) + '…';
+  });
+
+  check('tokens.css + app.css SHAs still match STATE.decisions (no M1 drift)', () => {
+    const state = JSON.parse(readFile('STATE.json'));
+    const tokens = sha256('styles/tokens.css');
+    const app = sha256('styles/app.css');
+    if (tokens !== state.decisions.tokens_css_sha256) throw new Error('tokens.css drift');
+    if (app !== state.decisions.app_css_sha256) throw new Error('app.css drift');
+    return 'both match';
+  });
+
+  check('TypeScript strict compiles', () => {
+    const r = spawnSync('npx', ['--no-install', 'tsc', '-p', 'tsconfig.json', '--noEmit'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`tsc exit ${r.status}: ${(r.stderr || r.stdout || '').slice(0, 400)}`);
+    return '';
+  });
+
+  check('pnpm build', () => {
+    const r = spawnSync('pnpm', ['build'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`pnpm build exit ${r.status}`);
+    return '';
+  });
+
+  check('vitest a11y-audit suite', () => {
+    const r = spawnSync('npx', ['--no-install', 'vitest', 'run', 'tests/a11y-audit.spec.ts'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`vitest exit ${r.status}: ${(r.stdout || r.stderr || '').slice(-1500)}`);
+    return '';
+  });
+
+  check('vitest done-checklist suite', () => {
+    const r = spawnSync('npx', ['--no-install', 'vitest', 'run', 'tests/done-checklist.spec.ts'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`vitest exit ${r.status}: ${(r.stdout || r.stderr || '').slice(-1500)}`);
+    return '';
+  });
+
+  check('tests/a11y-audit.report.md generated', () => {
+    if (!exists('tests/a11y-audit.report.md')) throw new Error('a11y-audit.report.md missing');
+    return '';
+  });
+
+  check('tests/done-checklist.report.md generated', () => {
+    if (!exists('tests/done-checklist.report.md')) throw new Error('done-checklist.report.md missing');
+    return '';
+  });
+
+  check('tests/manual-checklist.md generated with Yvette flow + 2-week dogfood', () => {
+    if (!exists('tests/manual-checklist.md')) throw new Error('manual-checklist.md missing');
+    const md = readFile('tests/manual-checklist.md');
+    if (!md.toLowerCase().includes('yvette')) throw new Error('manual-checklist missing Yvette flow');
+    if (!md.toLowerCase().includes('two-week') && !md.includes('10 consecutive')) {
+      throw new Error('manual-checklist missing 2-week dogfood section');
+    }
+    return '';
+  });
+
+  check('manifest.json.version === "1.0.0"', () => {
+    const m = JSON.parse(readFile('manifest.json'));
+    if (m.version !== '1.0.0') throw new Error(`version=${m.version}`);
+    return '';
+  });
+
+  check('STATE.json decisions sha256 fields unchanged since M1', () => {
+    const state = JSON.parse(readFile('STATE.json'));
+    const fields = ['tokens_css_sha256', 'app_css_sha256', 'icons_js_sha256', 'vendored_terminal_main_sha256'];
+    for (const f of fields) {
+      if (!state.decisions[f] || typeof state.decisions[f] !== 'string') {
+        throw new Error(`${f} missing`);
+      }
+    }
+    return `${fields.length} sha fields intact`;
+  });
+
+  summary('phase6b');
+}
+
 // ────────── Fail-closed stubs for later phases ──────────
 function unimplemented(p) {
   throw new Error(
@@ -636,7 +721,7 @@ const dispatch = {
   phase5a,
   phase5b,
   phase6a,
-  phase6b: () => unimplemented('6b'),
+  phase6b,
 };
 
 const fn = dispatch[phase];

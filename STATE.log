@@ -265,3 +265,104 @@
   - [ok] main.ts records the onboarding-skipped divergence
   - [ok] settings schema carries focus.completed
   - [ok] vitest phase5b suite
+## 2026-05-13T15:24:52.971Z  verify phase6b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] tokens.css + app.css SHAs still match STATE.decisions (no M1 drift) — both match
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [FAIL] vitest a11y-audit suite — vitest exit 1: 
+ RUN  v2.1.8 /Users/khalilbenali/code/workdeskos-plugin
+
+ ❯ tests/a11y-audit.spec.ts (3 tests | 1 failed) 52ms
+   × phase 6b · a11y audit > runs axe-core across every fixture with zero critical violations 50ms
+     → fixture settings-tab has critical violations: aria-required-children: Certain ARIA roles must contain particular children; button-name: Buttons must have discernible text; label: Form elements must have labels
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  10:24:54
+   Duration  489ms (transform 52ms, setup 0ms, collect 96ms, tests 52ms, environment 112ms, prepare 33ms)
+
+
+  - [ok] vitest done-checklist suite
+  - [ok] tests/a11y-audit.report.md generated
+  - [ok] tests/done-checklist.report.md generated
+  - [ok] tests/manual-checklist.md generated with Yvette flow + 2-week dogfood
+  - [ok] manifest.json.version === "1.0.0"
+  - [ok] STATE.json decisions sha256 fields unchanged since M1 — 4 sha fields intact
+## 2026-05-13T15:25:50.820Z  verify phase6b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] tokens.css + app.css SHAs still match STATE.decisions (no M1 drift) — both match
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest a11y-audit suite
+  - [ok] vitest done-checklist suite
+  - [ok] tests/a11y-audit.report.md generated
+  - [ok] tests/done-checklist.report.md generated
+  - [ok] tests/manual-checklist.md generated with Yvette flow + 2-week dogfood
+  - [ok] manifest.json.version === "1.0.0"
+  - [ok] STATE.json decisions sha256 fields unchanged since M1 — 4 sha fields intact
+## 2026-05-13T15:25:57.533Z  verify phase1
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase1 suite
+## 2026-05-13T15:25:59.298Z  verify phase2
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase2 suite
+## 2026-05-13T15:26:01.102Z  verify phase3
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase3 suite
+## 2026-05-13T15:26:02.826Z  verify phase4a.1
+  - [ok] vendored terminal main.ts SHA matches STATE — ec705c8c50dd…
+  - [ok] vendored main.ts preserves required class declarations — 4 tokens present
+  - [ok] vendored LICENSE present
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase4a.1 suite
+## 2026-05-13T15:26:04.699Z  verify phase4a.2
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase4a.2 suite
+## 2026-05-13T15:26:06.498Z  verify phase4b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase4b suite
+## 2026-05-13T15:26:08.270Z  verify phase5a
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase5a suite
+## 2026-05-13T15:26:10.096Z  verify phase5b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] phase 5b source files present — 8 files
+  - [ok] main.ts registers Quick capture command + Focus toggle hotkeys
+  - [ok] main.ts records the onboarding-skipped divergence
+  - [ok] settings schema carries focus.completed
+  - [ok] vitest phase5b suite
+## 2026-05-13T15:26:11.875Z  verify phase6a
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] phase 6a source files present — 5 files
+  - [ok] main.ts installs global showToast + editor drag-hover
+  - [ok] TreeRow wires fileMenuItems / folderMenuItems via showContextMenu
+  - [ok] terminal tabs wire terminalTabMenuItems on contextmenu
+  - [ok] styles.css ships .toast / .ws-popover / .skeleton / .banner rules — all selectors present
+  - [ok] vitest phase6a suite
+## 2026-05-13T15:26:13.628Z  verify phase6b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] tokens.css + app.css SHAs still match STATE.decisions (no M1 drift) — both match
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest a11y-audit suite
+  - [ok] vitest done-checklist suite
+  - [ok] tests/a11y-audit.report.md generated
+  - [ok] tests/done-checklist.report.md generated
+  - [ok] tests/manual-checklist.md generated with Yvette flow + 2-week dogfood
+  - [ok] manifest.json.version === "1.0.0"
+  - [ok] STATE.json decisions sha256 fields unchanged since M1 — 4 sha fields intact

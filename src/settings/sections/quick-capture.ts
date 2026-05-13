@@ -45,17 +45,21 @@ export async function mountQuickCaptureSection(parent: HTMLElement, plugin: Work
 async function mountSecretField(parent: HTMLElement, app: App): Promise<void> {
   const row = document.createElement('div');
   row.className = 'setting';
+  row.setAttribute('role', 'group');
 
   const meta = document.createElement('div');
   meta.className = 'setting-meta';
   const label = document.createElement('div');
   label.className = 'label';
+  label.id = 'ws-stt-key-label';
   label.textContent = 'STT API key';
   meta.appendChild(label);
   const desc = document.createElement('div');
   desc.className = 'desc';
+  desc.id = 'ws-stt-key-desc';
   desc.textContent = 'Stored in Obsidian’s SecretStorage; never written to data.json.';
   meta.appendChild(desc);
+  row.setAttribute('aria-labelledby', 'ws-stt-key-label');
   row.appendChild(meta);
 
   const control = document.createElement('div');
@@ -68,6 +72,13 @@ async function mountSecretField(parent: HTMLElement, app: App): Promise<void> {
   secret.onChange((v) => {
     app.secretStorage.setSecret(STT_KEY_NAME, v);
   });
+
+  const inputEl = control.querySelector('input');
+  if (inputEl) {
+    inputEl.setAttribute('aria-label', 'STT API key');
+    inputEl.setAttribute('aria-labelledby', 'ws-stt-key-label');
+    inputEl.setAttribute('aria-describedby', 'ws-stt-key-desc');
+  }
 
   parent.appendChild(row);
 }
