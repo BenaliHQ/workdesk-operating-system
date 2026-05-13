@@ -6,11 +6,13 @@ import { ItemView, WorkspaceLeaf } from 'obsidian';
 import { VIEW_TYPE_WORKDESK_TERMINAL } from '../constants';
 import { createTerminalSession, applySessionTheme } from '../terminal/init';
 import type { TerminalSession } from '../terminal/session';
+import { mountComposer, type ComposerHandle } from '../terminal/composer';
 import type WorkdeskosPlugin from '../main';
 
 export class TerminalView extends ItemView {
   private plugin: WorkdeskosPlugin;
   session: TerminalSession | null = null;
+  composer: ComposerHandle | null = null;
 
   constructor(leaf: WorkspaceLeaf, plugin: WorkdeskosPlugin) {
     super(leaf);
@@ -37,9 +39,17 @@ export class TerminalView extends ItemView {
     const vaultPath = resolveVaultPath(this.plugin);
     this.session = createTerminalSession(host, vaultPath, this.app);
     queueMicrotask(() => this.session?.fit());
+
+    this.composer = mountComposer(this.contentEl, {
+      onSend: (text) => {
+        this.session?.write(text + '\r');
+      },
+    });
   }
 
   async onClose(): Promise<void> {
+    this.composer?.dispose();
+    this.composer = null;
     this.session?.destroy();
     this.session = null;
   }

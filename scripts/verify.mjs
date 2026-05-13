@@ -358,6 +358,39 @@ function phase4a1() {
   summary('phase4a.1');
 }
 
+// ────────── Phase 4A.2 — composer + theme ──────────
+function phase4a2() {
+  logRun('phase4a.2');
+
+  check('vendored terminal main.ts SHA still matches STATE', () => {
+    const state = JSON.parse(readFile('STATE.json'));
+    const expected = state.decisions.vendored_terminal_main_sha256;
+    const actual = sha256('src/vendor/terminal/main.ts');
+    if (actual !== expected) throw new Error(`SHA drift: ${actual.slice(0, 12)}… != ${expected.slice(0, 12)}…`);
+    return actual.slice(0, 12) + '…';
+  });
+
+  check('TypeScript strict compiles', () => {
+    const r = spawnSync('npx', ['--no-install', 'tsc', '-p', 'tsconfig.json', '--noEmit'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`tsc exit ${r.status}: ${(r.stderr || r.stdout || '').slice(0, 400)}`);
+    return '';
+  });
+
+  check('pnpm build', () => {
+    const r = spawnSync('pnpm', ['build'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`pnpm build exit ${r.status}`);
+    return '';
+  });
+
+  check('vitest phase4a.2 suite', () => {
+    const r = spawnSync('npx', ['--no-install', 'vitest', 'run', 'tests/phase4a-2.spec.ts'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`vitest exit ${r.status}: ${(r.stdout || r.stderr || '').slice(-600)}`);
+    return '';
+  });
+
+  summary('phase4a.2');
+}
+
 // ────────── Fail-closed stubs for later phases ──────────
 function unimplemented(p) {
   throw new Error(
@@ -371,7 +404,7 @@ const dispatch = {
   phase2,
   phase3,
   'phase4a.1': phase4a1,
-  'phase4a.2': () => unimplemented('4a.2'),
+  'phase4a.2': phase4a2,
   phase4b: () => unimplemented('4b'),
   phase5a: () => unimplemented('5a'),
   phase5b: () => unimplemented('5b'),

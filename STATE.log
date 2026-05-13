@@ -124,3 +124,8 @@
   - [ok] TypeScript strict compiles
   - [ok] pnpm build
   - [ok] vitest phase4a.1 suite
+## 2026-05-13T14:58:10.423Z  verify phase4a.2
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase4a.2 suite
