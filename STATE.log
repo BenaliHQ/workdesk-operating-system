@@ -203,3 +203,12 @@
   - [ok] TypeScript strict compiles
   - [ok] pnpm build
   - [ok] vitest phase5a suite
+## 2026-05-13T15:18:53.955Z  verify phase5b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] phase 5b source files present — 8 files
+  - [ok] main.ts registers Quick capture command + Focus toggle hotkeys
+  - [ok] main.ts records the onboarding-skipped divergence
+  - [ok] settings schema carries focus.completed
+  - [ok] vitest phase5b suite
