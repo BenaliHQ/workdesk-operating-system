@@ -457,6 +457,90 @@ function phase5a() {
   summary('phase5a');
 }
 
+// ────────── Phase 5B — quick capture + focus mode ──────────
+function phase5b() {
+  logRun('phase5b');
+
+  check('vendored terminal main.ts SHA still matches STATE', () => {
+    const state = JSON.parse(readFile('STATE.json'));
+    const expected = state.decisions.vendored_terminal_main_sha256;
+    const actual = sha256('src/vendor/terminal/main.ts');
+    if (actual !== expected) throw new Error(`SHA drift`);
+    return actual.slice(0, 12) + '…';
+  });
+
+  check('TypeScript strict compiles', () => {
+    const r = spawnSync('npx', ['--no-install', 'tsc', '-p', 'tsconfig.json', '--noEmit'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`tsc exit ${r.status}: ${(r.stderr || r.stdout || '').slice(0, 400)}`);
+    return '';
+  });
+
+  check('pnpm build', () => {
+    const r = spawnSync('pnpm', ['build'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`pnpm build exit ${r.status}`);
+    return '';
+  });
+
+  check('phase 5b source files present', () => {
+    const required = [
+      'src/modals/QuickCapture.ts',
+      'src/services/capture/capture-flow.ts',
+      'src/services/capture/recorder.ts',
+      'src/services/capture/filename.ts',
+      'src/services/capture/obsidian-vault.ts',
+      'src/services/stt/provider.ts',
+      'src/services/stt/openai-compatible.ts',
+      'src/services/focus.ts',
+    ];
+    for (const f of required) {
+      if (!exists(f)) throw new Error(`missing ${f}`);
+    }
+    return `${required.length} files`;
+  });
+
+  check('main.ts registers Quick capture command + Focus toggle hotkeys', () => {
+    const src = readFile('src/main.ts');
+    if (!src.includes("'workdesk:capture:open'") && !src.includes('capture:open')) {
+      throw new Error('quick capture command missing');
+    }
+    if (!src.includes('focus:toggle')) throw new Error('focus toggle command missing');
+    if (!src.match(/modifiers:\s*\['Mod',\s*'Shift'\][\s\S]+key:\s*'m'/)) {
+      throw new Error('Cmd+Shift+M hotkey not bound');
+    }
+    if (!src.match(/modifiers:\s*\['Mod',\s*'Shift'\][\s\S]+key:\s*'f'/)) {
+      throw new Error('Cmd+Shift+F hotkey not bound');
+    }
+    return '';
+  });
+
+  check('main.ts records the onboarding-skipped divergence', () => {
+    const src = readFile('src/main.ts');
+    if (!src.includes('First-run orientation is handled by WorkDesk OS')) {
+      throw new Error('onboarding divergence comment missing');
+    }
+    return '';
+  });
+
+  check('settings schema carries focus.completed', () => {
+    const src = readFile('src/settings.ts');
+    if (!src.includes('focus: {') || !src.includes('completed: boolean')) {
+      throw new Error('focus.completed missing from settings');
+    }
+    if (!src.match(/focus:\s*\{\s*completed:\s*false,?\s*\}/)) {
+      throw new Error('DEFAULT_SETTINGS.focus.completed missing');
+    }
+    return '';
+  });
+
+  check('vitest phase5b suite', () => {
+    const r = spawnSync('npx', ['--no-install', 'vitest', 'run', 'tests/phase5b.spec.ts'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`vitest exit ${r.status}: ${(r.stdout || r.stderr || '').slice(-1200)}`);
+    return '';
+  });
+
+  summary('phase5b');
+}
+
 // ────────── Fail-closed stubs for later phases ──────────
 function unimplemented(p) {
   throw new Error(
@@ -473,7 +557,7 @@ const dispatch = {
   'phase4a.2': phase4a2,
   phase4b,
   phase5a,
-  phase5b: () => unimplemented('5b'),
+  phase5b,
   phase6a: () => unimplemented('6a'),
   phase6b: () => unimplemented('6b'),
 };

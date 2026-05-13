@@ -139,3 +139,67 @@
   - [ok] TypeScript strict compiles
   - [ok] pnpm build
   - [ok] vitest phase5a suite
+## 2026-05-13T15:18:00.928Z  verify phase5b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] phase 5b source files present — 8 files
+  - [ok] main.ts registers Quick capture command + Focus toggle hotkeys
+  - [ok] main.ts records the onboarding-skipped divergence
+  - [ok] settings schema carries focus.completed
+  - [FAIL] vitest phase5b suite — vitest exit 1: 
+ RUN  v2.1.8 /Users/khalilbenali/code/workdeskos-plugin
+
+ ❯ tests/phase5b.spec.ts (20 tests | 1 failed) 18ms
+   × phase 5b · audio recorder wrapper > start → stop yields a blob assembled from emitted chunks 3ms
+     → expected 30 to be 768 // Object.is equality
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 19 passed (20)
+   Start at  10:18:02
+   Duration  414ms (transform 45ms, setup 0ms, collect 44ms, tests 18ms, environment 121ms, prepare 55ms)
+
+
+## 2026-05-13T15:18:20.205Z  verify phase5b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] phase 5b source files present — 8 files
+  - [ok] main.ts registers Quick capture command + Focus toggle hotkeys
+  - [ok] main.ts records the onboarding-skipped divergence
+  - [ok] settings schema carries focus.completed
+  - [ok] vitest phase5b suite
+## 2026-05-13T15:18:26.159Z  verify phase1
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase1 suite
+## 2026-05-13T15:18:27.890Z  verify phase2
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase2 suite
+## 2026-05-13T15:18:29.572Z  verify phase3
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase3 suite
+## 2026-05-13T15:18:31.234Z  verify phase4a.1
+  - [ok] vendored terminal main.ts SHA matches STATE — ec705c8c50dd…
+  - [ok] vendored main.ts preserves required class declarations — 4 tokens present
+  - [ok] vendored LICENSE present
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase4a.1 suite
+## 2026-05-13T15:18:33.115Z  verify phase4a.2
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase4a.2 suite
+## 2026-05-13T15:18:34.758Z  verify phase4b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase4b suite
+## 2026-05-13T15:18:36.436Z  verify phase5a
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase5a suite

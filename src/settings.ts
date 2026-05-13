@@ -55,6 +55,10 @@ export interface WorkdeskSettings {
     completed: boolean;
     lastSeen: number;
   };
+  focus: {
+    /** Whether focus mode is currently active. Persisted so reload restores. */
+    completed: boolean;
+  };
   panes: {
     paneWidth: number;   // px, default 340, clamp [240, 560]
     rpaneWidth: number;  // px, default 340, clamp [280, 600]
@@ -114,6 +118,9 @@ export const DEFAULT_SETTINGS: WorkdeskSettings = {
   onboarding: {
     completed: false,
     lastSeen: 0,
+  },
+  focus: {
+    completed: false,
   },
   panes: {
     paneWidth: 340,

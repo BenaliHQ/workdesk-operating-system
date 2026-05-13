@@ -1,0 +1,192 @@
+// ⌘⇧M Quick capture modal.
+//
+// Renders design's `.qc-*` markup, drives `CaptureFlow`, surfaces live
+// transcript + destination chips, fires toasts on success / error.
+// Audio + STT live in services; this file only owns the DOM.
+
+import { Modal, type App } from 'obsidian';
+import { CaptureFlow, type CaptureDestination, type CaptureVault } from '../services/capture/capture-flow';
+import { getProvider } from '../services/stt/provider';
+import type WorkdeskosPlugin from '../main';
+
+const STT_SECRET_KEY = 'stt-groq';
+
+export interface QuickCaptureDeps {
+  vault: CaptureVault;
+  /** Override the live flow for tests. */
+  flow?: CaptureFlow;
+}
+
+export class QuickCaptureModal extends Modal {
+  private plugin: WorkdeskosPlugin;
+  private deps: QuickCaptureDeps;
+  private flow!: CaptureFlow;
+  private dest: CaptureDestination;
+  private transcriptEl!: HTMLElement;
+  private statusEl!: HTMLElement;
+  private micEl!: HTMLElement;
+  private saveBtn!: HTMLButtonElement;
+  private unsubscribe: (() => void) | null = null;
+
+  constructor(plugin: WorkdeskosPlugin, deps: QuickCaptureDeps) {
+    super(plugin.app);
+    this.plugin = plugin;
+    this.deps = deps;
+    this.dest = plugin.settings.capture.defaultDest;
+  }
+
+  onOpen(): void {
+    this.flow = this.deps.flow ?? this.buildFlow(this.plugin.app);
+    this.contentEl.replaceChildren();
+    this.contentEl.classList.add('qc');
+    this.titleEl.id = 'qc-title';
+    this.containerEl.setAttribute('role', 'dialog');
+    this.containerEl.setAttribute('aria-modal', 'true');
+    this.containerEl.setAttribute('aria-labelledby', 'qc-title');
+
+    const head = document.createElement('div');
+    head.className = 'qc-head';
+
+    this.micEl = document.createElement('div');
+    this.micEl.className = 'qc-mic';
+    this.micEl.setAttribute('aria-hidden', 'true');
+    head.appendChild(this.micEl);
+
+    const meta = document.createElement('div');
+    meta.className = 'qc-meta';
+    const title = document.createElement('div');
+    title.className = 'qc-title';
+    title.textContent = 'Quick capture';
+    title.id = 'qc-title';
+    this.titleEl = title;
+    meta.appendChild(title);
+    this.statusEl = document.createElement('div');
+    this.statusEl.className = 'qc-status';
+    meta.appendChild(this.statusEl);
+    head.appendChild(meta);
+    this.contentEl.appendChild(head);
+
+    const body = document.createElement('div');
+    body.className = 'qc-body';
+    this.transcriptEl = document.createElement('div');
+    this.transcriptEl.className = 'qc-transcript';
+    body.appendChild(this.transcriptEl);
+    this.contentEl.appendChild(body);
+
+    const foot = document.createElement('div');
+    foot.className = 'qc-foot';
+    foot.appendChild(this.buildDestChip('personal/captures', 'personal'));
+    foot.appendChild(this.buildDestChip('system/inbox', 'system'));
+    foot.appendChild(this.buildDestChip('gtd/inbox', 'gtd'));
+    const spacer = document.createElement('div');
+    spacer.className = 'spacer';
+    foot.appendChild(spacer);
+
+    const cancel = document.createElement('button');
+    cancel.className = 'btn ghost';
+    cancel.textContent = 'Cancel';
+    cancel.addEventListener('click', () => this.handleCancel());
+    foot.appendChild(cancel);
+
+    this.saveBtn = document.createElement('button');
+    this.saveBtn.className = 'btn primary';
+    this.saveBtn.textContent = 'Save';
+    this.saveBtn.addEventListener('click', () => this.handleSave());
+    foot.appendChild(this.saveBtn);
+    this.contentEl.appendChild(foot);
+
+    this.unsubscribe = this.flow.onStateChange((state, ctx) => this.renderState(state, ctx));
+    this.renderState(this.flow.getState(), {});
+
+    void this.flow.beginRecording().catch((err) => {
+      console.warn('[workdesk] capture begin failed', err);
+    });
+  }
+
+  onClose(): void {
+    this.unsubscribe?.();
+    this.unsubscribe = null;
+    if (this.flow.getState() === 'recording' || this.flow.getState() === 'requesting-permission') {
+      this.flow.cancel();
+    }
+    this.contentEl.replaceChildren();
+  }
+
+  setDestination(dest: CaptureDestination): void {
+    this.dest = dest;
+    for (const chip of this.contentEl.querySelectorAll<HTMLElement>('.dest')) {
+      chip.classList.toggle('active', chip.dataset.dest === dest);
+    }
+  }
+
+  private buildDestChip(dest: CaptureDestination, zone: string): HTMLButtonElement {
+    const chip = document.createElement('button');
+    chip.className = 'dest';
+    chip.dataset.dest = dest;
+    if (dest === this.dest) chip.classList.add('active');
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    dot.dataset.zone = zone;
+    chip.appendChild(dot);
+    const label = document.createElement('span');
+    label.textContent = dest;
+    chip.appendChild(label);
+    chip.addEventListener('click', () => this.setDestination(dest));
+    return chip;
+  }
+
+  private renderState(state: string, ctx: { error?: string; transcript?: string }): void {
+    this.micEl.classList.toggle('recording', state === 'recording');
+    switch (state) {
+      case 'idle':
+        this.statusEl.textContent = 'Idle';
+        break;
+      case 'requesting-permission':
+        this.statusEl.textContent = 'Requesting microphone…';
+        break;
+      case 'recording':
+        this.statusEl.innerHTML = '<span class="dot"></span>Recording';
+        break;
+      case 'uploading':
+        this.statusEl.textContent = 'Transcribing…';
+        this.saveBtn.disabled = true;
+        break;
+      case 'success':
+        this.statusEl.textContent = 'Saved';
+        break;
+      case 'error':
+        this.statusEl.textContent = `Error: ${ctx.error ?? 'unknown'}`;
+        break;
+    }
+    if (ctx.transcript) {
+      this.transcriptEl.textContent = ctx.transcript;
+    }
+  }
+
+  private async handleSave(): Promise<void> {
+    try {
+      const result = await this.flow.saveAndTranscribe(this.dest);
+      const toast = (window as unknown as { showToast?: (m: string, s: string, o?: unknown) => void }).showToast;
+      toast?.(`Capture saved · ${result.notePath}`, 'success');
+      this.close();
+    } catch (err) {
+      const toast = (window as unknown as { showToast?: (m: string, s: string, o?: unknown) => void }).showToast;
+      toast?.(`Capture failed: ${err instanceof Error ? err.message : String(err)}`, 'error');
+    }
+  }
+
+  private handleCancel(): void {
+    this.flow.cancel();
+    this.close();
+  }
+
+  private buildFlow(app: App): CaptureFlow {
+    const key = app.secretStorage.getSecret(STT_SECRET_KEY) ?? '';
+    const provider = getProvider(this.plugin.settings, { apiKey: key });
+    return new CaptureFlow({
+      provider,
+      vault: this.deps.vault,
+      autoLogToSystem: this.plugin.settings.capture.autoLogToSystem,
+    });
+  }
+}

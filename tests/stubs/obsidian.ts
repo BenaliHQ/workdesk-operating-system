@@ -86,8 +86,32 @@ export class TFolder { path = ''; name = ''; children: Array<TFile | TFolder> = 
 export class TAbstractFile { path = ''; name = ''; }
 
 export class Vault {
+  _createCalls: Array<{ path: string; data: string }> = [];
+  _appendCalls: Array<{ path: string; data: string }> = [];
+  _files = new Map<string, string>();
+  adapter = {
+    exists: async (p: string): Promise<boolean> => this._files.has(p),
+    read: async (p: string): Promise<string> => this._files.get(p) ?? '',
+    write: async (p: string, data: string): Promise<void> => {
+      this._files.set(p, data);
+    },
+    append: async (p: string, data: string): Promise<void> => {
+      const prior = this._files.get(p) ?? '';
+      this._files.set(p, prior + data);
+      this.__owner._appendCalls.push({ path: p, data });
+    },
+  };
+  __owner = this;
   async read(_f: TFile): Promise<string> { return ''; }
   async cachedRead(_f: TFile): Promise<string> { return ''; }
+  async create(path: string, data: string): Promise<TFile> {
+    this._createCalls.push({ path, data });
+    this._files.set(path, data);
+    const f = new TFile();
+    f.path = path;
+    return f;
+  }
+  async createFolder(_path: string): Promise<void> {}
   getAbstractFileByPath(_p: string): TAbstractFile | null { return null; }
   getMarkdownFiles(): TFile[] { return []; }
   getFiles(): TFile[] { return []; }
@@ -98,6 +122,30 @@ export class Vault {
 export class Notice { constructor(_msg: string, _ms?: number) {} }
 export function setIcon(_el: HTMLElement, _name: string): void {}
 export function addIcon(_name: string, _svg: string): void {}
+
+export interface RequestUrlParam {
+  url: string;
+  method?: string;
+  contentType?: string;
+  body?: string | ArrayBuffer;
+  headers?: Record<string, string>;
+  throw?: boolean;
+}
+export interface RequestUrlResponse {
+  status: number;
+  text: string;
+  json?: unknown;
+  headers?: Record<string, string>;
+}
+
+let _requestUrlImpl: ((p: RequestUrlParam) => Promise<RequestUrlResponse>) | null = null;
+export function __setRequestUrlMock(fn: ((p: RequestUrlParam) => Promise<RequestUrlResponse>) | null): void {
+  _requestUrlImpl = fn;
+}
+export async function requestUrl(p: RequestUrlParam): Promise<RequestUrlResponse> {
+  if (_requestUrlImpl) return _requestUrlImpl(p);
+  return { status: 200, text: '{}', json: {} };
+}
 
 export class Setting {
   containerEl: HTMLElement;

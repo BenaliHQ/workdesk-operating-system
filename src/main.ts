@@ -14,13 +14,19 @@ import { TerminalView } from './views/TerminalView';
 import { mountShell } from './layout/shell';
 import { wikilinkAndTagDecorations } from './editor/wikilink-ext';
 import { CommandPalette } from './modals/CommandPalette';
+import { QuickCaptureModal } from './modals/QuickCapture';
 import { WorkdeskSettingTab } from './settings/tab';
+import { createFocusController, type FocusController } from './services/focus';
+import { obsidianCaptureVault } from './services/capture/obsidian-vault';
 import type { ZoneId } from './types';
 
 export default class WorkdeskosPlugin extends Plugin {
   settings!: WorkdeskSettings;
   ribbon: WorkdeskRibbon | null = null;
   activeZone: ZoneId = 'atlas';
+  focus: FocusController | null = null;
+  // First-run orientation is handled by WorkDesk OS's /onboarding skill,
+  // not a plugin modal. STATE.json.decisions.onboarding_enabled = false.
 
   async onload(): Promise<void> {
     console.log(`[${PLUGIN_ID}] loaded`);
@@ -37,6 +43,14 @@ export default class WorkdeskosPlugin extends Plugin {
     this.ribbon = new WorkdeskRibbon(this);
     this.ribbon.mount(appEl);
     this.ribbon.onSlot((slot) => this.handleSlot(slot));
+
+    this.focus = createFocusController({
+      appEl,
+      settings: this.settings,
+      saveSettings: () => this.saveSettings(),
+    });
+    this.focus.restore();
+    if (this.focus.isOn()) this.ribbon.setFocus(true);
 
     this.registerView(VIEW_TYPE_WORKDESK_ZONE, (leaf) => new ZoneView(leaf, this));
 
@@ -73,6 +87,30 @@ export default class WorkdeskosPlugin extends Plugin {
       name: 'Triage capture inbox',
       callback: () => this.triageCaptureInbox(),
     });
+
+    this.addCommand({
+      id: `${COMMAND_ID_PREFIX}:capture:open`,
+      name: 'Quick capture',
+      hotkeys: [{ modifiers: ['Mod', 'Shift'], key: 'm' }],
+      callback: () => this.openQuickCapture(),
+    });
+
+    this.addCommand({
+      id: `${COMMAND_ID_PREFIX}:focus:toggle`,
+      name: 'Toggle focus mode',
+      hotkeys: [{ modifiers: ['Mod', 'Shift'], key: 'f' }],
+      callback: () => this.toggleFocus(),
+    });
+
+    this.registerDomEvent(document, 'keydown', (evt: KeyboardEvent) => {
+      if (evt.key !== 'Escape') return;
+      const modalOpen = document.querySelector('.modal-container.mod-shown, .scrim.open');
+      if (modalOpen) return;
+      if (this.focus?.isOn()) {
+        this.focus.off();
+        this.ribbon?.setFocus(false);
+      }
+    });
   }
 
   async onunload(): Promise<void> {
@@ -97,15 +135,25 @@ export default class WorkdeskosPlugin extends Plugin {
     // Phase 5A registers the command surface; the capture inbox flow lands in M3.
   }
 
+  private openQuickCapture(): void {
+    const modal = new QuickCaptureModal(this, { vault: obsidianCaptureVault(this.app) });
+    modal.open();
+  }
+
+  toggleFocus(): boolean {
+    if (!this.focus) return false;
+    const next = this.focus.toggle();
+    this.ribbon?.setFocus(next);
+    return next;
+  }
+
   private handleSlot(slot: string): void {
     const zones: ZoneId[] = ['atlas', 'gtd', 'intel', 'personal', 'system', 'config', 'files'];
     if (zones.includes(slot as ZoneId)) {
       this.activeZone = slot as ZoneId;
       this.ribbon?.setActiveZone(this.activeZone);
     } else if (slot === 'focus') {
-      const next = !document.body.classList.contains('focus-on');
-      document.body.classList.toggle('focus-on', next);
-      this.ribbon?.setFocus(next);
+      this.toggleFocus();
     }
   }
 
