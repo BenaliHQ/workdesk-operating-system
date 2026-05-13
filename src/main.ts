@@ -18,6 +18,8 @@ import { QuickCaptureModal } from './modals/QuickCapture';
 import { WorkdeskSettingTab } from './settings/tab';
 import { createFocusController, type FocusController } from './services/focus';
 import { obsidianCaptureVault } from './services/capture/obsidian-vault';
+import { installGlobalToast, showToast } from './components/Toast';
+import { attachEditorDragHover } from './components/DragDropHover';
 import type { ZoneId } from './types';
 
 export default class WorkdeskosPlugin extends Plugin {
@@ -31,6 +33,7 @@ export default class WorkdeskosPlugin extends Plugin {
   async onload(): Promise<void> {
     console.log(`[${PLUGIN_ID}] loaded`);
     await this.loadSettings();
+    installGlobalToast();
 
     const appEl = document.body.querySelector('.app') as HTMLElement | null
       ?? document.body;
@@ -51,6 +54,15 @@ export default class WorkdeskosPlugin extends Plugin {
     });
     this.focus.restore();
     if (this.focus.isOn()) this.ribbon.setFocus(true);
+
+    const editorPane = document.querySelector<HTMLElement>('.editor-pane');
+    if (editorPane) {
+      attachEditorDragHover(editorPane, {
+        onPathDropped: (path) => {
+          showToast(`Inserted file reference · ${path}`, 'success');
+        },
+      });
+    }
 
     this.registerView(VIEW_TYPE_WORKDESK_ZONE, (leaf) => new ZoneView(leaf, this));
 

@@ -541,6 +541,83 @@ function phase5b() {
   summary('phase5b');
 }
 
+// ────────── Phase 6A — polish primitives ──────────
+function phase6a() {
+  logRun('phase6a');
+
+  check('vendored terminal main.ts SHA still matches STATE', () => {
+    const state = JSON.parse(readFile('STATE.json'));
+    const expected = state.decisions.vendored_terminal_main_sha256;
+    const actual = sha256('src/vendor/terminal/main.ts');
+    if (actual !== expected) throw new Error('SHA drift');
+    return actual.slice(0, 12) + '…';
+  });
+
+  check('TypeScript strict compiles', () => {
+    const r = spawnSync('npx', ['--no-install', 'tsc', '-p', 'tsconfig.json', '--noEmit'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`tsc exit ${r.status}: ${(r.stderr || r.stdout || '').slice(0, 400)}`);
+    return '';
+  });
+
+  check('pnpm build', () => {
+    const r = spawnSync('pnpm', ['build'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`pnpm build exit ${r.status}`);
+    return '';
+  });
+
+  check('phase 6a source files present', () => {
+    const required = [
+      'src/components/Toast.ts',
+      'src/components/Banner.ts',
+      'src/components/Skeleton.ts',
+      'src/components/ContextMenu.ts',
+      'src/components/DragDropHover.ts',
+    ];
+    for (const f of required) {
+      if (!exists(f)) throw new Error(`missing ${f}`);
+    }
+    return `${required.length} files`;
+  });
+
+  check('main.ts installs global showToast + editor drag-hover', () => {
+    const src = readFile('src/main.ts');
+    if (!src.includes('installGlobalToast')) throw new Error('installGlobalToast not invoked');
+    if (!src.includes('attachEditorDragHover')) throw new Error('attachEditorDragHover not wired');
+    return '';
+  });
+
+  check('TreeRow wires fileMenuItems / folderMenuItems via showContextMenu', () => {
+    const src = readFile('src/components/TreeRow.ts');
+    if (!src.includes('showContextMenu')) throw new Error('TreeRow lacks showContextMenu binding');
+    if (!src.includes('fileMenuItems') || !src.includes('folderMenuItems')) {
+      throw new Error('TreeRow does not wire file/folder menu sets');
+    }
+    return '';
+  });
+
+  check('terminal tabs wire terminalTabMenuItems on contextmenu', () => {
+    const src = readFile('src/terminal/tabs.ts');
+    if (!src.includes('terminalTabMenuItems')) throw new Error('tabs.ts lacks terminal tab menu wiring');
+    return '';
+  });
+
+  check('styles.css ships .toast / .ws-popover / .skeleton / .banner rules', () => {
+    const css = readFile('styles.css');
+    for (const sel of ['.toast', '.toast-stack', '.ws-popover', '.skeleton', '.banner', '.skel-obj-card', '.spinner', '.editor-pane.dragging-over']) {
+      if (!css.includes(sel)) throw new Error(`styles.css missing ${sel}`);
+    }
+    return 'all selectors present';
+  });
+
+  check('vitest phase6a suite', () => {
+    const r = spawnSync('npx', ['--no-install', 'vitest', 'run', 'tests/phase6a.spec.ts'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`vitest exit ${r.status}: ${(r.stdout || r.stderr || '').slice(-1200)}`);
+    return '';
+  });
+
+  summary('phase6a');
+}
+
 // ────────── Fail-closed stubs for later phases ──────────
 function unimplemented(p) {
   throw new Error(
@@ -558,7 +635,7 @@ const dispatch = {
   phase4b,
   phase5a,
   phase5b,
-  phase6a: () => unimplemented('6a'),
+  phase6a,
   phase6b: () => unimplemented('6b'),
 };
 

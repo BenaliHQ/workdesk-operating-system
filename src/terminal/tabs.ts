@@ -1,6 +1,7 @@
 // Tab strip above the terminal canvas. Each .term-tab carries data-status
 // and data-tab. Click → switch; × → close; + → new; double-click → rename.
 
+import { showContextMenu, terminalTabMenuItems } from '../components/ContextMenu';
 import type { TabStatus } from './status-parser';
 
 export interface TabDescriptor {
@@ -14,6 +15,7 @@ export interface TabStripOptions {
   onClose(id: number): void;
   onNew(): void;
   onRename?(id: number, name: string): void;
+  onExportTranscript?(id: number): void;
 }
 
 export interface TabStripHandle {
@@ -79,6 +81,19 @@ export function mountTabStrip(parent: HTMLElement, opts: TabStripOptions): TabSt
       if (next && next.trim().length > 0) {
         api.rename(desc.id, next.trim());
       }
+    });
+
+    el.addEventListener('contextmenu', (evt) => {
+      evt.preventDefault();
+      const items = terminalTabMenuItems({
+        rename: () => {
+          const next = window.prompt('Rename tab', desc.name);
+          if (next && next.trim().length > 0) api.rename(desc.id, next.trim());
+        },
+        exportTranscript: opts.onExportTranscript ? () => opts.onExportTranscript?.(desc.id) : undefined,
+        endSession: () => opts.onClose(desc.id),
+      });
+      showContextMenu(evt.clientX, evt.clientY, items);
     });
 
     return el;
