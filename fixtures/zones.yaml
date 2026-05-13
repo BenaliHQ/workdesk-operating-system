@@ -1,0 +1,205 @@
+# config/zones.yaml — default WorkDesk zone manifest.
+#
+# Defines the six zones, the folders that belong to each, and the
+# top-level "objects" each zone surfaces in the zone pane.
+#
+# The plugin reads this file on load. If missing, falls back to the
+# defaults in shared/zones.js. After scaffolding (Phase 2), this file
+# lives at <vault>/config/zones.yaml.
+
+zones:
+  - id: atlas
+    name: atlas
+    sub: People, companies, projects, decisions
+    icon: globe
+    root: atlas
+    objects:
+      - id: projects
+        title: projects
+        sub: Active engagements & infrastructure
+        icon: folder
+        folder: atlas/projects
+        expanded: true
+      - id: people
+        title: people
+        sub: Contacts with vault entries
+        icon: person
+        folder: atlas/people
+      - id: companies
+        title: companies
+        sub: Clients, partners, vendors
+        icon: building
+        folder: atlas/companies
+      - id: meetings
+        title: meetings
+        sub: Transcribed sessions, processed
+        icon: video
+        folder: atlas/meetings
+      - id: decisions
+        title: decisions
+        sub: Logged calls with rationale
+        icon: badge
+        folder: atlas/decisions
+      - id: content
+        title: content
+        sub: Drafts, candidates, published
+        icon: pencil
+        folder: atlas/content
+
+  - id: gtd
+    name: gtd
+    sub: Active projects and next actions
+    icon: check
+    root: gtd
+    objects:
+      - id: inbox
+        title: inbox
+        sub: Awaiting processing
+        icon: inbox
+        folder: gtd/inbox
+        empty: caught-up
+      - id: projects
+        title: projects
+        sub: In motion right now
+        icon: folder
+        folder: gtd/projects
+        expanded: true
+      - id: next-actions
+        title: next-actions
+        sub: Things to do today
+        icon: zap
+        folder: gtd/next-actions
+      - id: waiting-for
+        title: waiting-for
+        sub: Blocked on others
+        icon: clock
+        folder: gtd/waiting-for
+      - id: someday
+        title: someday
+        sub: Maybe one day
+        icon: feather
+        folder: gtd/someday
+
+  - id: intel
+    name: intel
+    sub: Reads, concepts, and references
+    icon: signal
+    root: intel
+    objects:
+      - id: reads
+        title: reads
+        sub: Articles, papers, threads
+        icon: book
+        folder: intel/reads
+      - id: concepts
+        title: concepts
+        sub: Ideas in development
+        icon: feather
+        folder: intel/concepts
+      - id: reference
+        title: reference
+        sub: Standards and primitives
+        icon: archive
+        folder: intel/reference
+      - id: briefings
+        title: briefings
+        sub: Daily and weekly
+        icon: list
+        folder: intel/briefings
+
+  - id: personal
+    name: personal
+    sub: Journal, daily notes, captures
+    icon: person
+    root: personal
+    objects:
+      - id: daily
+        title: daily
+        sub: One note per day
+        icon: sun
+        folder: personal/daily
+        expanded: true
+      - id: journal
+        title: journal
+        sub: Long-form reflection
+        icon: feather
+        folder: personal/journal
+      - id: captures
+        title: captures
+        sub: Voice notes, transcribed
+        icon: pencil
+        folder: personal/captures
+      - id: books
+        title: books
+        sub: Reading notes
+        icon: book
+        folder: personal/books
+      - id: identity
+        title: identity
+        sub: Values, principles, voice
+        icon: shield
+        folder: personal/identity
+
+  - id: system
+    name: system
+    sub: Inbox, logs, processing
+    icon: layers
+    root: system
+    objects:
+      - id: log
+        title: log.md
+        sub: Append-only event stream
+        icon: list
+        file: system/log.md
+      - id: claude-log
+        title: claude-log
+        sub: Session audit trail
+        icon: archive
+        folder: system/claude-log
+      - id: reference
+        title: reference
+        sub: SOPs, workflows, standards
+        icon: book
+        folder: system/reference
+      - id: processing
+        title: _processing
+        sub: Claude scratch — cleared after runs
+        icon: folder
+        folder: system/_processing
+
+  - id: config
+    name: config
+    sub: WorkDesk plugin and skill configuration
+    icon: gear
+    root: config
+    objects:
+      - id: settings
+        title: settings.json
+        sub: Hooks, permissions, env
+        icon: file
+        file: config/settings.json
+      - id: agents
+        title: agents
+        sub: Orchestrator + specialists
+        icon: shield
+        folder: config/agents
+      - id: skills
+        title: skills
+        sub: Workflow entry points
+        icon: zap
+        folder: config/skills
+      - id: rules
+        title: rules
+        sub: Hard constraints
+        icon: badge
+        folder: config/rules
+      - id: scripts
+        title: scripts
+        sub: Hook implementations
+        icon: code
+        folder: config/scripts
+      - id: templates
+        title: templates
+        sub: Daily note, vault README
+        icon: file
+        folder: config/templates

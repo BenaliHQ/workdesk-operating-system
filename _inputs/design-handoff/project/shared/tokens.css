@@ -1,0 +1,227 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   WorkDesk — Design tokens (single source of truth)
+
+   Token model:
+   1. Obsidian-native variables (--background-primary, --text-normal, …) so
+      this plugin slots in cleanly with the host app, themes, and other
+      plugins. These are the names Claude Code should write CSS against.
+   2. A WorkDesk extension layer (--ws-…) for zone colors, motion, shadows
+      and other surfaces Obsidian doesn't provide.
+   3. The Obsidian variables are *assigned from* the WorkDesk source values
+      below, so changing the WorkDesk palette flows everywhere.
+
+   Theme is switched by .theme-light / .theme-dark on <body> — same contract
+   as Obsidian core.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* ╔═══════════════════════════════════════════════════════════════════════╗
+   ║ 1. WORKDESK SOURCE TOKENS — shared across themes                       ║
+   ╚═══════════════════════════════════════════════════════════════════════╝ */
+:root {
+  /* Spacing scale — 4px base. Use these only. */
+  --ws-space-1: 4px;
+  --ws-space-2: 8px;
+  --ws-space-3: 12px;
+  --ws-space-4: 16px;
+  --ws-space-5: 24px;
+  --ws-space-6: 32px;
+  --ws-space-7: 48px;
+  --ws-space-8: 64px;
+
+  /* Radii */
+  --ws-radius-row:   6px;   /* tree rows, small chips */
+  --ws-radius-card:  10px;  /* zone-cards, modals headers */
+  --ws-radius-modal: 14px;  /* command palette, settings windows */
+  --ws-radius-pill:  999px;
+
+  /* Type stack */
+  --ws-font-sans:    "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ws-font-display: "Manrope", "DM Sans", system-ui, sans-serif;
+  --ws-font-mono:    "Geist Mono", "JetBrains Mono", ui-monospace, "SF Mono", "Menlo", monospace;
+
+  /* Type scale (px) */
+  --ws-fs-11: 11px;   --ws-lh-11: 1.45;
+  --ws-fs-12: 12px;   --ws-lh-12: 1.5;
+  --ws-fs-13: 13px;   --ws-lh-13: 1.55;
+  --ws-fs-14: 14px;   --ws-lh-14: 1.5;
+  --ws-fs-15: 15px;   --ws-lh-15: 1.4;
+  --ws-fs-17: 17px;   --ws-lh-17: 1.35;
+  --ws-fs-20: 20px;   --ws-lh-20: 1.2;
+  --ws-fs-22: 22px;   --ws-lh-22: 1.18;
+  --ws-fs-28: 28px;   --ws-lh-28: 1.15;
+
+  /* Motion — keep small + tactile. Never animate panel widths slower than 200ms. */
+  --ws-dur-fast:   120ms;
+  --ws-dur-base:   160ms;
+  --ws-dur-pane:   200ms;
+  --ws-dur-modal:  220ms;
+  --ws-ease-out:   cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ws-ease-in:    cubic-bezier(0.4, 0, 1, 1);
+  --ws-ease-spring: cubic-bezier(0.34, 1.3, 0.5, 1);
+
+  /* Layout */
+  --ws-ribbon-w:  64px;
+  --ws-pane-w:    340px;
+  --ws-rpane-w:   340px;
+  --ws-editor-max: 720px;
+
+  /* Z-index */
+  --ws-z-base:    1;
+  --ws-z-sticky:  10;
+  --ws-z-modal:   100;
+  --ws-z-toast:   200;
+}
+
+/* ╔═══════════════════════════════════════════════════════════════════════╗
+   ║ 2. LIGHT THEME — cream / warm-neutral                                  ║
+   ╚═══════════════════════════════════════════════════════════════════════╝ */
+.theme-light,
+:root {
+  /* ── Obsidian-native surface tokens ───────────────────────────────── */
+  --background-primary:        #ffffff;        /* editor surface */
+  --background-primary-alt:    #faf9f7;        /* alt editor (e.g. for headings) */
+  --background-secondary:      #faf9f7;        /* left pane (zone pane) */
+  --background-secondary-alt:  #f3f1ee;        /* ribbon, app frame */
+  --background-modifier-hover: #f1efeb;
+  --background-modifier-active-hover: #ebe7e0;
+  --background-modifier-border:       #e9e5df;
+  --background-modifier-border-hover: #d8d2c8;
+  --background-modifier-border-focus: #5a6b7a;
+  --background-modifier-form-field:   #ffffff;
+  --background-modifier-error:        #f4e6e8;
+  --background-modifier-success:      #e6efe6;
+  --background-modifier-message:      #f5ecdc;
+
+  /* ── Text ─────────────────────────────────────────────────────────── */
+  --text-normal:    #1a1a1a;
+  --text-muted:     #6b6862;
+  --text-faint:     #9a958d;
+  --text-on-accent: #ffffff;
+  --text-accent:    #5a6b7a;        /* slate — links + interactive */
+  --text-accent-hover: #3f4d5b;
+  --text-error:     #8a4a55;
+  --text-success:   #4f7a52;
+  --text-warning:   #8a6a2e;
+  --text-selection: rgba(90, 107, 122, 0.18);
+
+  /* ── Interactive ──────────────────────────────────────────────────── */
+  --interactive-normal:  #f3f1ee;
+  --interactive-hover:   #ebe7e0;
+  --interactive-accent:  #5a6b7a;
+  --interactive-accent-hover: #3f4d5b;
+
+  /* ── Code blocks (Obsidian-native) ────────────────────────────────── */
+  --code-background: #f6f3ed;
+  --code-normal:     #2a2a2a;
+  --code-comment:    #9a958d;
+  --code-keyword:    #5a6b7a;
+  --code-string:     #4f7a52;
+  --code-value:      #8a6a2e;
+
+  /* ── WorkDesk extension: zone palettes (pastel, low-sat) ──────────── */
+  --ws-zone-atlas-bg:    #e7eef6;  --ws-zone-atlas-fg:    #4a6a8a;
+  --ws-zone-gtd-bg:      #e6efe6;  --ws-zone-gtd-fg:      #4f7a52;
+  --ws-zone-intel-bg:    #f5ecdc;  --ws-zone-intel-fg:    #8a6a2e;
+  --ws-zone-personal-bg: #f4e6e8;  --ws-zone-personal-fg: #8a4a55;
+  --ws-zone-system-bg:   #ececec;  --ws-zone-system-fg:   #5a5a5a;
+  --ws-zone-config-bg:   #ece9f3;  --ws-zone-config-fg:   #5e548a;
+  --ws-zone-files-bg:    #e8e8e6;  --ws-zone-files-fg:    #4a4a48;
+
+  /* ── WorkDesk extension: shadows ──────────────────────────────────── */
+  --ws-shadow-card:   0 1px 0 rgba(20,20,20,0.02), 0 1px 3px rgba(20,20,20,0.04);
+  --ws-shadow-hover:  0 1px 0 rgba(20,20,20,0.03), 0 2px 8px rgba(20,20,20,0.06);
+  --ws-shadow-modal:  0 1px 0 rgba(20,20,20,0.04), 0 12px 36px rgba(20,20,20,0.16);
+  --ws-shadow-popover:0 1px 0 rgba(20,20,20,0.03), 0 6px 20px rgba(20,20,20,0.10);
+
+  /* ── WorkDesk extension: hairlines & scrim ────────────────────────── */
+  --ws-border-hair: #efece6;
+  --ws-scrim:       rgba(20, 20, 20, 0.18);
+  --ws-card-soft:   #fcfbf9;     /* tertiary surface inside cards */
+
+  /* ── Terminal palette (light, matches editor) ─────────────────────── */
+  --ws-term-fg:       #2a2a2a;
+  --ws-term-dim:      #9a958d;
+  --ws-term-prompt:   #5a6b7a;
+  --ws-term-accent:   #4a6a8a;
+  --ws-term-success:  #4f7a52;
+  --ws-term-warn:     #8a6a2e;
+  --ws-term-error:    #8a4a55;
+  --ws-term-caret:    #5a6b7a;
+}
+
+/* ╔═══════════════════════════════════════════════════════════════════════╗
+   ║ 3. DARK THEME — warm coffee, low contrast                              ║
+   ╚═══════════════════════════════════════════════════════════════════════╝ */
+.theme-dark {
+  --background-primary:        #2a2723;
+  --background-primary-alt:    #272420;
+  --background-secondary:      #211f1c;
+  --background-secondary-alt:  #1c1a17;
+  --background-modifier-hover: #322e29;
+  --background-modifier-active-hover: #3a3530;
+  --background-modifier-border:       #3a342d;
+  --background-modifier-border-hover: #4a4238;
+  --background-modifier-border-focus: #8a9aa8;
+  --background-modifier-form-field:   #2a2723;
+  --background-modifier-error:        #2c1e22;
+  --background-modifier-success:      #1f2a20;
+  --background-modifier-message:      #2c241a;
+
+  --text-normal:    #ebe5d9;
+  --text-muted:     #a8a094;
+  --text-faint:     #76706a;
+  --text-on-accent: #1c1a17;
+  --text-accent:    #8a9aa8;
+  --text-accent-hover: #a8b8c5;
+  --text-error:     #cc8a93;
+  --text-success:   #8eb892;
+  --text-warning:   #cca676;
+  --text-selection: rgba(138, 154, 168, 0.22);
+
+  --interactive-normal:  #322e29;
+  --interactive-hover:   #3a3530;
+  --interactive-accent:  #8a9aa8;
+  --interactive-accent-hover: #a8b8c5;
+
+  --code-background: #27241f;
+  --code-normal:     #d8d2c4;
+  --code-comment:    #76706a;
+  --code-keyword:    #8a9aa8;
+  --code-string:     #8eb892;
+  --code-value:      #cca676;
+
+  --ws-zone-atlas-bg:    #1e2a38;  --ws-zone-atlas-fg:    #7fa6cc;
+  --ws-zone-gtd-bg:      #1f2a20;  --ws-zone-gtd-fg:      #8eb892;
+  --ws-zone-intel-bg:    #2c241a;  --ws-zone-intel-fg:    #cca676;
+  --ws-zone-personal-bg: #2c1e22;  --ws-zone-personal-fg: #cc8a93;
+  --ws-zone-system-bg:   #2a2622;  --ws-zone-system-fg:   #a39b91;
+  --ws-zone-config-bg:   #252035;  --ws-zone-config-fg:   #a89bd0;
+  --ws-zone-files-bg:    #2a2622;  --ws-zone-files-fg:    #a8a094;
+
+  --ws-shadow-card:    0 1px 0 rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.3);
+  --ws-shadow-hover:   0 1px 0 rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.4);
+  --ws-shadow-modal:   0 1px 0 rgba(0,0,0,0.4), 0 12px 36px rgba(0,0,0,0.5);
+  --ws-shadow-popover: 0 1px 0 rgba(0,0,0,0.35), 0 6px 20px rgba(0,0,0,0.35);
+
+  --ws-border-hair: #2e2924;
+  --ws-scrim:       rgba(0, 0, 0, 0.5);
+  --ws-card-soft:   #272420;
+
+  --ws-term-fg:       #d8d2c4;
+  --ws-term-dim:      #76706a;
+  --ws-term-prompt:   #8a9aa8;
+  --ws-term-accent:   #7fa6cc;
+  --ws-term-success:  #8eb892;
+  --ws-term-warn:     #cca676;
+  --ws-term-error:    #cc8a93;
+  --ws-term-caret:    #8a9aa8;
+}
+
+/* ╔═══════════════════════════════════════════════════════════════════════╗
+   ║ 4. FOCUS RING — accessible, theme-aware                                ║
+   ╚═══════════════════════════════════════════════════════════════════════╝ */
+*:focus-visible {
+  outline: 2px solid var(--background-modifier-border-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

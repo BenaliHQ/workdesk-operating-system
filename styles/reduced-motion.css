@@ -1,0 +1,15 @@
+/* Reduced-motion supplement.
+ *
+ * Per handoff/animations.md § reduced-motion, this rule belongs in app.css.
+ * styles/app.css is copied verbatim (SHA-checked) so we keep this in a
+ * separate file and esbuild.config.mjs concatenates it at bundle time.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

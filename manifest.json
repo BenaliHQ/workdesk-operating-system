@@ -1,0 +1,10 @@
+{
+  "id": "workdeskos-plugin",
+  "name": "WorkdeskOS Plugin",
+  "version": "0.1.0",
+  "minAppVersion": "1.11.4",
+  "description": "Curated visual surface for WorkdeskOS vaults — zones, command palette, quick capture, and a Claude Code terminal.",
+  "author": "Benali",
+  "authorUrl": "https://github.com/BenaliHQ/workdesk-os",
+  "isDesktopOnly": true
+}

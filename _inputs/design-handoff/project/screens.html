@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>WorkDesk — Screens gallery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Manrope:wght@500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared/tokens.css" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: var(--ws-font-sans);
+    background: var(--background-secondary-alt);
+    color: var(--text-normal);
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+  .shell {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 48px 32px 120px;
+  }
+  header.page {
+    display: flex; align-items: flex-end; gap: 24px;
+    margin-bottom: 36px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--background-modifier-border);
+  }
+  header.page h1 {
+    font-family: var(--ws-font-display);
+    font-size: 36px; font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  header.page .sub { color: var(--text-muted); font-size: 14px; max-width: 540px; margin-top: 8px; }
+  .crumb { font-size: 12px; color: var(--text-faint); margin-bottom: 8px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .theme-pill {
+    margin-left: auto;
+    display: inline-flex;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 7px;
+    padding: 3px;
+    box-shadow: var(--ws-shadow-card);
+  }
+  .theme-pill button {
+    border: 0; background: transparent;
+    font-family: var(--ws-font-sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 6px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .theme-pill button.active { background: var(--background-secondary-alt); color: var(--text-normal); }
+
+  .link-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 32px; }
+  .link-bar a {
+    display: inline-flex; gap: 6px; align-items: center;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    color: var(--text-normal);
+    padding: 6px 12px;
+    border-radius: 7px;
+    text-decoration: none;
+    font-size: 13px;
+    box-shadow: var(--ws-shadow-card);
+  }
+  .link-bar a:hover { background: var(--background-modifier-hover); }
+  .link-bar a.home { background: var(--interactive-accent); color: var(--text-on-accent); border-color: var(--interactive-accent); }
+
+  /* Section heading */
+  .group {
+    margin-top: 40px;
+  }
+  .group > h2 {
+    font-family: var(--ws-font-display);
+    font-size: 22px; font-weight: 600;
+    letter-spacing: -0.015em;
+    margin: 0 0 4px;
+  }
+  .group > .desc { color: var(--text-muted); font-size: 13.5px; margin: 0 0 18px; max-width: 720px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
+    gap: 22px;
+  }
+
+  /* Screen card */
+  .screen {
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 14px;
+    box-shadow: var(--ws-shadow-card);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .screen .head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid var(--ws-border-hair);
+  }
+  .screen .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--ws-zone-atlas-fg);
+  }
+  .screen .dot.gtd      { background: var(--ws-zone-gtd-fg); }
+  .screen .dot.intel    { background: var(--ws-zone-intel-fg); }
+  .screen .dot.personal { background: var(--ws-zone-personal-fg); }
+  .screen .dot.system   { background: var(--ws-zone-system-fg); }
+  .screen .dot.config   { background: var(--ws-zone-config-fg); }
+  .screen .dot.files    { background: var(--ws-zone-files-fg); }
+  .screen .title {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .screen .meta {
+    font-family: var(--ws-font-mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-left: auto;
+  }
+  .screen .meta a {
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 3px 8px;
+    border-radius: 5px;
+    border: 1px solid var(--ws-border-hair);
+  }
+  .screen .meta a:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
+  .screen .desc {
+    padding: 0 18px 12px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .screen .frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    background: var(--background-secondary-alt);
+    overflow: hidden;
+    border-top: 1px solid var(--ws-border-hair);
+  }
+  /* Iframes are rendered at native resolution (1400 × 875) then scaled
+     down to fit the card. */
+  .screen iframe {
+    position: absolute;
+    width: 1400px; height: 875px;
+    border: 0;
+    transform-origin: top left;
+    /* Scale set inline per-card based on observed card width */
+  }
+  /* Cards in a two-column layout get scaled around 0.42×.
+     We compute scale at runtime so layout reshuffles still look right. */
+</style>
+</head>
+<body class="theme-light">
+<div class="shell">
+
+<header class="page">
+  <div>
+    <div class="crumb">WorkDesk · design system</div>
+    <h1>Screens gallery</h1>
+    <div class="sub">Every surface a user encounters with the plugin installed. Each card is the live prototype, deep-linked to that state — click any card to open it full-size.</div>
+  </div>
+  <div class="theme-pill">
+    <button id="t-light" class="active">Light</button>
+    <button id="t-dark">Dark</button>
+  </div>
+</header>
+
+<div class="link-bar">
+  <a href="index.html" class="home">← Overview</a>
+  <a href="prototype.html">Interactive prototype</a>
+  <a href="tokens.html">Design tokens</a>
+  <a href="components.html">Component specs</a>
+  <a href="handoff/screens.md">screens.md (Claude)</a>
+</div>
+
+<div id="root"></div>
+
+</div>
+
+<script>
+  const $ = (s) => document.querySelector(s);
+
+  // Each entry becomes one card. URL params are the contract.
+  const GROUPS = [
+    {
+      title: 'Zones — default state',
+      desc: 'Operator landed in a normal day. Each zone shows the curated card list with one object expanded.',
+      screens: [
+        { id: 'atlas',    dot: '',         title: 'atlas — _brief.md open',     desc: 'Active project brief. Properties block, callouts, kbd, task list, code block — full markdown coverage.',
+          params: 'zone=atlas&file=_brief.md' },
+        { id: 'gtd',      dot: 'gtd',      title: 'gtd — projects + inbox',    desc: 'Inbox shows the green "caught up" state. Active projects expanded.',
+          params: 'zone=gtd&file=_status.md' },
+        { id: 'intel',    dot: 'intel',    title: 'intel — reads, concepts',   desc: 'Long-running knowledge base. All cards collapsed by default.',
+          params: 'zone=intel' },
+        { id: 'personal', dot: 'personal', title: 'personal — today\'s daily', desc: 'Daily note auto-opened. Tasks, captures, journal block.',
+          params: 'zone=personal&file=2026-05-13.md' },
+        { id: 'system',   dot: 'system',   title: 'system — logs + reference', desc: 'Append-only event stream, claude-log audit, processing scratch.',
+          params: 'zone=system' },
+        { id: 'config',   dot: 'config',   title: 'config — plugin guts',      desc: 'Settings.json, agents, skills, rules, scripts. Where Claude Code lives.',
+          params: 'zone=config' },
+      ],
+    },
+    {
+      title: 'Empty states',
+      desc: 'Fresh install: the vault has zones but no objects. Calm, with a single create-CTA.',
+      screens: [
+        { id: 'empty-atlas',    dot: '',         title: 'atlas — empty',        desc: 'First-run for a non-Khalil operator.',
+          params: 'zone=atlas&empty=1' },
+        { id: 'empty-gtd',      dot: 'gtd',      title: 'gtd — empty',          desc: 'Nothing to triage. Zero anxiety.',
+          params: 'zone=gtd&empty=1' },
+        { id: 'empty-personal', dot: 'personal', title: 'personal — empty',     desc: 'No daily notes yet. First capture starts the streak.',
+          params: 'zone=personal&empty=1' },
+      ],
+    },
+    {
+      title: 'Modals + overlays',
+      desc: 'Floating surfaces the user invokes via hotkey or ribbon.',
+      screens: [
+        { id: 'cmd-palette', dot: '',         title: 'Command palette',     desc: '⌘K · Filtered, grouped commands. Files, zones, WorkDesk actions, triage, view.',
+          params: 'zone=atlas&modal=cmd' },
+        { id: 'quick-capt',  dot: 'personal', title: 'Quick capture',       desc: '⌘⇧M · Live transcription via Groq Whisper. Pulse ring on the mic.',
+          params: 'zone=atlas&modal=qc' },
+        { id: 'settings',    dot: 'config',   title: 'WorkDesk settings',   desc: 'Plugin settings tab — vault, zones, quick capture, terminal, danger zone.',
+          params: 'zone=atlas&modal=settings' },
+        { id: 'onboarding',  dot: '',         title: 'Onboarding modal',    desc: 'Four steps. Replayable from the command palette anytime.',
+          params: 'zone=atlas&modal=onboarding' },
+      ],
+    },
+    {
+      title: 'Pane states',
+      desc: 'The four-pane shell collapses gracefully. Edge bumpers bring panes back.',
+      screens: [
+        { id: 'no-left',  dot: '',         title: 'Zone pane collapsed',  desc: 'Just ribbon + editor + terminal. Edge bumper at left.',
+          params: 'zone=atlas&left=0' },
+        { id: 'no-right', dot: '',         title: 'Terminal collapsed',   desc: 'Ribbon + zone pane + editor. Edge bumper at right.',
+          params: 'zone=atlas&right=0' },
+        { id: 'focus',    dot: '',         title: 'Focus mode',           desc: 'Both panes hidden, ribbon dimmed to 40%. ⌘⇧F to toggle.',
+          params: 'zone=atlas&focus=1' },
+        { id: 'dark',     dot: '',         title: 'Dark theme — default', desc: 'The warm-coffee dark mode. Editor surface #2a2723.',
+          params: 'zone=atlas&theme=dark' },
+      ],
+    },
+  ];
+
+  const root = $('#root');
+  let globalTheme = 'light';
+
+  function buildCards() {
+    root.innerHTML = '';
+    GROUPS.forEach((g) => {
+      const sec = document.createElement('section');
+      sec.className = 'group';
+      sec.innerHTML = `<h2>${g.title}</h2><p class="desc">${g.desc}</p><div class="grid"></div>`;
+      const grid = sec.querySelector('.grid');
+      g.screens.forEach((s) => {
+        const params = `${s.params}&theme=${globalTheme}&embed=1`;
+        const url = `prototype.html?${params}`;
+        const card = document.createElement('div');
+        card.className = 'screen';
+        card.innerHTML = `
+          <div class="head">
+            <div class="dot ${s.dot || ''}"></div>
+            <div class="title">${s.title}</div>
+            <div class="meta"><a href="${url}" target="_blank">Open ↗</a></div>
+          </div>
+          <div class="desc">${s.desc}</div>
+          <div class="frame">
+            <iframe src="${url}" loading="lazy" title="${s.title}"></iframe>
+          </div>`;
+        grid.appendChild(card);
+      });
+      root.appendChild(sec);
+    });
+    requestAnimationFrame(rescaleAll);
+  }
+
+  function rescaleAll() {
+    document.querySelectorAll('.screen .frame').forEach((frame) => {
+      const iframe = frame.querySelector('iframe');
+      if (!iframe) return;
+      const w = frame.clientWidth;
+      const h = frame.clientHeight;
+      const scale = Math.min(w / 1400, h / 875);
+      iframe.style.transform = `scale(${scale})`;
+      iframe.style.width = `${1400}px`;
+      iframe.style.height = `${875}px`;
+      iframe.style.left = `${(w - 1400 * scale) / 2}px`;
+      iframe.style.top  = `${(h - 875 * scale) / 2}px`;
+    });
+  }
+
+  window.addEventListener('resize', () => requestAnimationFrame(rescaleAll));
+
+  // theme toggle (rebuilds iframes so the new theme deep-link applies)
+  $('#t-light').addEventListener('click', () => {
+    globalTheme = 'light';
+    document.body.classList.add('theme-light');
+    document.body.classList.remove('theme-dark');
+    $('#t-light').classList.add('active');
+    $('#t-dark').classList.remove('active');
+    buildCards();
+  });
+  $('#t-dark').addEventListener('click', () => {
+    globalTheme = 'dark';
+    document.body.classList.add('theme-dark');
+    document.body.classList.remove('theme-light');
+    $('#t-dark').classList.add('active');
+    $('#t-light').classList.remove('active');
+    buildCards();
+  });
+
+  buildCards();
+</script>
+</body>
+</html>

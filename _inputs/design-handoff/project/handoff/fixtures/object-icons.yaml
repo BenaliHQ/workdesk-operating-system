@@ -1,0 +1,46 @@
+# config/object-icons.yaml — glyph overrides for individual notes/folders.
+#
+# Keys are matched against file/folder NAMES (not full paths). Used by
+# the zone view to assign glyphs to TreeNodes inside an object's children.
+# Falls back to the default icon: 'file' for files, 'folder' for folders.
+
+# Decision-style notes (named with a leading underscore)
+"_brief.md": file
+"_status.md": file
+"_inbox.md": inbox
+"plan.md": list
+
+# Conventional folders
+"specs":        archive
+"notes":        pencil
+"reference":    book
+"deliverables": upload
+"repo":         code
+"_archive":     archive
+
+# Daily notes (caught by the YYYY-MM-DD glob in the scanner)
+"daily-note":   sun
+
+# Specific files we want extra-recognizable
+"README.md":    book
+"manifest.json": code
+"tokens.css":   layers
+"app.css":      layers
+"main.ts":      code
+"settings.json": gear
+
+# Templates
+"daily.md":         sun
+"daily-minimal.md": sun
+"meeting.md":       video
+"decision.md":      badge
+"capture.md":       mic
+
+# Globs (matched against the basename — first match wins)
+globs:
+  "2026-*.md": sun
+  "_archive*": archive
+  "*.html":   code
+  "*.json":   gear
+  "*.yaml":   gear
+  "*.yml":    gear

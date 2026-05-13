@@ -1,0 +1,119 @@
+{
+  "schema": 2,
+  "plugin_id": "workdeskos-plugin",
+  "repo_path": "/Users/khalilbenali/code/workdeskos-plugin",
+  "last_session": "M1",
+  "phases": {
+    "0": {
+      "status": "PENDING",
+      "commit": null,
+      "verified_at": null,
+      "checkpoint": null
+    },
+    "1": {
+      "status": "PENDING",
+      "commit": null,
+      "verified_at": null,
+      "checkpoint": null
+    },
+    "2": {
+      "status": "PENDING",
+      "commit": null,
+      "verified_at": null,
+      "checkpoint": null
+    },
+    "3": {
+      "status": "PENDING",
+      "commit": null,
+      "verified_at": null,
+      "checkpoint": null
+    },
+    "4a.1": {
+      "status": "PENDING",
+      "commit": null,
+      "verified_at": null,
+      "checkpoint": null
+    },
+    "4a.2": {
+      "status": "PENDING",
+      "commit": null,
+      "verified_at": null,
+      "checkpoint": null
+    },
+    "4b": {
+      "status": "PENDING",
+      "commit": null,
+      "verified_at": null,
+      "checkpoint": null
+    },
+    "5a": {
+      "status": "PENDING",
+      "commit": null,
+      "verified_at": null,
+      "checkpoint": null
+    },
+    "5b": {
+      "status": "PENDING",
+      "commit": null,
+      "verified_at": null,
+      "checkpoint": null
+    },
+    "6a": {
+      "status": "PENDING",
+      "commit": null,
+      "verified_at": null,
+      "checkpoint": null
+    },
+    "6b": {
+      "status": "PENDING",
+      "commit": null,
+      "verified_at": null,
+      "checkpoint": null
+    }
+  },
+  "decisions": {
+    "token_namespace": "ws",
+    "command_prefix": "workdesk",
+    "stt_provider": "groq",
+    "stt_multi_provider": true,
+    "stt_key_storage": "obsidian-secret-storage-since-1.11.4",
+    "claude_binary": "auto-detect-with-override",
+    "drag_drop_temp": ".tmp/dragdrop",
+    "onboarding_enabled": false,
+    "onboarding_done_item_waived": true,
+    "two_week_dogfood_waived_from_auto_verify": true,
+    "platform": "macos-desktop-only",
+    "vault_workdesk_css_coexist": false,
+    "carry_forward_v0": false,
+    "terminal_vendoring": "verbatim",
+    "terminal_upstream_sha": "297fea0a2194c97426b67a8c9040c73035b8ce65",
+    "context7_required": false,
+    "context7_fallback": "webfetch",
+    "tokens_css_sha256": "55bb7a30d3a3507035aea78b9e189b97e314e55bc9a300b654d0c823aa44e166",
+    "app_css_sha256": "f0808dc09a1626799e2043ef66ef50596cad51801515a0d94ad8c8c59d2c5cad",
+    "icons_js_sha256": "48b5d1aad1c46f5c118deb5d9ca70d3d93e5b362ff4abdc1e0e02e46ef7bbd31",
+    "vendored_terminal_main_sha256": "ec705c8c50dd73b0788792ec4340ca053d3d83271e12c72a6892e43367cd22bc",
+    "font_shas": {
+      "dm-sans-400": "258f9f1b553bb57419619f41d3b1445226c7bc63d2a3409efef4a68426709e94",
+      "dm-sans-500": "258f9f1b553bb57419619f41d3b1445226c7bc63d2a3409efef4a68426709e94",
+      "dm-sans-600": "258f9f1b553bb57419619f41d3b1445226c7bc63d2a3409efef4a68426709e94",
+      "manrope-500": "14be4114dcfde74652f19f9ffae8c9bb50707e9e88bd2b1fcd86fb50224109e7",
+      "manrope-600": "14be4114dcfde74652f19f9ffae8c9bb50707e9e88bd2b1fcd86fb50224109e7",
+      "manrope-700": "14be4114dcfde74652f19f9ffae8c9bb50707e9e88bd2b1fcd86fb50224109e7",
+      "geist-mono-400": "e9fb088eeacced307860d82ceedb0ae9ad2ebfa07a7c0a7279c8c961dd9d5fd3",
+      "geist-mono-500": "e9fb088eeacced307860d82ceedb0ae9ad2ebfa07a7c0a7279c8c961dd9d5fd3"
+    },
+    "first_run_gate": "settings.onboarding.completed",
+    "stt_key_api": "obsidian-secret-storage-and-component-since-1.11.4",
+    "min_app_version": "1.11.4",
+    "added_deps": [],
+    "context7_available": false
+  },
+  "runtime": {
+    "node": "25.6.1",
+    "pnpm": "10.30.3",
+    "python3_path": "/usr/bin/python3",
+    "python3_version": "3.9.6"
+  },
+  "log": "STATE.log"
+}

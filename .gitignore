@@ -1,0 +1,6 @@
+node_modules/
+main.js
+styles.css
+.tmp/
+.DS_Store
+scripts/logs/

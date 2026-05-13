@@ -1,0 +1,56 @@
+zones:
+  atlas:
+    name: atlas
+    sub: people, companies, projects
+    icon: globe
+    objects:
+      - id: projects
+        title: projects
+        sub: active work
+        icon: badge
+        path: atlas/projects
+      - id: people
+        title: people
+        sub: relationships
+        icon: person
+        path: atlas/people
+  gtd:
+    name: gtd
+    sub: inbox, actions, projects
+    icon: check
+    objects:
+      - id: inbox
+        title: inbox
+        sub: unprocessed
+        icon: inbox
+        path: gtd/inbox
+      - id: projects
+        title: projects
+        sub: active work
+        icon: badge
+        path: gtd/projects
+  intel:
+    name: intel
+    sub: concepts, syntheses, reference
+    icon: signal
+    objects:
+      - id: concepts
+        title: concepts
+        sub: named frameworks
+        icon: book
+        path: intel/concepts
+  system:
+    name: system
+    sub: logs, intake
+    icon: layers
+    objects:
+      - id: log
+        title: log
+        sub: append-only
+        icon: list
+        path: system/log.md
+  config:
+    name: config
+    sub: rules, tools, zones
+    icon: gear
+    objects: []

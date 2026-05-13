@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>WorkDesk — Visual spec for Claude Code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Manrope:wght@500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared/tokens.css" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: var(--ws-font-sans);
+    background: var(--background-secondary-alt);
+    color: var(--text-normal);
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+  }
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 64px 40px 120px;
+  }
+
+  /* ── Hero ───────────────────────────────────────── */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 56px;
+    align-items: center;
+    margin-bottom: 64px;
+  }
+  @media (max-width: 920px) { .hero { grid-template-columns: 1fr; } }
+
+  .hero .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--ws-font-mono);
+    font-size: 11.5px;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero .eyebrow .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--interactive-accent);
+  }
+  .hero h1 {
+    font-family: var(--ws-font-display);
+    font-size: 52px; font-weight: 700;
+    letter-spacing: -0.025em;
+    margin: 0 0 16px;
+    line-height: 1.02;
+  }
+  .hero .lede {
+    font-size: 17px;
+    color: var(--text-muted);
+    line-height: 1.55;
+    max-width: 580px;
+    margin: 0 0 24px;
+  }
+  .hero .cta-row {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .btn-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px;
+    border-radius: 9px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    color: var(--text-normal);
+    box-shadow: var(--ws-shadow-card);
+    transition: box-shadow var(--ws-dur-base) var(--ws-ease-out);
+  }
+  .btn-cta:hover { box-shadow: var(--ws-shadow-hover); }
+  .btn-cta.primary {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border-color: var(--interactive-accent);
+  }
+  .btn-cta.primary:hover { background: var(--interactive-accent-hover); }
+
+  /* Hero illustration: a stylized 4-pane shell */
+  .hero-art {
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 16px;
+    box-shadow: var(--ws-shadow-hover);
+    padding: 12px;
+    aspect-ratio: 3 / 2.1;
+    display: grid;
+    grid-template-columns: 36px 1fr 90px;
+    grid-template-rows: 22px 1fr;
+    gap: 8px;
+    overflow: hidden;
+  }
+  .hero-art .h-ribbon {
+    grid-row: 1 / 3;
+    background: var(--background-secondary-alt);
+    border-radius: 9px;
+    padding: 8px 0;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .hero-art .h-ribbon .pip {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+  }
+  .hero-art .h-tabs {
+    grid-column: 2 / 4;
+    background: var(--background-secondary);
+    border-radius: 6px;
+  }
+  .hero-art .h-pane {
+    background: var(--background-secondary);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex; flex-direction: column; gap: 5px;
+    overflow: hidden;
+  }
+  .hero-art .h-pane .h-card {
+    background: var(--background-primary);
+    border-radius: 6px;
+    padding: 6px 8px;
+    box-shadow: var(--ws-shadow-card);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hero-art .h-pane .h-card .h-dot { width: 14px; height: 14px; border-radius: 50%; }
+  .hero-art .h-pane .h-card .h-bar {
+    flex: 1;
+    height: 4px;
+    border-radius: 3px;
+    background: var(--background-modifier-hover);
+  }
+  .hero-art .h-pane .h-card .h-num {
+    font-family: var(--ws-font-mono);
+    font-size: 9px;
+    color: var(--text-faint);
+  }
+  .hero-art .h-editor {
+    background: var(--background-primary);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 6px;
+    overflow: hidden;
+  }
+  .hero-art .h-editor .h-h1 {
+    width: 70%; height: 11px; border-radius: 3px;
+    background: var(--text-normal);
+    opacity: 0.85;
+  }
+  .hero-art .h-editor .h-p {
+    height: 4px; border-radius: 2px;
+    background: var(--background-modifier-hover);
+  }
+  .hero-art .h-editor .h-p.w-100 { width: 100%; }
+  .hero-art .h-editor .h-p.w-90  { width: 90%; }
+  .hero-art .h-editor .h-p.w-60  { width: 60%; }
+  .hero-art .h-editor .h-callout {
+    margin-top: 6px;
+    padding: 6px 8px;
+    background: var(--ws-zone-atlas-bg);
+    border-left: 2px solid var(--ws-zone-atlas-fg);
+    border-radius: 4px;
+    height: 22px;
+  }
+  .hero-art .h-term {
+    background: var(--background-secondary);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-family: var(--ws-font-mono);
+    font-size: 8px;
+    color: var(--text-muted);
+    display: flex; flex-direction: column; gap: 3px;
+    overflow: hidden;
+  }
+  .hero-art .h-term .l1 { color: var(--text-faint); }
+  .hero-art .h-term .pmt { color: var(--interactive-accent); }
+  .hero-art .h-term .acc { color: var(--ws-zone-atlas-fg); }
+  .hero-art .h-term .ok  { color: var(--text-success); }
+
+  /* ── Tile grid ───────────────────────────────────── */
+  section.tiles { margin-top: 16px; }
+  section.tiles > h2 {
+    font-family: var(--ws-font-display);
+    font-size: 22px; font-weight: 600;
+    letter-spacing: -0.015em;
+    margin: 0 0 6px;
+  }
+  section.tiles > .desc { color: var(--text-muted); font-size: 13.5px; margin: 0 0 22px; max-width: 720px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .tile {
+    text-decoration: none;
+    color: inherit;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 14px;
+    padding: 22px 22px 18px;
+    box-shadow: var(--ws-shadow-card);
+    display: flex; flex-direction: column;
+    gap: 12px;
+    transition: box-shadow var(--ws-dur-base) var(--ws-ease-out), transform var(--ws-dur-fast) var(--ws-ease-out);
+  }
+  .tile:hover { box-shadow: var(--ws-shadow-hover); transform: translateY(-2px); }
+
+  .tile .glyph {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: grid; place-items: center;
+    background: var(--ws-zone-atlas-bg);
+    color: var(--ws-zone-atlas-fg);
+    margin-bottom: 4px;
+  }
+  .tile h3 {
+    font-family: var(--ws-font-display);
+    font-size: 17px; font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .tile p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .tile .meta {
+    font-family: var(--ws-font-mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--ws-border-hair);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .tile .meta .arrow { color: var(--text-muted); }
+
+  .tile.featured {
+    grid-column: span 2;
+    background: linear-gradient(180deg, var(--background-primary), var(--background-primary-alt));
+  }
+  .tile.featured .glyph {
+    background: var(--ws-zone-gtd-bg);
+    color: var(--ws-zone-gtd-fg);
+  }
+
+  /* zone-keyed tiles */
+  .tile.zone-atlas    .glyph { background: var(--ws-zone-atlas-bg);    color: var(--ws-zone-atlas-fg); }
+  .tile.zone-gtd      .glyph { background: var(--ws-zone-gtd-bg);      color: var(--ws-zone-gtd-fg); }
+  .tile.zone-intel    .glyph { background: var(--ws-zone-intel-bg);    color: var(--ws-zone-intel-fg); }
+  .tile.zone-personal .glyph { background: var(--ws-zone-personal-bg); color: var(--ws-zone-personal-fg); }
+  .tile.zone-system   .glyph { background: var(--ws-zone-system-bg);   color: var(--ws-zone-system-fg); }
+  .tile.zone-config   .glyph { background: var(--ws-zone-config-bg);   color: var(--ws-zone-config-fg); }
+
+  /* ── Handoff card grid ──────────────────────────── */
+  .handoff {
+    margin-top: 64px;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 16px;
+    padding: 32px 32px 28px;
+    box-shadow: var(--ws-shadow-card);
+  }
+  .handoff h2 {
+    font-family: var(--ws-font-display);
+    font-size: 22px; font-weight: 600;
+    letter-spacing: -0.015em;
+    margin: 0 0 6px;
+  }
+  .handoff > p {
+    color: var(--text-muted);
+    margin: 0 0 24px;
+    font-size: 13.5px;
+    max-width: 720px;
+  }
+  .handoff-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 24px;
+  }
+  @media (max-width: 760px) { .handoff-list { grid-template-columns: 1fr; } }
+  .handoff-item {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--ws-border-hair);
+    text-decoration: none;
+    color: inherit;
+  }
+  .handoff-item:hover { background: var(--background-modifier-hover); border-radius: 6px; }
+  .handoff-item .num {
+    font-family: var(--ws-font-mono);
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+  .handoff-item .label {
+    font-family: var(--ws-font-mono);
+    font-size: 13px;
+  }
+  .handoff-item .role {
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+
+  /* ── Footer ─────────────────────────────────────── */
+  footer.page {
+    margin-top: 64px;
+    padding-top: 32px;
+    border-top: 1px solid var(--background-modifier-border);
+    font-size: 12.5px;
+    color: var(--text-faint);
+    line-height: 1.7;
+    display: flex; justify-content: space-between; align-items: baseline;
+    flex-wrap: wrap; gap: 24px;
+  }
+  footer.page code { font-family: var(--ws-font-mono); }
+
+  /* theme toggle */
+  .theme-pill {
+    position: fixed;
+    top: 24px; right: 24px;
+    display: inline-flex;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 7px;
+    padding: 3px;
+    box-shadow: var(--ws-shadow-popover);
+    z-index: 20;
+  }
+  .theme-pill button {
+    border: 0; background: transparent;
+    font-family: var(--ws-font-sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 6px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .theme-pill button.active { background: var(--background-secondary-alt); color: var(--text-normal); }
+
+  /* facts */
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px;
+    margin: 40px 0 0;
+  }
+  .fact {
+    padding: 18px 20px;
+    background: var(--background-primary);
+    border: 1px solid var(--ws-border-hair);
+    border-radius: 12px;
+  }
+  .fact .big {
+    font-family: var(--ws-font-display);
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0 0 2px;
+    color: var(--text-normal);
+  }
+  .fact .lbl {
+    font-size: 11.5px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+</style>
+</head>
+<body class="theme-light">
+
+<div class="theme-pill">
+  <button id="t-light" class="active">Light</button>
+  <button id="t-dark">Dark</button>
+</div>
+
+<div class="shell">
+
+<!-- ─────────────────────── Hero ─────────────────────── -->
+<section class="hero">
+  <div>
+    <div class="eyebrow"><span class="dot"></span>WorkDesk · design handoff · v1.0</div>
+    <h1>WorkDesk visual spec for Claude Code</h1>
+    <p class="lede">Every surface, token, component, and screen for the <strong>workdesk-surface</strong> Obsidian plugin — locked, annotated, and structured so Claude Code can build the plugin without guessing.</p>
+    <div class="cta-row">
+      <a class="btn-cta primary" href="prototype.html">
+        Open interactive prototype
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+      <a class="btn-cta" href="handoff/README.md">Read the handoff README</a>
+    </div>
+    <div class="facts">
+      <div class="fact"><div class="big">4</div><div class="lbl">Panes in shell</div></div>
+      <div class="fact"><div class="big">7</div><div class="lbl">Zones (5 + files + config)</div></div>
+      <div class="fact"><div class="big">120+</div><div class="lbl">CSS tokens</div></div>
+      <div class="fact"><div class="big">2</div><div class="lbl">Themes (light + dark)</div></div>
+    </div>
+  </div>
+
+  <div class="hero-art" aria-hidden="true">
+    <div class="h-ribbon">
+      <div class="pip" style="background: var(--ws-zone-atlas-bg); box-shadow: 0 0 0 2px var(--background-secondary-alt), 0 0 0 3px rgba(0,0,0,0.18);"></div>
+      <div class="pip" style="background: var(--ws-zone-gtd-bg);"></div>
+      <div class="pip" style="background: var(--ws-zone-intel-bg);"></div>
+      <div class="pip" style="background: var(--ws-zone-personal-bg);"></div>
+      <div class="pip" style="background: var(--ws-zone-system-bg);"></div>
+      <div class="pip" style="background: var(--ws-zone-config-bg);"></div>
+      <div style="flex:1"></div>
+      <div class="pip" style="background: var(--interactive-accent); opacity: 0.5; width: 18px; height: 18px;"></div>
+    </div>
+    <div class="h-tabs"></div>
+    <div class="h-pane">
+      <div class="h-card"><div class="h-dot" style="background: var(--ws-zone-atlas-bg)"></div><div class="h-bar"></div><div class="h-num">8</div></div>
+      <div class="h-card"><div class="h-dot" style="background: var(--ws-zone-atlas-bg)"></div><div class="h-bar"></div><div class="h-num">34</div></div>
+      <div class="h-card"><div class="h-dot" style="background: var(--ws-zone-atlas-bg)"></div><div class="h-bar"></div><div class="h-num">17</div></div>
+      <div class="h-card"><div class="h-dot" style="background: var(--ws-zone-atlas-bg)"></div><div class="h-bar"></div><div class="h-num">61</div></div>
+      <div class="h-card"><div class="h-dot" style="background: var(--ws-zone-atlas-bg)"></div><div class="h-bar"></div><div class="h-num">22</div></div>
+    </div>
+    <div class="h-editor">
+      <div class="h-h1"></div>
+      <div class="h-p w-100"></div>
+      <div class="h-p w-90"></div>
+      <div class="h-p w-60"></div>
+      <div class="h-callout"></div>
+      <div class="h-p w-100" style="margin-top: 4px"></div>
+      <div class="h-p w-90"></div>
+      <div class="h-p w-60"></div>
+    </div>
+    <div class="h-term" style="grid-column: 3 / 4; grid-row: 2 / 3;">
+      <span class="l1">~/Workdesk-OS · main</span>
+      <span class="l1">v0.42 · opus</span>
+      <span></span>
+      <span><span class="pmt">❯</span> read brief</span>
+      <span class="l1">Reading <span class="acc">_brief.md</span>…</span>
+      <span class="l1">✓ 98 lines</span>
+      <span></span>
+      <span><span class="ok">✓</span> 3 forks ranked</span>
+      <span><span class="pmt">❯</span> <span style="display:inline-block;width:4px;height:7px;background:var(--interactive-accent);vertical-align:-1px"></span></span>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────── Primary exploration ─────────────────────── -->
+<section class="tiles">
+  <h2>Where to look first</h2>
+  <p class="desc">The four canonical artifacts. Start with the prototype to see the surface live, then drill into tokens / components / screens for the spec data.</p>
+  <div class="grid">
+    <a href="prototype.html" class="tile featured zone-gtd">
+      <div class="glyph" id="g-proto"></div>
+      <h3>Interactive prototype</h3>
+      <p>The whole plugin running live in your browser. Switch zones, expand trees, open palette / quick capture / settings, toggle dark, enter focus mode. Every state Claude Code needs to mirror is reachable here.</p>
+      <div class="meta"><span>prototype.html</span><span class="arrow">→</span></div>
+    </a>
+    <a href="tokens.html" class="tile zone-atlas">
+      <div class="glyph" id="g-tokens"></div>
+      <h3>Design tokens</h3>
+      <p>Every CSS variable as a live swatch — colors, type, spacing, radius, shadows, motion, icons. Includes the full <code>tokens.css</code> ready to paste into the plugin.</p>
+      <div class="meta"><span>tokens.html</span><span class="arrow">→</span></div>
+    </a>
+    <a href="components.html" class="tile zone-intel">
+      <div class="glyph" id="g-comp"></div>
+      <h3>Component specs</h3>
+      <p>Every UI block — zone slot, zone card, tree row, callouts, modals, terminal lines, buttons, fields, toggle, segmented — with geometry, states, and token map.</p>
+      <div class="meta"><span>components.html</span><span class="arrow">→</span></div>
+    </a>
+    <a href="screens.html" class="tile zone-personal">
+      <div class="glyph" id="g-screens"></div>
+      <h3>Screens gallery</h3>
+      <p>Every screen a user could encounter, embedded live: default zones, empty / first-run, modals, pane states, focus mode, dark theme. Each card deep-links to the prototype.</p>
+      <div class="meta"><span>screens.html</span><span class="arrow">→</span></div>
+    </a>
+  </div>
+</section>
+
+<!-- ─────────────────────── Markdown handoff ─────────────────────── -->
+<div class="handoff">
+  <h2>Markdown handoff · for Claude Code</h2>
+  <p>The same content as the visual pages above, in a form Claude Code can read directly. Drop the <code>handoff/</code> folder into the plugin repo or feed it in via context.</p>
+  <div class="handoff-list">
+    <a class="handoff-item" href="handoff/PROMPT.md">
+      <div class="num">00</div>
+      <div>
+        <div class="label">PROMPT.md</div>
+        <div class="role">Paste this into Claude Code to start the build</div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="handoff/README.md">
+      <div class="num">01</div>
+      <div>
+        <div class="label">README.md</div>
+        <div class="role">Orientation · non-negotiables · what the plugin is</div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="handoff/build-sequence.md">
+      <div class="num">02</div>
+      <div>
+        <div class="label">build-sequence.md</div>
+        <div class="role">Phased build order (Phase 0 → 6) with acceptance criteria</div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="handoff/design-tokens.md">
+      <div class="num">03</div>
+      <div>
+        <div class="label">design-tokens.md</div>
+        <div class="role">Every CSS variable, role + theme values</div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="handoff/components.md">
+      <div class="num">04</div>
+      <div>
+        <div class="label">components.md</div>
+        <div class="role">Geometry, states, token map per component</div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="handoff/manifest.md">
+      <div class="num">05</div>
+      <div>
+        <div class="label">manifest.md</div>
+        <div class="role">Plugin manifest, folder structure, commands, settings schema</div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="handoff/animations.md">
+      <div class="num">06</div>
+      <div>
+        <div class="label">animations.md</div>
+        <div class="role">Motion + easing tokens, animation inventory</div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="handoff/accessibility.md">
+      <div class="num">07</div>
+      <div>
+        <div class="label">accessibility.md</div>
+        <div class="role">Focus, ARIA, contrast, keyboard surface</div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="handoff/screens.md">
+      <div class="num">08</div>
+      <div>
+        <div class="label">screens.md</div>
+        <div class="role">URL param contract + screen-by-screen narrative</div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="handoff/DONE-checklist.md">
+      <div class="num">09</div>
+      <div>
+        <div class="label">DONE-checklist.md</div>
+        <div class="role">Smoke test the plugin must pass to ship</div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="handoff/types.d.ts">
+      <div class="num">10</div>
+      <div>
+        <div class="label">types.d.ts</div>
+        <div class="role">TypeScript ambient types for the data model</div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="handoff/fixtures/zones.yaml">
+      <div class="num">11</div>
+      <div>
+        <div class="label">fixtures/zones.yaml</div>
+        <div class="role">Default zone manifest · ship as auto-scaffold seed</div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="handoff/fixtures/object-icons.yaml">
+      <div class="num">12</div>
+      <div>
+        <div class="label">fixtures/object-icons.yaml</div>
+        <div class="role">Glyph overrides per file/folder name</div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="shared/tokens.css">
+      <div class="num">13</div>
+      <div>
+        <div class="label">shared/tokens.css</div>
+        <div class="role">Copy verbatim into the plugin's <code>styles/tokens.css</code></div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="shared/app.css">
+      <div class="num">14</div>
+      <div>
+        <div class="label">shared/app.css</div>
+        <div class="role">Component CSS · copy into <code>styles/app.css</code></div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="handoff/screenshots/README.md">
+      <div class="num">16</div>
+      <div>
+        <div class="label">screenshots/</div>
+        <div class="role">Static PNGs of every screen state · offline reference</div>
+      </div>
+      <div class="num">→</div>
+    </a>
+    <a class="handoff-item" href="shared/icons.js">
+      <div class="num">15</div>
+      <div>
+        <div class="label">shared/icons.js</div>
+        <div class="role">WorkDesk SVG icon set · port to TypeScript</div>
+      </div>
+      <div class="num">→</div>
+    </a>
+  </div>
+</div>
+
+<footer class="page">
+  <div>
+    <strong>WorkDesk OS</strong> · workdesk-surface plugin · visual spec v1.0
+    <br />Built May 13 2026 · all tokens align with Obsidian's native CSS variable contract.
+  </div>
+  <div style="text-align: right;">
+    Use the prompt: <code>"Read handoff/ and build the plugin per these specs."</code>
+  </div>
+</footer>
+
+</div>
+
+<script src="shared/icons.js"></script>
+<script>
+  const $ = (s) => document.querySelector(s);
+  // Stamp glyphs onto tiles
+  $('#g-proto').innerHTML   = window.wsSvg('code', 20);
+  $('#g-tokens').innerHTML  = window.wsSvg('layers', 20);
+  $('#g-comp').innerHTML    = window.wsSvg('files', 20);
+  $('#g-screens').innerHTML = window.wsSvg('outline', 20);
+
+  // Theme toggle
+  $('#t-light').addEventListener('click', () => {
+    document.body.classList.remove('theme-dark');
+    document.body.classList.add('theme-light');
+    $('#t-light').classList.add('active');
+    $('#t-dark').classList.remove('active');
+  });
+  $('#t-dark').addEventListener('click', () => {
+    document.body.classList.add('theme-dark');
+    document.body.classList.remove('theme-light');
+    $('#t-dark').classList.add('active');
+    $('#t-light').classList.remove('active');
+  });
+</script>
+</body>
+</html>

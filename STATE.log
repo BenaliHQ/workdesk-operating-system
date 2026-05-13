@@ -1,0 +1,89 @@
+# WorkdeskOS Plugin — STATE log (append-only)
+## 2026-05-13T14:41:00.615Z  verify phase0
+  - [ok] STATE.json validates against zod schema — schema=2
+  - [ok] deliverable: scripts/preflight.sh
+  - [ok] deliverable: manifest.json
+  - [ok] deliverable: package.json
+  - [ok] deliverable: tsconfig.json
+  - [ok] deliverable: esbuild.config.mjs
+  - [ok] deliverable: .gitignore
+  - [ok] deliverable: .nvmrc
+  - [ok] deliverable: README.md
+  - [ok] deliverable: LICENSE
+  - [ok] deliverable: styles/tokens.css
+  - [ok] deliverable: styles/app.css
+  - [ok] deliverable: styles/reduced-motion.css
+  - [ok] deliverable: styles/fonts.css
+  - [ok] deliverable: src/icons.ts
+  - [ok] deliverable: src/types.d.ts
+  - [ok] deliverable: fixtures/zones.yaml
+  - [ok] deliverable: fixtures/object-icons.yaml
+  - [ok] deliverable: src/main.ts
+  - [ok] deliverable: src/settings.ts
+  - [ok] deliverable: src/constants.ts
+  - [ok] deliverable: STATE.json
+  - [ok] deliverable: STATE.md
+  - [ok] deliverable: STATE.log
+  - [ok] deliverable: scripts/render-state-md.mjs
+  - [ok] deliverable: scripts/state-schema.mjs
+  - [ok] deliverable: scripts/copy-fonts.mjs
+  - [ok] deliverable: scripts/verify.mjs
+  - [ok] deliverable: scripts/run-all.sh
+  - [ok] deliverable: scripts/install-check.sh
+  - [ok] deliverable: tests/fixtures/sample-vault
+  - [ok] deliverable: tests/stubs/obsidian.ts
+  - [ok] deliverable: _inputs/design-handoff
+  - [ok] deliverable: _inputs/workdesk-terminal.main.ts
+  - [ok] styles/tokens.css matches _inputs source byte-for-byte — 55bb7a30d3a3…
+  - [ok] styles/app.css matches _inputs source byte-for-byte — f0808dc09a16…
+  - [FAIL] src/icons.ts ports ≥ 47 icons from shared/icons.js — only 0 icons in src/icons.ts
+  - [ok] manifest.json id + minAppVersion + isDesktopOnly — id=workdeskos-plugin minAppVersion=1.11.4
+  - [ok] package.json deps are exact (no ^) — all exact
+  - [ok] tsc --strict --noEmit — strict mode
+  - [ok] pnpm build → main.js + styles.css — build ok
+  - [ok] fonts/ contains ≥ 8 .woff2 with SHAs in STATE.decisions.font_shas — 8 fonts verified
+  - [ok] prompts/S*.md absent (mega-spec mode) — no prompts/S*.md
+## 2026-05-13T14:41:17.698Z  verify phase0
+  - [ok] STATE.json validates against zod schema — schema=2
+  - [ok] deliverable: scripts/preflight.sh
+  - [ok] deliverable: manifest.json
+  - [ok] deliverable: package.json
+  - [ok] deliverable: tsconfig.json
+  - [ok] deliverable: esbuild.config.mjs
+  - [ok] deliverable: .gitignore
+  - [ok] deliverable: .nvmrc
+  - [ok] deliverable: README.md
+  - [ok] deliverable: LICENSE
+  - [ok] deliverable: styles/tokens.css
+  - [ok] deliverable: styles/app.css
+  - [ok] deliverable: styles/reduced-motion.css
+  - [ok] deliverable: styles/fonts.css
+  - [ok] deliverable: src/icons.ts
+  - [ok] deliverable: src/types.d.ts
+  - [ok] deliverable: fixtures/zones.yaml
+  - [ok] deliverable: fixtures/object-icons.yaml
+  - [ok] deliverable: src/main.ts
+  - [ok] deliverable: src/settings.ts
+  - [ok] deliverable: src/constants.ts
+  - [ok] deliverable: STATE.json
+  - [ok] deliverable: STATE.md
+  - [ok] deliverable: STATE.log
+  - [ok] deliverable: scripts/render-state-md.mjs
+  - [ok] deliverable: scripts/state-schema.mjs
+  - [ok] deliverable: scripts/copy-fonts.mjs
+  - [ok] deliverable: scripts/verify.mjs
+  - [ok] deliverable: scripts/run-all.sh
+  - [ok] deliverable: scripts/install-check.sh
+  - [ok] deliverable: tests/fixtures/sample-vault
+  - [ok] deliverable: tests/stubs/obsidian.ts
+  - [ok] deliverable: _inputs/design-handoff
+  - [ok] deliverable: _inputs/workdesk-terminal.main.ts
+  - [ok] styles/tokens.css matches _inputs source byte-for-byte — 55bb7a30d3a3…
+  - [ok] styles/app.css matches _inputs source byte-for-byte — f0808dc09a16…
+  - [ok] src/icons.ts ports ≥ 47 icons from shared/icons.js — 53 icons
+  - [ok] manifest.json id + minAppVersion + isDesktopOnly — id=workdeskos-plugin minAppVersion=1.11.4
+  - [ok] package.json deps are exact (no ^) — all exact
+  - [ok] tsc --strict --noEmit — strict mode
+  - [ok] pnpm build → main.js + styles.css — build ok
+  - [ok] fonts/ contains ≥ 8 .woff2 with SHAs in STATE.decisions.font_shas — 8 fonts verified
+  - [ok] prompts/S*.md absent (mega-spec mode) — no prompts/S*.md

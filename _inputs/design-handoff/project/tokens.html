@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>WorkDesk — Design tokens reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Manrope:wght@500;600&family=Geist+Mono:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared/tokens.css" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: var(--ws-font-sans);
+    background: var(--background-secondary-alt);
+    color: var(--text-normal);
+    margin: 0; padding: 0;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 56px 40px 120px;
+  }
+  header.page {
+    display: flex; align-items: flex-end; gap: 24px;
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--background-modifier-border);
+  }
+  header.page h1 {
+    font-family: var(--ws-font-display);
+    font-size: 36px; font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0; line-height: 1.05;
+  }
+  header.page .sub { color: var(--text-muted); font-size: 14px; max-width: 540px; margin-top: 8px; }
+  .crumb { font-size: 12px; color: var(--text-faint); margin-bottom: 8px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .theme-pill {
+    margin-left: auto;
+    display: inline-flex;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 7px;
+    padding: 3px;
+    gap: 2px;
+    box-shadow: var(--ws-shadow-card);
+  }
+  .theme-pill button {
+    border: 0; background: transparent;
+    font-family: var(--ws-font-sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 6px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .theme-pill button.active { background: var(--background-secondary-alt); color: var(--text-normal); }
+
+  section { margin-top: 48px; }
+  section > h2 {
+    font-family: var(--ws-font-display);
+    font-size: 22px; font-weight: 600;
+    letter-spacing: -0.015em;
+    margin: 0 0 6px;
+  }
+  section > .desc {
+    font-size: 13.5px; color: var(--text-muted);
+    margin: 0 0 20px;
+    max-width: 760px;
+  }
+  .section-label {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin: 28px 0 12px;
+  }
+
+  /* ─── card ─────────────────────────────────────────────── */
+  .card {
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 12px;
+    box-shadow: var(--ws-shadow-card);
+    overflow: hidden;
+  }
+
+  /* ─── color grid ───────────────────────────────────────── */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .swatch {
+    background: var(--background-primary);
+    border: 1px solid var(--ws-border-hair);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .swatch .chip {
+    height: 84px;
+    border-bottom: 1px solid var(--ws-border-hair);
+  }
+  .swatch .body { padding: 10px 12px 12px; }
+  .swatch .name {
+    font-family: var(--ws-font-mono);
+    font-size: 12px;
+    color: var(--text-normal);
+    word-break: break-all;
+  }
+  .swatch .val {
+    font-family: var(--ws-font-mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-top: 2px;
+  }
+  .swatch .role { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  /* zone block: bg + fg paired */
+  .zone-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--ws-border-hair);
+    background: var(--background-primary);
+    margin-bottom: 12px;
+  }
+  .zone-pair .half { padding: 16px 18px; min-height: 92px; display: flex; flex-direction: column; gap: 6px; }
+  .zone-pair .half.bg { color: var(--text-muted); }
+  .zone-pair .half .lbl { font-family: var(--ws-font-mono); font-size: 11px; }
+  .zone-pair .half .name { font-family: var(--ws-font-display); font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+
+  /* ─── type ─────────────────────────────────────────────── */
+  .type-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 220px;
+    gap: 24px;
+    align-items: baseline;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--ws-border-hair);
+  }
+  .type-row:last-child { border-bottom: none; }
+  .type-row .lbl { font-family: var(--ws-font-mono); font-size: 12px; color: var(--text-muted); }
+  .type-row .demo { color: var(--text-normal); }
+  .type-row .css { font-family: var(--ws-font-mono); font-size: 11.5px; color: var(--text-faint); white-space: nowrap; }
+
+  /* ─── spacing/radius ───────────────────────────────────── */
+  .scale {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 12px;
+  }
+  .scale .tile {
+    background: var(--background-primary);
+    border: 1px solid var(--ws-border-hair);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+  .scale .tile .viz {
+    height: 64px;
+    margin: 0 auto 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .scale .tile .box {
+    background: var(--interactive-accent);
+    opacity: 0.85;
+    border-radius: 3px;
+  }
+  .scale .tile .ring {
+    border: 2px solid var(--interactive-accent);
+    background: transparent;
+  }
+  .scale .tile .name { font-family: var(--ws-font-mono); font-size: 11px; color: var(--text-normal); }
+  .scale .tile .val  { font-family: var(--ws-font-mono); font-size: 10.5px; color: var(--text-faint); margin-top: 1px; }
+
+  /* ─── shadow grid ──────────────────────────────────────── */
+  .shadows {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 24px;
+  }
+  .shadow-card {
+    background: var(--background-primary);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--ws-border-hair);
+    text-align: center;
+  }
+  .shadow-card.s-card    { box-shadow: var(--ws-shadow-card); }
+  .shadow-card.s-hover   { box-shadow: var(--ws-shadow-hover); }
+  .shadow-card.s-popover { box-shadow: var(--ws-shadow-popover); }
+  .shadow-card.s-modal   { box-shadow: var(--ws-shadow-modal); }
+  .shadow-card .lbl { font-family: var(--ws-font-mono); font-size: 12px; color: var(--text-normal); }
+  .shadow-card .sub { font-size: 11px; color: var(--text-faint); margin-top: 4px; }
+
+  /* ─── code block ───────────────────────────────────────── */
+  pre.css-snippet {
+    background: var(--code-background);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    font-family: var(--ws-font-mono);
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--code-normal);
+    overflow-x: auto;
+    margin: 0;
+  }
+  pre.css-snippet .c-comment { color: var(--code-comment); }
+  pre.css-snippet .c-var     { color: var(--code-keyword); }
+  pre.css-snippet .c-val     { color: var(--code-value); }
+
+  /* ─── motion ───────────────────────────────────────────── */
+  .motion-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .motion-tile {
+    background: var(--background-primary);
+    border: 1px solid var(--ws-border-hair);
+    border-radius: 10px;
+    padding: 16px;
+    overflow: hidden;
+    position: relative;
+  }
+  .motion-tile .runway {
+    height: 16px;
+    background: var(--background-modifier-hover);
+    border-radius: 999px;
+    margin: 10px 0 6px;
+    position: relative;
+  }
+  .motion-tile .dot {
+    position: absolute;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--interactive-accent);
+    top: 2px; left: 2px;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+  }
+  .motion-tile .dot.fast    { animation: travel var(--ws-dur-fast) var(--ws-ease-out) infinite alternate; }
+  .motion-tile .dot.base    { animation: travel var(--ws-dur-base) var(--ws-ease-out) infinite alternate; }
+  .motion-tile .dot.pane    { animation: travel var(--ws-dur-pane) var(--ws-ease-out) infinite alternate; }
+  .motion-tile .dot.modal   { animation: travel var(--ws-dur-modal) var(--ws-ease-spring) infinite alternate; }
+  @keyframes travel {
+    from { left: 2px; }
+    to   { left: calc(100% - 14px); }
+  }
+  .motion-tile .name { font-family: var(--ws-font-mono); font-size: 12px; }
+  .motion-tile .val  { font-family: var(--ws-font-mono); font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+
+  /* ─── icon grid ────────────────────────────────────────── */
+  .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+    gap: 8px;
+  }
+  .icon-tile {
+    background: var(--background-primary);
+    border: 1px solid var(--ws-border-hair);
+    border-radius: 10px;
+    padding: 14px 8px 10px;
+    text-align: center;
+    color: var(--text-normal);
+  }
+  .icon-tile .glyph {
+    margin: 0 auto 8px;
+    display: grid; place-items: center;
+    width: 36px; height: 36px;
+    color: var(--text-muted);
+  }
+  .icon-tile .lbl { font-family: var(--ws-font-mono); font-size: 11px; color: var(--text-faint); }
+
+  /* link bar */
+  .link-bar {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-bottom: 16px;
+  }
+  .link-bar a {
+    display: inline-flex; gap: 6px; align-items: center;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    color: var(--text-normal);
+    padding: 6px 12px;
+    border-radius: 7px;
+    text-decoration: none;
+    font-size: 13px;
+    box-shadow: var(--ws-shadow-card);
+  }
+  .link-bar a:hover { background: var(--background-modifier-hover); }
+  .link-bar a.home { background: var(--interactive-accent); color: var(--text-on-accent); border-color: var(--interactive-accent); }
+</style>
+</head>
+<body class="theme-light">
+<div class="shell">
+
+<header class="page">
+  <div>
+    <div class="crumb">WorkDesk · design system</div>
+    <h1>Design tokens</h1>
+    <div class="sub">Single source of truth. Every CSS variable used across the plugin, organized by role. Names match Obsidian's native theming vocabulary so this drops in cleanly.</div>
+  </div>
+  <div class="theme-pill">
+    <button id="t-light" class="active">Light</button>
+    <button id="t-dark">Dark</button>
+  </div>
+</header>
+
+<div class="link-bar">
+  <a href="index.html" class="home">← Overview</a>
+  <a href="prototype.html">Interactive prototype</a>
+  <a href="components.html">Component specs</a>
+  <a href="screens.html">Screens gallery</a>
+  <a href="handoff/design-tokens.md">tokens.md (Claude)</a>
+</div>
+
+<!-- ═══════════════════════════════════════ Colors ═══════════════════════════════════════ -->
+<section>
+  <h2>Colors</h2>
+  <p class="desc">All Obsidian-native variables. Theme via <code>.theme-light</code> / <code>.theme-dark</code> on <code>&lt;body&gt;</code>.</p>
+
+  <div class="section-label">Surface · background-*</div>
+  <div class="color-grid" id="grid-bg"></div>
+
+  <div class="section-label">Text · text-*</div>
+  <div class="color-grid" id="grid-text"></div>
+
+  <div class="section-label">Interactive · interactive-*</div>
+  <div class="color-grid" id="grid-interactive"></div>
+
+  <div class="section-label">Modifiers · background-modifier-*</div>
+  <div class="color-grid" id="grid-mod"></div>
+
+  <div class="section-label">Code blocks · code-*</div>
+  <div class="color-grid" id="grid-code"></div>
+
+  <div class="section-label">WorkDesk zone palettes · --ws-zone-*-bg / --ws-zone-*-fg</div>
+  <div id="zone-pairs"></div>
+
+  <div class="section-label">WorkDesk terminal · --ws-term-*</div>
+  <div class="color-grid" id="grid-term"></div>
+</section>
+
+<!-- ═══════════════════════════════════════ Type ═══════════════════════════════════════ -->
+<section>
+  <h2>Typography</h2>
+  <p class="desc">Three families. <strong>DM Sans</strong> body, <strong>Manrope</strong> display (h1/h2 + pane heroes), <strong>Geist Mono</strong> for terminal + code.</p>
+
+  <div class="card" style="padding: 8px 24px 0;" id="type-table"></div>
+</section>
+
+<!-- ═══════════════════════════════════════ Spacing ═══════════════════════════════════════ -->
+<section>
+  <h2>Spacing</h2>
+  <p class="desc">4-px base scale. Use these tokens only — never one-off values.</p>
+  <div class="scale" id="scale-spacing"></div>
+</section>
+
+<!-- ═══════════════════════════════════════ Radius ═══════════════════════════════════════ -->
+<section>
+  <h2>Radius</h2>
+  <p class="desc">Four corner sizes. Most chrome lives between 6–14 px.</p>
+  <div class="scale" id="scale-radius"></div>
+</section>
+
+<!-- ═══════════════════════════════════════ Shadow ═══════════════════════════════════════ -->
+<section>
+  <h2>Elevation</h2>
+  <p class="desc">Soft, paper-like. Never use harder Material-style shadows.</p>
+  <div class="shadows" id="shadow-grid"></div>
+</section>
+
+<!-- ═══════════════════════════════════════ Motion ═══════════════════════════════════════ -->
+<section>
+  <h2>Motion</h2>
+  <p class="desc">Tactile, not flashy. Use <code>--ws-ease-out</code> for most things; <code>--ws-ease-spring</code> only for modal entrance.</p>
+  <div class="motion-grid" id="motion-grid"></div>
+</section>
+
+<!-- ═══════════════════════════════════════ Layout ═══════════════════════════════════════ -->
+<section>
+  <h2>Layout dimensions</h2>
+  <div class="color-grid" id="layout-grid"></div>
+</section>
+
+<!-- ═══════════════════════════════════════ Icons ═══════════════════════════════════════ -->
+<section>
+  <h2>Iconography</h2>
+  <p class="desc">Custom WorkDesk set — 24×24 viewBox, 1.75px stroke, rounded caps. Match this style when adding new glyphs.</p>
+  <div class="icon-grid" id="icon-grid"></div>
+</section>
+
+<!-- ═══════════════════════════════════════ Copy-paste ═══════════════════════════════════════ -->
+<section>
+  <h2>Copy-paste CSS</h2>
+  <p class="desc">The full <code>tokens.css</code> for the plugin. Identical to <code>shared/tokens.css</code> in this project.</p>
+  <pre class="css-snippet" id="full-css"></pre>
+</section>
+
+</div>
+
+<script src="shared/icons.js"></script>
+<script>
+  const $  = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+  // theme
+  $('#t-light').addEventListener('click', () => setTheme(false));
+  $('#t-dark').addEventListener('click', () => setTheme(true));
+  function setTheme(dark) {
+    document.body.classList.toggle('theme-dark', dark);
+    document.body.classList.toggle('theme-light', !dark);
+    $('#t-light').classList.toggle('active', !dark);
+    $('#t-dark').classList.toggle('active', dark);
+  }
+
+  function readVar(name) {
+    return getComputedStyle(document.body).getPropertyValue(name).trim() || '—';
+  }
+  function swatch(token, role) {
+    const v = readVar(token);
+    return `<div class="swatch">
+      <div class="chip" style="background: var(${token});"></div>
+      <div class="body">
+        <div class="name">${token}</div>
+        <div class="val" data-live="${token}">${v}</div>
+        <div class="role">${role}</div>
+      </div>
+    </div>`;
+  }
+
+  const BG_TOKENS = [
+    ['--background-primary',       'Editor surface'],
+    ['--background-primary-alt',   'Alt editor surface'],
+    ['--background-secondary',     'Left pane (zone) / right pane'],
+    ['--background-secondary-alt', 'Ribbon / app frame'],
+    ['--ws-card-soft',             'Tertiary surface inside cards (WS extension)'],
+  ];
+  const TEXT_TOKENS = [
+    ['--text-normal',    'Body text + headings'],
+    ['--text-muted',     'Sub-titles, secondary copy'],
+    ['--text-faint',     'Tertiary, counts, captions'],
+    ['--text-accent',    'Links + slate interactive color'],
+    ['--text-on-accent', 'Foreground on accent fills'],
+    ['--text-error',     'Error / personal zone'],
+    ['--text-success',   'Caught-up / gtd zone'],
+    ['--text-warning',   'Warning / intel zone'],
+  ];
+  const INTERACT_TOKENS = [
+    ['--interactive-accent',       'Primary slate · buttons + indicators'],
+    ['--interactive-accent-hover', 'Hover state'],
+    ['--interactive-normal',       'Neutral button fill'],
+    ['--interactive-hover',        'Neutral hover fill'],
+  ];
+  const MOD_TOKENS = [
+    ['--background-modifier-hover',        'Row + button hover'],
+    ['--background-modifier-active-hover', 'Active row / pressed'],
+    ['--background-modifier-border',       'Standard 1-px hairline'],
+    ['--background-modifier-border-hover', 'Hover-state hairline'],
+    ['--background-modifier-border-focus', 'Focus ring color'],
+    ['--background-modifier-form-field',   'Input fill'],
+    ['--background-modifier-success',      'Success callout fill'],
+    ['--background-modifier-error',        'Error callout fill'],
+    ['--background-modifier-message',      'Warning / info callout fill'],
+    ['--ws-border-hair',                   'Hairlines inside cards (WS extension)'],
+  ];
+  const CODE_TOKENS = [
+    ['--code-background', 'Pre + inline code fill'],
+    ['--code-normal',     'Default code text'],
+    ['--code-comment',    'Comments'],
+    ['--code-keyword',    'Keywords'],
+    ['--code-string',     'Strings'],
+    ['--code-value',      'Numbers + literals'],
+  ];
+  const TERM_TOKENS = [
+    ['--ws-term-fg',      'Normal output'],
+    ['--ws-term-dim',     'Dim / metadata'],
+    ['--ws-term-prompt',  'Prompt glyph'],
+    ['--ws-term-accent',  'File names, links'],
+    ['--ws-term-success', 'Success state'],
+    ['--ws-term-warn',    'Warning'],
+    ['--ws-term-error',   'Error'],
+  ];
+  $('#grid-bg').innerHTML          = BG_TOKENS.map(([t,r]) => swatch(t,r)).join('');
+  $('#grid-text').innerHTML        = TEXT_TOKENS.map(([t,r]) => swatch(t,r)).join('');
+  $('#grid-interactive').innerHTML = INTERACT_TOKENS.map(([t,r]) => swatch(t,r)).join('');
+  $('#grid-mod').innerHTML         = MOD_TOKENS.map(([t,r]) => swatch(t,r)).join('');
+  $('#grid-code').innerHTML        = CODE_TOKENS.map(([t,r]) => swatch(t,r)).join('');
+  $('#grid-term').innerHTML        = TERM_TOKENS.map(([t,r]) => swatch(t,r)).join('');
+
+  // Zone pairs
+  const ZONES = [
+    ['atlas',    'People, projects, decisions'],
+    ['gtd',      'Active work + next actions'],
+    ['intel',    'Reads, concepts, briefings'],
+    ['personal', 'Journal, daily, captures'],
+    ['system',   'Logs + reference'],
+    ['config',   'Plugin + skill config'],
+    ['files',    'Stock file explorer view'],
+  ];
+  $('#zone-pairs').innerHTML = ZONES.map(([id, role]) => {
+    const bgT = `--ws-zone-${id}-bg`;
+    const fgT = `--ws-zone-${id}-fg`;
+    return `<div class="zone-pair">
+      <div class="half bg" style="background: var(${bgT});">
+        <div class="lbl">${bgT}</div>
+        <div class="name" style="color: var(${fgT}); text-transform: lowercase;">${id}</div>
+        <div class="lbl" data-live="${bgT}">${readVar(bgT)}</div>
+        <div class="lbl" style="margin-top:auto;color: var(--text-faint)">${role}</div>
+      </div>
+      <div class="half" style="background: var(${fgT}); color: var(${bgT});">
+        <div class="lbl" style="opacity:0.85">${fgT}</div>
+        <div style="font-family: var(--ws-font-mono); font-size: 11px; opacity: 0.85;" data-live-on="${fgT}">${readVar(fgT)}</div>
+        <div class="lbl" style="margin-top:auto;opacity:0.7">Foreground · icons + counts</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Type table
+  const TYPE = [
+    ['fs-28', '28px / 1.15', 'Hero numerals + tokens pane <h1>'],
+    ['fs-22', '22px / 1.18', 'Section H2 on spec pages'],
+    ['fs-20', '20px / 1.20', 'Zone hero (.pane-hero h1)'],
+    ['fs-17', '17px / 1.35', 'Modal titles'],
+    ['fs-15', '15px / 1.40', 'Settings input labels'],
+    ['fs-14', '14px / 1.50', 'Body default · zone-card titles'],
+    ['fs-13', '13px / 1.55', 'Tree rows · breadcrumbs · table cells'],
+    ['fs-12', '12px / 1.50', 'Hero sub · breadcrumbs · captions'],
+    ['fs-11', '11px / 1.45', 'Pane labels · counts · kbd'],
+  ];
+  $('#type-table').innerHTML = TYPE.map(([key, css, demo]) => `
+    <div class="type-row">
+      <div class="lbl">--ws-${key}</div>
+      <div class="demo" style="font-size: var(--ws-${key}); line-height: var(--ws-lh-${key.split('-')[1]});">${demo}</div>
+      <div class="css">${css}</div>
+    </div>
+  `).join('');
+
+  // Spacing scale
+  const SPACE = [
+    ['ws-space-1', 4],  ['ws-space-2', 8],  ['ws-space-3', 12],
+    ['ws-space-4', 16], ['ws-space-5', 24], ['ws-space-6', 32],
+    ['ws-space-7', 48], ['ws-space-8', 64],
+  ];
+  $('#scale-spacing').innerHTML = SPACE.map(([n, px]) => `
+    <div class="tile">
+      <div class="viz"><div class="box" style="width: var(--${n}); height: var(--${n});"></div></div>
+      <div class="name">--${n}</div>
+      <div class="val">${px}px</div>
+    </div>
+  `).join('');
+
+  // Radius scale
+  const RADIUS = [
+    ['ws-radius-row',    '6px',  'Tree rows, small chips'],
+    ['ws-radius-card',   '10px', 'Zone cards, hero dots'],
+    ['ws-radius-modal',  '14px', 'Modals + popovers'],
+    ['ws-radius-pill',   '999',  'Pills + status badges'],
+  ];
+  $('#scale-radius').innerHTML = RADIUS.map(([n, val, role]) => `
+    <div class="tile">
+      <div class="viz"><div class="box ring" style="width: 64px; height: 40px; border-radius: var(--${n});"></div></div>
+      <div class="name">--${n}</div>
+      <div class="val">${val} · ${role}</div>
+    </div>
+  `).join('');
+
+  // Shadow grid
+  const SHADOWS = [
+    ['s-card',    'ws-shadow-card',    'Default zone-card surface'],
+    ['s-hover',   'ws-shadow-hover',   'Hover state on cards'],
+    ['s-popover', 'ws-shadow-popover', 'Tooltips, hover popovers'],
+    ['s-modal',   'ws-shadow-modal',   'Command palette + settings'],
+  ];
+  $('#shadow-grid').innerHTML = SHADOWS.map(([cls, token, role]) => `
+    <div class="shadow-card ${cls}">
+      <div class="lbl">--${token}</div>
+      <div class="sub">${role}</div>
+    </div>
+  `).join('');
+
+  // Motion grid
+  const MOTION = [
+    ['fast',  '--ws-dur-fast',  '120ms · ease-out · button & row hover'],
+    ['base',  '--ws-dur-base',  '160ms · ease-out · card hover & general'],
+    ['pane',  '--ws-dur-pane',  '200ms · ease-out · pane collapse + grid resize'],
+    ['modal', '--ws-dur-modal', '220ms · ease-spring · modal entrance'],
+  ];
+  $('#motion-grid').innerHTML = MOTION.map(([cls, name, desc]) => `
+    <div class="motion-tile">
+      <div class="name">${name}</div>
+      <div class="val">${desc}</div>
+      <div class="runway"><div class="dot ${cls}"></div></div>
+    </div>
+  `).join('');
+
+  // Layout
+  const LAYOUT = [
+    ['--ws-ribbon-w',  'Left ribbon column · 64px'],
+    ['--ws-pane-w',    'Zone pane column · 340px'],
+    ['--ws-rpane-w',   'Right pane column · 340px'],
+    ['--ws-editor-max','Editor center column max · 720px'],
+  ];
+  $('#layout-grid').innerHTML = LAYOUT.map(([t, role]) => `
+    <div class="swatch">
+      <div class="chip" style="background: var(--background-primary-alt); display:flex; align-items:center; justify-content:center; color:var(--text-faint); font-family: var(--ws-font-mono); font-size: 12px;">${readVar(t)}</div>
+      <div class="body">
+        <div class="name">${t}</div>
+        <div class="role">${role}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Icon grid (all glyphs in WS_ICONS)
+  const allIcons = Object.keys(window.WS_ICONS);
+  $('#icon-grid').innerHTML = allIcons.map((n) => `
+    <div class="icon-tile">
+      <div class="glyph">${window.wsSvg(n, 24)}</div>
+      <div class="lbl">${n}</div>
+    </div>
+  `).join('');
+
+  // Pull live tokens.css as the snippet (best effort — falls back to inline)
+  fetch('shared/tokens.css').then((r) => r.ok ? r.text() : '').then((t) => {
+    if (!t) return;
+    $('#full-css').textContent = t;
+  }).catch(() => {});
+
+  // Live-update the values shown next to swatches when theme changes
+  function refreshLiveVals() {
+    $$('[data-live]').forEach((el) => el.textContent = readVar(el.dataset.live));
+    $$('[data-live-on]').forEach((el) => el.textContent = readVar(el.dataset.liveOn));
+  }
+  const obs = new MutationObserver(refreshLiveVals);
+  obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+</script>
+</body>
+</html>

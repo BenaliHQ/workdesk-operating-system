@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>WorkDesk — Component specs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Manrope:wght@500;600&family=Geist+Mono:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared/tokens.css" />
+<link rel="stylesheet" href="shared/app.css" />
+<style>
+  body {
+    background: var(--background-secondary-alt);
+    padding: 0;
+  }
+  .shell {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 56px 40px 120px;
+  }
+  header.page {
+    display: flex; align-items: flex-end; gap: 24px;
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--background-modifier-border);
+  }
+  header.page h1 {
+    font-family: var(--ws-font-display);
+    font-size: 36px; font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  header.page .sub { color: var(--text-muted); font-size: 14px; max-width: 540px; margin-top: 8px; }
+  .crumb { font-size: 12px; color: var(--text-faint); margin-bottom: 8px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .theme-pill {
+    margin-left: auto;
+    display: inline-flex;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 7px;
+    padding: 3px;
+    box-shadow: var(--ws-shadow-card);
+  }
+  .theme-pill button {
+    border: 0; background: transparent;
+    font-family: var(--ws-font-sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 6px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .theme-pill button.active { background: var(--background-secondary-alt); color: var(--text-normal); }
+
+  .link-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 32px; }
+  .link-bar a {
+    display: inline-flex; gap: 6px; align-items: center;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    color: var(--text-normal);
+    padding: 6px 12px;
+    border-radius: 7px;
+    text-decoration: none;
+    font-size: 13px;
+    box-shadow: var(--ws-shadow-card);
+  }
+  .link-bar a:hover { background: var(--background-modifier-hover); }
+  .link-bar a.home { background: var(--interactive-accent); color: var(--text-on-accent); border-color: var(--interactive-accent); }
+
+  .toc {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+    margin-bottom: 48px;
+  }
+  .toc a {
+    text-decoration: none;
+    background: var(--background-primary);
+    border: 1px solid var(--ws-border-hair);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .toc a:hover { color: var(--text-normal); background: var(--background-modifier-hover); }
+  .toc a .key { font-family: var(--ws-font-mono); font-size: 10.5px; display: block; color: var(--text-faint); margin-top: 2px; }
+
+  /* Component card */
+  .comp {
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 14px;
+    box-shadow: var(--ws-shadow-card);
+    margin: 0 0 28px;
+    overflow: hidden;
+  }
+  .comp-head {
+    padding: 20px 28px 16px;
+    border-bottom: 1px solid var(--ws-border-hair);
+  }
+  .comp-head .key { font-family: var(--ws-font-mono); font-size: 11px; color: var(--text-faint); margin-bottom: 6px; letter-spacing: 0.04em; }
+  .comp-head h3 {
+    font-family: var(--ws-font-display);
+    font-size: 22px; font-weight: 600;
+    letter-spacing: -0.015em;
+    margin: 0 0 4px;
+  }
+  .comp-head .desc { color: var(--text-muted); font-size: 13.5px; max-width: 720px; line-height: 1.55; }
+
+  .comp-body {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 0;
+  }
+  @media (max-width: 900px) {
+    .comp-body { grid-template-columns: 1fr; }
+  }
+  .demo {
+    padding: 32px 28px;
+    background: var(--background-primary-alt);
+    border-right: 1px solid var(--ws-border-hair);
+    display: flex; flex-direction: column; gap: 24px;
+    align-items: stretch;
+    min-height: 200px;
+  }
+  .demo .state-label {
+    font-family: var(--ws-font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+    margin-bottom: 6px;
+  }
+  .demo .state {
+    background: var(--background-primary);
+    border: 1px dashed var(--ws-border-hair);
+    border-radius: 10px;
+    padding: 22px;
+  }
+
+  .spec {
+    padding: 22px 24px;
+    background: var(--background-primary);
+    overflow-x: auto;
+  }
+  .spec h4 {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin: 0 0 8px;
+  }
+  .spec h4 + h4 { margin-top: 18px; }
+  .spec dl {
+    margin: 0; display: grid;
+    grid-template-columns: minmax(110px, max-content) 1fr;
+    gap: 4px 14px;
+    font-size: 12.5px;
+  }
+  .spec dt { color: var(--text-faint); font-family: var(--ws-font-mono); font-size: 11.5px; padding-top: 1px; }
+  .spec dd { margin: 0; color: var(--text-normal); }
+  .spec dd code, .spec dd .mono {
+    font-family: var(--ws-font-mono);
+    font-size: 11.5px;
+    color: var(--text-normal);
+    background: var(--background-modifier-hover);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+
+  .spec ul { margin: 0; padding-left: 14px; font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
+  .spec ul li { margin: 2px 0; }
+
+  /* Helpers for in-demo components */
+  .demo-frame {
+    background: var(--background-secondary);
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid var(--ws-border-hair);
+  }
+
+  /* Mini token chip */
+  .tok {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--background-modifier-hover);
+    border: 1px solid var(--ws-border-hair);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: var(--ws-font-mono);
+    font-size: 11px;
+    color: var(--text-normal);
+  }
+  .tok .sw { width: 10px; height: 10px; border-radius: 3px; border: 1px solid var(--ws-border-hair); }
+
+  /* Annotated dimension */
+  .dim {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: var(--ws-font-mono);
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+  .dim b { color: var(--text-normal); font-weight: 500; }
+</style>
+</head>
+<body class="theme-light">
+<div class="shell">
+
+<header class="page">
+  <div>
+    <div class="crumb">WorkDesk · design system</div>
+    <h1>Component specs</h1>
+    <div class="sub">Every component in the plugin, rendered live with its key states, exact dimensions, and the design tokens it consumes.</div>
+  </div>
+  <div class="theme-pill">
+    <button id="t-light" class="active">Light</button>
+    <button id="t-dark">Dark</button>
+  </div>
+</header>
+
+<div class="link-bar">
+  <a href="index.html" class="home">← Overview</a>
+  <a href="prototype.html">Interactive prototype</a>
+  <a href="tokens.html">Design tokens</a>
+  <a href="screens.html">Screens gallery</a>
+  <a href="handoff/components.md">components.md (Claude)</a>
+</div>
+
+<div class="toc">
+  <a href="#zone-slot"><span>Zone slot</span><span class="key">ribbon</span></a>
+  <a href="#ribbon-icon"><span>Ribbon icon</span><span class="key">ribbon</span></a>
+  <a href="#zone-card"><span>Zone card</span><span class="key">pane</span></a>
+  <a href="#tree-row"><span>Tree row</span><span class="key">pane</span></a>
+  <a href="#empty-zone"><span>Empty zone</span><span class="key">pane</span></a>
+  <a href="#editor-tabs"><span>Editor tabs</span><span class="key">editor</span></a>
+  <a href="#breadcrumb"><span>Breadcrumb</span><span class="key">editor</span></a>
+  <a href="#callout"><span>Callouts</span><span class="key">editor</span></a>
+  <a href="#properties"><span>Properties</span><span class="key">editor</span></a>
+  <a href="#tasklist"><span>Task list</span><span class="key">editor</span></a>
+  <a href="#wikilink"><span>Wikilinks &amp; tags</span><span class="key">editor</span></a>
+  <a href="#term-line"><span>Terminal lines</span><span class="key">terminal</span></a>
+  <a href="#icon-btn"><span>Icon button</span><span class="key">chrome</span></a>
+  <a href="#btn"><span>Button</span><span class="key">chrome</span></a>
+  <a href="#field"><span>Form fields</span><span class="key">chrome</span></a>
+  <a href="#toggle"><span>Toggle</span><span class="key">chrome</span></a>
+  <a href="#segmented"><span>Segmented</span><span class="key">chrome</span></a>
+  <a href="#kbd"><span>Kbd chips</span><span class="key">chrome</span></a>
+</div>
+
+<!-- ═══════════════════════ Zone slot ═══════════════════════ -->
+<article class="comp" id="zone-slot">
+  <header class="comp-head">
+    <div class="key">.zone-slot · ribbon button</div>
+    <h3>Zone slot</h3>
+    <div class="desc">The ribbon's primary nav element. One per zone; pastel dot with zone glyph. Active state shows a 3-px slate accent rail on the left edge and a soft outline around the dot.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo">
+      <div>
+        <div class="state-label">Default</div>
+        <div class="demo-frame" style="display:flex; gap:10px; padding: 12px 8px;">
+          <button class="zone-slot" data-zone="atlas"><div class="dot" id="zs-atlas"></div></button>
+          <button class="zone-slot" data-zone="gtd"><div class="dot" id="zs-gtd"></div></button>
+          <button class="zone-slot" data-zone="intel"><div class="dot" id="zs-intel"></div></button>
+          <button class="zone-slot" data-zone="personal"><div class="dot" id="zs-personal"></div></button>
+          <button class="zone-slot" data-zone="system"><div class="dot" id="zs-system"></div></button>
+          <button class="zone-slot" data-zone="config"><div class="dot" id="zs-config"></div></button>
+        </div>
+      </div>
+      <div>
+        <div class="state-label">Active (zone selected)</div>
+        <div class="demo-frame" style="padding: 12px 8px; display:flex; gap:10px;">
+          <button class="zone-slot active" data-zone="atlas"><div class="dot" id="zs-atlas-a"></div></button>
+        </div>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>slot</dt><dd>44 × 44, radius 12, grid place-items center</dd>
+        <dt>dot</dt><dd>32 × 32, border-radius 50%, glyph 16 px</dd>
+        <dt>active rail</dt><dd>3 × calc(44 - 16) at left:-1, radius 0 3 3 0</dd>
+        <dt>active ring</dt><dd>2 px outer + 3 px ring (frame, slate@.18)</dd>
+      </dl>
+      <h4>Tokens</h4>
+      <dl>
+        <dt>fg + bg</dt><dd><code>--ws-zone-{zone}-fg / -bg</code></dd>
+        <dt>frame</dt><dd><code>--background-secondary-alt</code></dd>
+        <dt>rail</dt><dd><code>--text-normal</code></dd>
+        <dt>hover bg</dt><dd>rgba(0,0,0,0.04) · light · /(255,255,255,0.04) dark</dd>
+      </dl>
+      <h4>Motion</h4>
+      <dl>
+        <dt>hover scale</dt><dd>dot transform: scale(1.04) over <code>--ws-dur-fast</code></dd>
+      </dl>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Ribbon icon ═══════════════════════ -->
+<article class="comp" id="ribbon-icon">
+  <header class="comp-head">
+    <div class="key">.ribbon-icon</div>
+    <h3>Ribbon icon</h3>
+    <div class="desc">Tool icons in the ribbon below the zones — search, today, terminal toggle, focus mode, and the mic anchored at the bottom.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo">
+      <div class="demo-frame" style="display:flex; gap:6px; padding:12px; flex-direction: column; align-items: center; width: 64px;">
+        <button class="ribbon-icon" id="ri-search"></button>
+        <button class="ribbon-icon" id="ri-today"></button>
+        <button class="ribbon-icon active" id="ri-term"></button>
+        <button class="ribbon-icon" id="ri-focus"></button>
+        <div style="flex:1;min-height:14px"></div>
+        <button class="ribbon-icon mic" id="ri-mic"></button>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>button</dt><dd>36 × 36, radius 8, grid place-items center</dd>
+        <dt>glyph</dt><dd>18 × 18, stroke 1.75, currentColor</dd>
+      </dl>
+      <h4>States</h4>
+      <ul>
+        <li><b>default</b> · color <code>--text-muted</code></li>
+        <li><b>hover</b> · background rgba(0,0,0,0.04), color <code>--text-normal</code></li>
+        <li><b>active</b> · background rgba(0,0,0,0.06)</li>
+        <li><b>mic</b> · color <code>--interactive-accent</code> (slate)</li>
+        <li><b>focus-mode active</b> · slate fill <code>rgba(slate,0.14)</code></li>
+      </ul>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Zone card ═══════════════════════ -->
+<article class="comp" id="zone-card">
+  <header class="comp-head">
+    <div class="key">.obj · zone-card</div>
+    <h3>Zone card</h3>
+    <div class="desc">The primary object row in the zone pane. White surface, soft shadow, pastel circle with the object initial. Counts right-aligned. Click to expand children (folder tree) below.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo">
+      <div>
+        <div class="state-label">Collapsed</div>
+        <div class="demo-frame">
+          <div class="obj collapsed">
+            <div class="obj-row">
+              <div class="obj-icon" id="cd-icon-1" style="background: var(--ws-zone-atlas-bg); color: var(--ws-zone-atlas-fg);"></div>
+              <div class="obj-text">
+                <div class="obj-title">projects</div>
+                <div class="obj-sub">Active engagements &amp; infrastructure</div>
+              </div>
+              <div class="obj-meta">8</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="state-label">Expanded</div>
+        <div class="demo-frame">
+          <div class="obj">
+            <div class="obj-row">
+              <div class="obj-icon" id="cd-icon-2" style="background: var(--ws-zone-atlas-bg); color: var(--ws-zone-atlas-fg);"></div>
+              <div class="obj-text">
+                <div class="obj-title">projects</div>
+                <div class="obj-sub">Active engagements</div>
+              </div>
+              <div class="obj-meta">8</div>
+            </div>
+            <div class="obj-children">
+              <div class="row is-folder open" data-depth="1"><div class="chevron" id="td-chev"></div><div class="glyph" id="td-fol"></div><div class="name">workdesk</div><div class="count">23</div></div>
+              <div class="row is-file active" data-depth="2"><div></div><div class="glyph" id="td-file"></div><div class="name">_brief.md</div><div class="count"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="state-label">Empty / caught-up</div>
+        <div class="demo-frame">
+          <div class="obj">
+            <div class="obj-row">
+              <div class="obj-icon" id="cd-icon-3" style="background: var(--ws-zone-gtd-bg); color: var(--ws-zone-gtd-fg);"></div>
+              <div class="obj-text"><div class="obj-title">inbox</div><div class="obj-sub">Awaiting processing</div></div>
+              <div class="obj-meta caught-up" id="td-check"></div>
+            </div>
+            <div class="obj-children">
+              <div class="empty-row caught-up" id="td-check2"> All caught up.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>card</dt><dd>radius <code>--ws-radius-card</code> (10), shadow <code>--ws-shadow-card</code></dd>
+        <dt>row</dt><dd>grid <code>36 / 1fr / auto</code>, padding 11 / 12 px, gap 12 px</dd>
+        <dt>icon</dt><dd>32 × 32, border-radius 50%, font 14/600, glyph or initial</dd>
+        <dt>title</dt><dd><code>--ws-fs-14</code>, 500 weight, line-height 1.25</dd>
+        <dt>sub</dt><dd><code>--ws-fs-12</code>, <code>--text-faint</code>, ellipsis</dd>
+        <dt>meta</dt><dd><code>--ws-fs-11</code>, tabular-nums, right padding 8</dd>
+        <dt>children</dt><dd>border-top 1 px <code>--ws-border-hair</code>, background <code>--ws-card-soft</code>, padding 8 / 0</dd>
+      </dl>
+      <h4>Behavior</h4>
+      <ul>
+        <li>Click obj-row → toggle <code>.collapsed</code></li>
+        <li>Hover → shadow shifts to <code>--ws-shadow-hover</code></li>
+        <li>Empty count (0 or '—') auto-expands and shows empty-row</li>
+        <li>Inbox-like cards may emit <code>empty: 'caught-up'</code> for green check</li>
+      </ul>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Tree row ═══════════════════════ -->
+<article class="comp" id="tree-row">
+  <header class="comp-head">
+    <div class="key">.row · file / folder</div>
+    <h3>Tree row</h3>
+    <div class="desc">Indented file and folder rows inside an expanded zone card. Depth pads by 16 px steps. Folders rotate their chevron 90° when open.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo">
+      <div class="demo-frame" style="padding: 8px 4px;">
+        <div class="row is-folder open" data-depth="1"><div class="chevron" id="tr-c1"></div><div class="glyph" id="tr-f1"></div><div class="name">workdesk</div><div class="count">23</div></div>
+        <div class="row is-file active" data-depth="2"><div></div><div class="glyph" id="tr-d1"></div><div class="name">_brief.md</div><div class="count"></div></div>
+        <div class="row is-file" data-depth="2"><div></div><div class="glyph" id="tr-d2"></div><div class="name">_status.md</div><div class="count"></div></div>
+        <div class="row is-folder" data-depth="2"><div class="chevron" id="tr-c2"></div><div class="glyph" id="tr-f2"></div><div class="name">specs</div><div class="count">4</div></div>
+        <div class="row is-folder open" data-depth="2"><div class="chevron" id="tr-c3"></div><div class="glyph" id="tr-f3"></div><div class="name">notes</div><div class="count">7</div></div>
+        <div class="row is-file" data-depth="3"><div></div><div class="glyph" id="tr-d3"></div><div class="name">2026-05-13 sync.md</div><div class="count"></div></div>
+        <div class="row empty-folder" data-depth="2"><div></div><div></div><div class="name">Empty folder</div><div></div></div>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>row</dt><dd>grid <code>16 / 18 / 1fr / auto</code>, height 28, radius 6, font 13</dd>
+        <dt>depth pad</dt><dd>16 px per level (28, 44, 60, 76 …)</dd>
+        <dt>chevron</dt><dd>10 px, rotates 90° when <code>.open</code></dd>
+        <dt>glyph</dt><dd>folder 13 / file 12</dd>
+      </dl>
+      <h4>States</h4>
+      <ul>
+        <li><b>hover</b> · <code>--background-modifier-hover</code></li>
+        <li><b>active</b> (selected file) · <code>--background-modifier-active-hover</code></li>
+        <li><b>open</b> (folder expanded) · chevron 90°</li>
+        <li><b>empty-folder</b> · italic, cursor default, no hover</li>
+      </ul>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Empty zone ═══════════════════════ -->
+<article class="comp" id="empty-zone">
+  <header class="comp-head">
+    <div class="key">.zone-empty</div>
+    <h3>Empty zone</h3>
+    <div class="desc">Shown when a whole zone has no objects (fresh install) or when the user previews the empty state. Big faded dot, soft copy, optional CTA.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo" style="background: var(--background-secondary)">
+      <div class="zone-empty" style="min-height: 220px; padding: 32px;">
+        <div class="big-dot" style="background: var(--ws-zone-atlas-bg); color: var(--ws-zone-atlas-fg);" id="ez-icon"></div>
+        <h2>Nothing in atlas yet.</h2>
+        <p>Objects appear as you capture, process, or onboard new content.</p>
+        <button class="empty-cta" id="ez-cta">Create first atlas note</button>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>container</dt><dd>flex-column centered, padding 32 px</dd>
+        <dt>big-dot</dt><dd>56 × 56, radius 50%, opacity 0.55</dd>
+        <dt>h2</dt><dd>15 px / 500, <code>--text-muted</code></dd>
+        <dt>p</dt><dd>13 px / 1.6, max-width 260, <code>--text-faint</code></dd>
+        <dt>cta</dt><dd>padding 8 / 14, radius 8, border 1 px <code>--background-modifier-border</code></dd>
+      </dl>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Editor tabs ═══════════════════════ -->
+<article class="comp" id="editor-tabs">
+  <header class="comp-head">
+    <div class="key">.editor-tabs · .tab</div>
+    <h3>Editor tabs</h3>
+    <div class="desc">Shows the open file (one for now — multi-tab pending). Houses the pane-toggle buttons + the command, settings, theme, and right-pane chrome controls.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo" style="background: var(--background-secondary)">
+      <div class="demo-frame" style="padding: 0; background: var(--background-primary)">
+        <div class="editor-tabs" style="border-top: 1px solid var(--ws-border-hair)">
+          <button class="icon-btn editor-toggle-left" id="et-tl"></button>
+          <div class="tab active">_brief.md</div>
+          <div class="editor-actions">
+            <button class="icon-btn" id="et-cmd"></button>
+            <button class="icon-btn" id="et-set"></button>
+            <button class="icon-btn" id="et-th"></button>
+            <button class="icon-btn" id="et-tr"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>bar</dt><dd>height 36, border-bottom 1 px hair, padding 0 / 12</dd>
+        <dt>tab</dt><dd>padding 0 / 12, font 13, right border 1 px hair</dd>
+        <dt>icon-btn</dt><dd>26 × 26, radius 6</dd>
+        <dt>actions</dt><dd>margin-left auto, gap 4 px</dd>
+      </dl>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Breadcrumb ═══════════════════════ -->
+<article class="comp" id="breadcrumb">
+  <header class="comp-head">
+    <div class="key">.breadcrumb</div>
+    <h3>Breadcrumb</h3>
+    <div class="desc">Path of the open file, slash-separated. Below the tabs, single-line, dim.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo" style="background: var(--background-secondary)">
+      <div class="demo-frame" style="padding: 0; background: var(--background-primary);">
+        <div class="breadcrumb"><span>atlas</span><span>projects</span><span>workdesk</span><span>_brief.md</span></div>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>bar</dt><dd>height 30, padding 0 / 24, border-bottom 1 px hair</dd>
+        <dt>type</dt><dd>12 px, <code>--text-faint</code>, separator '/' with 6 px sides</dd>
+      </dl>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Callouts ═══════════════════════ -->
+<article class="comp" id="callout">
+  <header class="comp-head">
+    <div class="key">.callout.{note|warning|success|info|error}</div>
+    <h3>Callouts</h3>
+    <div class="desc">Standalone blocks inside the editor body. Border-left rail in the type color, fill in the matching pastel zone-bg.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo" style="background: var(--background-primary)">
+      <div class="editor-body" style="max-width:none;padding:0">
+        <div class="callout note"><div class="callout-title">Note</div><p>A neutral observation. Uses the atlas blue.</p></div>
+        <div class="callout success"><div class="callout-title">Success</div><p>The thing worked. Uses gtd green.</p></div>
+        <div class="callout warning"><div class="callout-title">Warning</div><p>Heads up. Uses intel ochre.</p></div>
+        <div class="callout info"><div class="callout-title">Info</div><p>Side-channel info. Uses config violet.</p></div>
+        <div class="callout error"><div class="callout-title">Error</div><p>Something is wrong. Uses personal rose.</p></div>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>block</dt><dd>radius 8, border-left 3 px, padding 12 / 16</dd>
+        <dt>title</dt><dd>uppercase 12 px / 600, letter-spacing 0.06em, gap 6 px before icon</dd>
+      </dl>
+      <h4>Token map</h4>
+      <ul>
+        <li><b>note</b> · <code>--ws-zone-atlas-*</code></li>
+        <li><b>success</b> · <code>--ws-zone-gtd-*</code></li>
+        <li><b>warning</b> · <code>--ws-zone-intel-*</code></li>
+        <li><b>info</b> · <code>--ws-zone-config-*</code></li>
+        <li><b>error</b> · <code>--ws-zone-personal-*</code></li>
+      </ul>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Properties ═══════════════════════ -->
+<article class="comp" id="properties">
+  <header class="comp-head">
+    <div class="key">.properties · YAML frontmatter view</div>
+    <h3>Properties block</h3>
+    <div class="desc">Rendered representation of a note's frontmatter, sat directly under the H1. Two-column grid: key / value.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo" style="background: var(--background-primary)">
+      <div class="editor-body" style="max-width:none;padding:0">
+        <div class="properties">
+          <div class="key">type</div><div class="val">project-brief</div>
+          <div class="key">status</div><div class="val">active</div>
+          <div class="key">updated</div><div class="val">May 13, 2026</div>
+          <div class="key">owner</div><div class="val"><span class="wikilink">khalil-benalioulhaj</span></div>
+          <div class="key">tags</div><div class="val"><a class="tag">#workdesk</a> <a class="tag">#v1</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>container</dt><dd>radius 8, padding 12 / 16, background <code>--ws-card-soft</code>, border 1 px hair</dd>
+        <dt>grid</dt><dd>110 / 1fr columns, row-gap 6, col-gap 12</dd>
+        <dt>key</dt><dd>12 px, <code>--text-faint</code></dd>
+        <dt>val</dt><dd>13 px, <code>--text-normal</code>; supports wikilinks + tags</dd>
+      </dl>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Task list ═══════════════════════ -->
+<article class="comp" id="tasklist">
+  <header class="comp-head">
+    <div class="key">.task-list</div>
+    <h3>Task list</h3>
+    <div class="desc">Markdown checkboxes (<code>- [ ]</code> / <code>- [x]</code>). Custom rendering, no list marker.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo" style="background: var(--background-primary)">
+      <div class="editor-body" style="max-width:none;padding:0">
+        <ul class="task-list">
+          <li><span class="checkbox checked"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg></span><span class="done">Phase A — install bedrock</span></li>
+          <li><span class="checkbox"></span>Phase D — visual product surface</li>
+          <li><span class="checkbox"></span>Yvette's two-week dogfood</li>
+        </ul>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>row</dt><dd>flex, gap 10, margin 0.25em</dd>
+        <dt>checkbox</dt><dd>16 × 16, radius 4, border 1.5 px <code>--background-modifier-border-hover</code></dd>
+        <dt>checked</dt><dd>fill <code>--interactive-accent</code>, glyph 11 px checkmark</dd>
+        <dt>done</dt><dd>strike-through, <code>--text-faint</code></dd>
+      </dl>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Wikilink + tag ═══════════════════════ -->
+<article class="comp" id="wikilink">
+  <header class="comp-head">
+    <div class="key">.wikilink · .tag</div>
+    <h3>Wikilinks &amp; tags</h3>
+    <div class="desc">Inline references inside body copy. Wikilinks use atlas blue; tags are pill-shaped neutrals with slate text.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo" style="background: var(--background-primary)">
+      <div class="editor-body" style="max-width:none;padding:0">
+        <p>Met with <span class="wikilink">yvette-raven</span> on <span class="wikilink">2026-05-13</span> to review the <span class="wikilink">workdesk/_brief</span>. Tagged the note with <a class="tag">#workdesk</a> and <a class="tag">#decision</a> — see also <a href="#">github.com/BenaliHQ/workdesk-os</a>.</p>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Tokens</h4>
+      <dl>
+        <dt>wikilink</dt><dd>color <code>--ws-zone-atlas-fg</code>, underline dotted, hover bg <code>--ws-zone-atlas-bg</code></dd>
+        <dt>tag</dt><dd>radius pill, bg <code>--background-modifier-hover</code>, color <code>--text-accent</code></dd>
+        <dt>link</dt><dd>color <code>--text-accent</code>, underline 1 px, offset 3</dd>
+      </dl>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Terminal line ═══════════════════════ -->
+<article class="comp" id="term-line">
+  <header class="comp-head">
+    <div class="key">.term-{prompt | user | claude | dim | accent | success | warn | error}</div>
+    <h3>Terminal lines</h3>
+    <div class="desc">Right-pane terminal output. Light theme intentionally — calmer than a dark terminal, on-brand with the editor.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo" style="background: var(--background-secondary)">
+      <div class="demo-frame" style="padding: 14px 20px; font-family: var(--ws-font-mono); font-size: 13px; line-height: 1.65; background: var(--background-secondary);">
+        <div class="term-line"><span class="term-dim">~/Workdesk-OS · main</span></div>
+        <div class="term-line"><span class="term-dim">claude code v0.42 · opus 4.7</span></div>
+        <div class="term-line">&nbsp;</div>
+        <div class="term-line"><span class="term-prompt">❯</span> <span class="term-user">read atlas/projects/workdesk/_brief.md</span></div>
+        <div class="term-line"><span class="term-claude">Reading <span class="term-accent">_brief.md</span>…</span></div>
+        <div class="term-line"><span class="term-dim">  ✓ 98 lines · 4.2 KB</span></div>
+        <div class="term-line"><span class="term-success">✓ done</span> <span class="term-warn">! 1 warning</span> <span class="term-error">✗ 0 errors</span></div>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Tokens</h4>
+      <dl>
+        <dt>prompt</dt><dd><code>--ws-term-prompt</code> · slate</dd>
+        <dt>user</dt><dd><code>--ws-term-fg</code></dd>
+        <dt>claude</dt><dd><code>--ws-term-fg</code> @ 0.9 opacity</dd>
+        <dt>dim</dt><dd><code>--ws-term-dim</code></dd>
+        <dt>accent</dt><dd><code>--ws-term-accent</code> · for file names</dd>
+        <dt>success / warn / error</dt><dd>matching <code>--ws-term-*</code></dd>
+      </dl>
+      <h4>Font</h4>
+      <dl>
+        <dt>family</dt><dd>Geist Mono, fallback JetBrains / SF Mono</dd>
+        <dt>size</dt><dd>13 px, line-height 1.65</dd>
+        <dt>caret</dt><dd>7 × 15 block, slate, 1 s blink</dd>
+      </dl>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Icon button ═══════════════════════ -->
+<article class="comp" id="icon-btn">
+  <header class="comp-head">
+    <div class="key">.icon-btn</div>
+    <h3>Icon button</h3>
+    <div class="desc">26-px square button for chrome controls (tab actions, toolbar buttons, sort/collapse). Hover lifts to the row-hover fill.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo">
+      <div class="demo-frame" style="display:flex;gap:6px">
+        <button class="icon-btn" id="ib-1"></button>
+        <button class="icon-btn" id="ib-2"></button>
+        <button class="icon-btn is-active" id="ib-3"></button>
+        <button class="icon-btn" id="ib-4"></button>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>button</dt><dd>26 × 26, radius 6, grid place-items center</dd>
+        <dt>glyph</dt><dd>14 × 14, stroke 1.75, currentColor</dd>
+      </dl>
+      <h4>States</h4>
+      <ul>
+        <li><b>default</b> · color <code>--text-faint</code></li>
+        <li><b>hover</b> · <code>--background-modifier-hover</code> + <code>--text-normal</code></li>
+        <li><b>active</b> (toggle on) · <code>--background-modifier-active-hover</code></li>
+        <li><b>focus-visible</b> · 2-px outline <code>--background-modifier-border-focus</code></li>
+      </ul>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Button ═══════════════════════ -->
+<article class="comp" id="btn">
+  <header class="comp-head">
+    <div class="key">.btn · .btn.primary · .btn.ghost · .btn.danger</div>
+    <h3>Button</h3>
+    <div class="desc">Standard buttons for forms and modals. Primary uses the slate accent; danger uses the personal-rose semantic.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo">
+      <div class="demo-frame" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn">Default</button>
+        <button class="btn primary">Save capture</button>
+        <button class="btn ghost">Cancel</button>
+        <button class="btn danger">Reset…</button>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>button</dt><dd>padding 7 / 14, radius 7, font 13</dd>
+        <dt>icon gap</dt><dd>6 px before label icon, inline-flex center</dd>
+      </dl>
+      <h4>Tokens</h4>
+      <ul>
+        <li><b>default</b> · bg <code>--background-primary</code>, border <code>--background-modifier-border</code></li>
+        <li><b>primary</b> · bg <code>--interactive-accent</code>, color <code>--text-on-accent</code></li>
+        <li><b>ghost</b> · transparent, hover <code>--background-modifier-hover</code></li>
+        <li><b>danger</b> · color <code>--text-error</code>, hover bg <code>--background-modifier-error</code></li>
+      </ul>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Field ═══════════════════════ -->
+<article class="comp" id="field">
+  <header class="comp-head">
+    <div class="key">.field · .field.mono · .select</div>
+    <h3>Form fields</h3>
+    <div class="desc">Inputs and selects used inside Settings. Mono variant for paths and keys.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo">
+      <div class="demo-frame" style="display:flex;flex-direction:column;gap:10px">
+        <input class="field" value="Default text input" />
+        <input class="field mono" value="~/Workdesk-OS" />
+        <select class="select"><option>Groq · whisper-large-v3</option><option>OpenAI · whisper-1</option></select>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>field</dt><dd>padding 6 / 10, radius 6, border 1 px <code>--background-modifier-border</code></dd>
+        <dt>focus</dt><dd>border-color <code>--background-modifier-border-focus</code></dd>
+        <dt>select</dt><dd>right-padding 28 (chevron sprite)</dd>
+      </dl>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Toggle ═══════════════════════ -->
+<article class="comp" id="toggle">
+  <header class="comp-head">
+    <div class="key">.toggle · .toggle.on</div>
+    <h3>Toggle</h3>
+    <div class="desc">Binary switch used throughout Settings. 32 × 18, slate accent when on.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo">
+      <div class="demo-frame" style="display:flex;gap:18px;align-items:center">
+        <div class="toggle"></div>
+        <div class="toggle on"></div>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>track</dt><dd>32 × 18, radius 9</dd>
+        <dt>thumb</dt><dd>14 × 14 circle, top 2 / left 2 → 16 (transition fast)</dd>
+        <dt>off</dt><dd>bg <code>--background-modifier-border</code></dd>
+        <dt>on</dt><dd>bg <code>--interactive-accent</code></dd>
+      </dl>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Segmented ═══════════════════════ -->
+<article class="comp" id="segmented">
+  <header class="comp-head">
+    <div class="key">.segmented</div>
+    <h3>Segmented control</h3>
+    <div class="desc">Inline radio-like control. Used for zone density, compact toggles.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo">
+      <div class="demo-frame" style="display:flex">
+        <div class="segmented">
+          <button>compact</button>
+          <button class="active">cozy</button>
+          <button>spacious</button>
+        </div>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>track</dt><dd>radius 7, padding 2, gap 2, bg <code>--background-modifier-hover</code></dd>
+        <dt>option</dt><dd>padding 5 / 10, radius 5, font 12</dd>
+        <dt>active</dt><dd>bg <code>--background-primary</code>, shadow <code>--ws-shadow-card</code></dd>
+      </dl>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════════════════ Kbd ═══════════════════════ -->
+<article class="comp" id="kbd">
+  <header class="comp-head">
+    <div class="key">kbd · .hk-chip</div>
+    <h3>Keyboard chips</h3>
+    <div class="desc">Used to render hotkey hints in body copy + command palette.</div>
+  </header>
+  <div class="comp-body">
+    <div class="demo">
+      <div class="demo-frame" style="display:flex;flex-direction:column;gap:12px">
+        <div class="editor-body" style="max-width:none;padding:0">
+          <p>Press <kbd>⌘</kbd> + <kbd>K</kbd> to open the command palette.</p>
+        </div>
+        <div>
+          <span class="hk-chip"><kbd>⌘</kbd><kbd>⇧</kbd><kbd>M</kbd></span>
+        </div>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Geometry</h4>
+      <dl>
+        <dt>kbd</dt><dd>font mono 0.78em, padding 1 / 6, radius 4, border 1 px bottom 2 px</dd>
+        <dt>chip</dt><dd>gap 3 px, font 11, color <code>--text-faint</code></dd>
+      </dl>
+    </div>
+  </div>
+</article>
+
+</div>
+
+<script src="shared/icons.js"></script>
+<script>
+  const $ = (s) => document.querySelector(s);
+
+  // Stamp glyphs into demo components
+  function stamp(sel, name, size = 16) {
+    const el = $(sel); if (el) el.innerHTML = window.wsSvg(name, size);
+  }
+
+  // Zone slots
+  ['atlas:globe', 'gtd:check', 'intel:signal', 'personal:person', 'system:layers', 'config:gear'].forEach((p) => {
+    const [id, ic] = p.split(':');
+    stamp('#zs-' + id, ic, 16);
+  });
+  stamp('#zs-atlas-a', 'globe', 16);
+
+  // Ribbon icons
+  stamp('#ri-search', 'search', 18);
+  stamp('#ri-today',  'calendar', 18);
+  stamp('#ri-term',   'code', 18);
+  stamp('#ri-focus',  'focus', 18);
+  stamp('#ri-mic',    'mic', 18);
+
+  // Object-icon demo: first letter of title (capitalized via CSS)
+  $('#cd-icon-1').textContent = 'P';
+  $('#cd-icon-2').textContent = 'P';
+  $('#cd-icon-3').textContent = 'I';
+  stamp('#td-chev', 'chevron', 10);
+  stamp('#td-fol',  'folder',  13);
+  stamp('#td-file', 'file',    12);
+  $('#td-check').innerHTML = window.wsSvg('check', 13);
+  $('#td-check2').innerHTML = window.wsSvg('check', 14) + '<span style="margin-left:4px">All caught up.</span>';
+
+  // Tree-row demo block
+  ['c1','c2','c3'].forEach((k) => stamp('#tr-' + k, 'chevron', 10));
+  ['f1','f2','f3'].forEach((k) => stamp('#tr-' + k, 'folder', 13));
+  ['d1','d2','d3'].forEach((k) => stamp('#tr-' + k, 'file', 12));
+
+  // empty-zone
+  stamp('#ez-icon', 'globe', 24);
+  $('#ez-cta').innerHTML = window.wsSvg('plus', 14) + '<span style="margin-left:6px">Create first atlas note</span>';
+
+  // editor tabs
+  stamp('#et-tl', 'panelL', 14);
+  stamp('#et-cmd','command', 14);
+  stamp('#et-set','gear',    14);
+  stamp('#et-th', 'moon',    14);
+  stamp('#et-tr', 'panelR',  14);
+
+  // icon-btn demo
+  stamp('#ib-1', 'search', 14);
+  stamp('#ib-2', 'sort',   14);
+  stamp('#ib-3', 'collapse', 14);
+  stamp('#ib-4', 'plus',   14);
+
+  // Theme toggle
+  $('#t-light').addEventListener('click', () => { document.body.classList.remove('theme-dark'); document.body.classList.add('theme-light'); $('#t-light').classList.add('active'); $('#t-dark').classList.remove('active'); });
+  $('#t-dark').addEventListener('click', () => { document.body.classList.add('theme-dark'); document.body.classList.remove('theme-light'); $('#t-dark').classList.add('active'); $('#t-light').classList.remove('active'); });
+</script>
+</body>
+</html>

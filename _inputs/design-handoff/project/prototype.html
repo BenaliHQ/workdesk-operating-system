@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>WorkDesk — Interactive prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Manrope:wght@400;500;600&family=Geist+Mono:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared/tokens.css" />
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body class="theme-light">
+
+<div class="app" id="app">
+
+  <!-- ───────── Ribbon ───────── -->
+  <aside class="ribbon" id="ribbon" data-screen-label="Ribbon"></aside>
+
+  <!-- ───────── Zone pane ───────── -->
+  <section class="pane" id="zone-pane" data-screen-label="Zone pane">
+    <div class="pane-hero" id="pane-hero"></div>
+    <div class="pane-toolbar">
+      <div class="label" id="pane-label">Objects</div>
+      <div class="toolbar-actions">
+        <button class="icon-btn" title="New note" data-act="new"></button>
+        <button class="icon-btn" title="Sort" data-act="sort"></button>
+        <button class="icon-btn" id="collapse-all" title="Collapse all"></button>
+        <button class="icon-btn" id="demo-empty" title="Preview as empty (fresh install)"></button>
+      </div>
+    </div>
+    <div class="object-list" id="object-list"></div>
+  </section>
+
+  <!-- ───────── Editor ───────── -->
+  <main class="editor-pane" data-screen-label="Editor">
+    <div class="editor-tabs">
+      <button class="icon-btn editor-toggle-left" id="toggle-left" title="Toggle left pane"></button>
+      <div class="tab active" id="active-tab">_brief.md</div>
+      <div class="editor-actions">
+        <button class="icon-btn" id="open-cmd"      title="Command palette (⌘K)"></button>
+        <button class="icon-btn" id="open-settings" title="WorkDesk settings"></button>
+        <button class="icon-btn" id="toggle-theme"  title="Toggle dark mode"></button>
+        <button class="icon-btn" id="toggle-right"  title="Toggle right pane"></button>
+      </div>
+    </div>
+    <div class="breadcrumb" id="breadcrumb">
+      <span>atlas</span><span>projects</span><span>workdesk</span><span>_brief.md</span>
+    </div>
+    <article class="editor-body" id="editor-body"></article>
+  </main>
+
+  <!-- ───────── Right pane: terminal ───────── -->
+  <aside class="right-pane" data-screen-label="Right pane / terminal">
+    <div class="right-tabs">
+      <button class="right-tab"        title="Backlinks" data-rtab="backlinks"></button>
+      <button class="right-tab"        title="Outline"   data-rtab="outline"></button>
+      <button class="right-tab"        title="Calendar"  data-rtab="calendar"></button>
+      <button class="right-tab active" title="Terminal"  data-rtab="terminal"></button>
+      <div style="flex:1"></div>
+      <button class="right-tab icon-btn" id="collapse-right" title="Collapse right pane" style="color:var(--text-normal); opacity: 0.7;"></button>
+    </div>
+    <div class="terminal-body" id="terminal-body"></div>
+    <div class="term-composer" id="term-composer">
+      <div class="composer-inner">
+        <div class="composer-shell">
+          <span class="composer-prompt" aria-hidden="true">▌</span>
+          <textarea class="composer-input" id="composer-input"
+                    placeholder="Ask Claude — ⌘↵ to send"
+                    rows="1"
+                    aria-label="Type a message"></textarea>
+          <div class="composer-actions">
+            <button class="composer-icon" title="Reference a note (insert [[)" aria-label="Reference a note" id="composer-attach"></button>
+            <button class="composer-send" title="Send (⌘↵)" aria-label="Send" id="composer-send"></button>
+          </div>
+        </div>
+        <div class="composer-meta">
+          <span class="composer-meta-l"><span class="model-dot"></span>opus 4.7 · 18 skills</span>
+          <span class="composer-meta-r"><kbd>⌘</kbd><kbd>↵</kbd> send<span class="recall-hint"> · <kbd>↑</kbd> recall</span><span class="blur-hint"> · <kbd>esc</kbd> blur</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="terminal-statusbar" id="terminal-statusbar"></div>
+    <div class="cal-body" id="calendar-body" style="display:none"></div>
+    <div class="rp-body" id="backlinks-body" style="display:none"></div>
+    <div class="rp-body" id="outline-body" style="display:none"></div>
+  </aside>
+
+  <!-- edge bumpers -->
+  <button class="edge-expand left"  id="expand-left"  title="Show left pane"></button>
+  <button class="edge-expand right" id="expand-right" title="Show right pane"></button>
+
+  <!-- Resizable column splitters (drag to adjust pane widths) -->
+  <div class="splitter splitter-left"  data-side="left"  title="Drag to resize left pane"></div>
+  <div class="splitter splitter-right" data-side="right" title="Drag to resize right pane"></div>
+</div>
+
+<!-- ─────────── Command palette ─────────── -->
+<div class="scrim top" id="cmd-scrim">
+  <div class="modal cmd-palette" data-screen-label="Command palette">
+    <div class="cmd-input-row">
+      <span id="cmd-icon"></span>
+      <input class="cmd-input" id="cmd-input" placeholder="Type a command or jump to a file…" />
+      <span class="cmd-pill">⌘K</span>
+    </div>
+    <div class="cmd-list" id="cmd-list"></div>
+    <div class="cmd-footer">
+      <span class="hint"><kbd>↑↓</kbd> navigate</span>
+      <span class="hint"><kbd>↵</kbd> select</span>
+      <span class="hint"><kbd>esc</kbd> dismiss</span>
+      <span style="flex:1"></span>
+      <span class="hint" style="color: var(--text-faint)">WorkDesk &middot; 24 commands</span>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────── Quick capture ─────────── -->
+<div class="scrim center" id="qc-scrim">
+  <div class="modal qc" data-screen-label="Quick capture">
+    <div class="qc-head">
+      <div class="qc-mic recording" id="qc-mic"></div>
+      <div class="qc-meta">
+        <div class="qc-title">Quick capture</div>
+        <div class="qc-status"><span class="dot"></span>Recording · 00:07 · Groq whisper-large-v3</div>
+      </div>
+      <button class="btn ghost" id="qc-cancel">esc</button>
+    </div>
+    <div class="qc-body">
+      <div class="qc-transcript">
+        The hard part isn't building the plugin — the hard part is making the visual surface so calm that nobody notices it's a plugin. Add this to <span class="wikilink">workdesk/_brief.md</span> under risks.<span class="live"> Also: investigate cross-device parity once the iOS pipeline </span>
+      </div>
+    </div>
+    <div class="qc-foot">
+      <span class="dest"><span class="dot" style="background: var(--ws-zone-personal-fg)"></span>personal / captures</span>
+      <span class="dest"><span class="dot" style="background: var(--ws-zone-system-fg)"></span>system / log</span>
+      <span class="spacer"></span>
+      <button class="btn ghost" id="qc-stop">Stop &amp; discard</button>
+      <button class="btn primary" id="qc-save">Save capture <kbd style="margin-left:6px;padding:0 5px;background:rgba(255,255,255,0.18);border-radius:3px;font-family:var(--ws-font-mono);font-size:10px">↵</kbd></button>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────── Settings ─────────── -->
+<div class="scrim center" id="settings-scrim">
+  <div class="modal settings" data-screen-label="Settings">
+    <nav class="settings-nav">
+      <div class="settings-nav-title">Obsidian</div>
+      <div class="settings-nav-item"><span class="glyph"></span>Editor</div>
+      <div class="settings-nav-item"><span class="glyph"></span>Files &amp; links</div>
+      <div class="settings-nav-item"><span class="glyph"></span>Appearance</div>
+      <div class="settings-nav-item"><span class="glyph"></span>Hotkeys</div>
+
+      <div class="settings-nav-title" style="margin-top:14px">WorkDesk</div>
+      <div class="settings-nav-item active"><span class="glyph"></span>General</div>
+      <div class="settings-nav-item"><span class="glyph"></span>Zones</div>
+      <div class="settings-nav-item"><span class="glyph"></span>Terminal</div>
+      <div class="settings-nav-item"><span class="glyph"></span>Quick capture</div>
+      <div class="settings-nav-item"><span class="glyph"></span>Claude Code</div>
+      <div class="settings-nav-item"><span class="glyph"></span>About</div>
+    </nav>
+    <div class="settings-body" id="settings-body"></div>
+  </div>
+</div>
+
+<!-- ─────────── Onboarding modal ─────────── -->
+<div class="scrim center" id="ob-scrim">
+  <div class="modal" style="width:560px;max-width:92vw" data-screen-label="Onboarding">
+    <div style="padding:32px 32px 8px;display:flex;gap:14px;align-items:center">
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--ws-zone-atlas-bg);color:var(--ws-zone-atlas-fg);display:grid;place-items:center" id="ob-icon"></div>
+      <div>
+        <div style="font-family:var(--ws-font-display);font-size:20px;font-weight:600;letter-spacing:-0.015em">Welcome to WorkDesk</div>
+        <div style="color:var(--text-faint);font-size:13px;margin-top:2px">Step <span id="ob-step">1</span> of 4 · ~3 minutes</div>
+      </div>
+      <button class="btn ghost" id="ob-close" style="margin-left:auto">esc</button>
+    </div>
+    <div id="ob-body" style="padding:18px 32px 4px;font-size:14px;line-height:1.6;color:var(--text-normal);min-height:200px"></div>
+    <div style="display:flex;align-items:center;gap:8px;padding:16px 32px 24px;border-top:1px solid var(--ws-border-hair);margin-top:16px">
+      <div style="display:flex;gap:6px" id="ob-dots"></div>
+      <span style="flex:1"></span>
+      <button class="btn ghost" id="ob-back">Back</button>
+      <button class="btn primary" id="ob-next">Next</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toast-stack"></div>
+
+<script src="shared/icons.js"></script>
+<script src="shared/zones.js"></script>
+<script src="shared/notes.js"></script>
+<script src="prototype.js"></script>
+</body>
+</html>
