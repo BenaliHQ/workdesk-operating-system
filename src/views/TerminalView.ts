@@ -18,11 +18,13 @@ import type WorkdeskosPlugin from '../main';
 
 export class TerminalView extends ItemView {
   private plugin: WorkdeskosPlugin;
-  session: TerminalSession | null = null;
+  private sessions = new Map<number, TerminalSession>();
+  private activeId: number | null = null;
   composer: ComposerHandle | null = null;
   tabs: TabStripHandle | null = null;
   statusbar: StatusbarHandle | null = null;
   fullscreen: FullscreenHandle | null = null;
+  private canvasHost: HTMLElement | null = null;
   private detachDropzone: (() => void) | null = null;
   private autocomplete: AutocompleteHandle | null = null;
   private tabStatuses = new Map<number, TabStatus>();
@@ -30,6 +32,11 @@ export class TerminalView extends ItemView {
   constructor(leaf: WorkspaceLeaf, plugin: WorkdeskosPlugin) {
     super(leaf);
     this.plugin = plugin;
+  }
+
+  /** Active session, or null when no tabs are open. */
+  get session(): TerminalSession | null {
+    return this.activeId === null ? null : (this.sessions.get(this.activeId) ?? null);
   }
 
   getViewType(): string {
@@ -50,9 +57,9 @@ export class TerminalView extends ItemView {
 
     const header = this.contentEl.createDiv({ cls: 'term-session-head' });
     this.tabs = mountTabStrip(header, {
-      onActivate: (id) => this.tabs?.setActive(id),
-      onClose: (id) => this.tabs?.removeTab(id),
-      onNew: () => this.openNewTab(),
+      onActivate: (id) => this.setActiveSession(id),
+      onClose: (id) => this.closeSession(id),
+      onNew: () => this.openNewSession(),
     });
 
     const fsBtn = header.createEl('button', { cls: 'icon-btn term-fullscreen-btn' });
@@ -60,25 +67,7 @@ export class TerminalView extends ItemView {
     fsBtn.setAttribute('aria-label', 'Toggle fullscreen');
     fsBtn.addEventListener('click', () => this.fullscreen?.isActive() ? this.fullscreen.exit() : this.fullscreen?.enter());
 
-    const canvasHost = this.contentEl.createDiv({ cls: 'workdesk-term-host' });
-    const vaultPath = resolveVaultPath(this.plugin);
-    this.session = createTerminalSession(canvasHost, vaultPath, this.app);
-
-    // Tab strip seeds with the first session id.
-    const firstId = this.session.id;
-    this.tabs.addTab({ id: firstId, name: this.session.name, status: 'idle' });
-    this.tabStatuses.set(firstId, 'idle');
-
-    this.session.onData((chunk) => {
-      const current = this.tabStatuses.get(firstId) ?? 'idle';
-      const next = parseStatusFromChunk(chunk, current);
-      if (next !== current) {
-        this.tabStatuses.set(firstId, next);
-        this.tabs?.setStatus(firstId, next);
-      }
-    });
-
-    queueMicrotask(() => this.session?.fit());
+    this.canvasHost = this.contentEl.createDiv({ cls: 'workdesk-term-host' });
 
     this.statusbar = mountStatusbar(this.contentEl, {});
 
@@ -90,22 +79,24 @@ export class TerminalView extends ItemView {
     });
 
     this.detachDropzone = attachDropzone({
-      element: canvasHost,
+      element: this.canvasHost,
       onPathDropped: (escaped) => this.session?.write(escaped + ' '),
     });
 
     const appEl = (this.contentEl.closest('.app') as HTMLElement | null) ?? document.body;
     this.fullscreen = createFullscreenToggle({
       appEl,
-      sessions: () => Array.from(this.tabStatuses.keys()).map((id) => ({
-        id,
-        name: this.tabs?.list().find((t) => t.id === id)?.name ?? `zsh ${id}`,
-        active: id === this.session?.id,
+      sessions: () => Array.from(this.sessions.values()).map((s) => ({
+        id: s.id,
+        name: this.tabs?.list().find((t) => t.id === s.id)?.name ?? s.name,
+        active: s.id === this.activeId,
       })),
-      onActivate: () => {},
-      onNew: () => this.openNewTab(),
+      onActivate: (id) => this.setActiveSession(id),
+      onNew: () => this.openNewSession(),
       onExit: () => {},
     });
+
+    this.openNewSession();
   }
 
   async onClose(): Promise<void> {
@@ -121,18 +112,63 @@ export class TerminalView extends ItemView {
     this.composer = null;
     this.tabs?.dispose();
     this.tabs = null;
-    this.session?.destroy();
-    this.session = null;
+    for (const s of this.sessions.values()) s.destroy();
+    this.sessions.clear();
+    this.activeId = null;
+    this.canvasHost = null;
     this.tabStatuses.clear();
   }
 
   refreshTheme(): void {
-    if (this.session) applySessionTheme(this.session);
+    for (const s of this.sessions.values()) applySessionTheme(s);
   }
 
-  private openNewTab(): void {
-    // Phase 4B keeps a single PTY backing tab; tabs.ts owns the strip itself.
-    // Multi-session PTY orchestration lives in phase 5B / M3.
+  /** Public API — called by the plugin's `workdesk:terminal:new-tab` command. */
+  openNewSession(): void {
+    if (!this.canvasHost) return;
+    const vaultPath = resolveVaultPath(this.plugin);
+    const session = createTerminalSession(this.canvasHost, vaultPath, this.app);
+    this.sessions.set(session.id, session);
+    this.tabs?.addTab({ id: session.id, name: session.name, status: 'idle' });
+    this.tabStatuses.set(session.id, 'idle');
+    session.onData((chunk) => {
+      const current = this.tabStatuses.get(session.id) ?? 'idle';
+      const next = parseStatusFromChunk(chunk, current);
+      if (next !== current) {
+        this.tabStatuses.set(session.id, next);
+        this.tabs?.setStatus(session.id, next);
+      }
+    });
+    this.setActiveSession(session.id);
+  }
+
+  private setActiveSession(id: number): void {
+    if (!this.sessions.has(id)) return;
+    this.activeId = id;
+    for (const [sid, s] of this.sessions.entries()) {
+      s.containerEl.style.display = sid === id ? '' : 'none';
+    }
+    this.tabs?.setActive(id);
+    queueMicrotask(() => this.session?.fit());
+    // Re-render the fullscreen session rail so it picks up the new active
+    // highlight and any session that was just added. refresh() is a no-op
+    // when the rail isn't mounted, so it's safe to call unconditionally.
+    this.fullscreen?.refresh();
+  }
+
+  private closeSession(id: number): void {
+    const session = this.sessions.get(id);
+    if (!session) return;
+    session.destroy();
+    this.sessions.delete(id);
+    this.tabStatuses.delete(id);
+    this.tabs?.removeTab(id);
+    if (this.activeId === id) {
+      const next = this.sessions.keys().next().value;
+      this.activeId = next ?? null;
+      if (this.activeId !== null) this.setActiveSession(this.activeId);
+    }
+    this.fullscreen?.refresh();
   }
 
   private openComposerAutocomplete(): void {

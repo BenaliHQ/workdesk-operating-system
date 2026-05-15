@@ -18,6 +18,10 @@ Items that need human judgment or multi-day observation. Work through this list 
   - *Verify:* Tab through every interactive surface in this order: ribbon → zone pane → editor tabs → editor body → right-pane tabs → terminal body → edge bumpers. See handoff/accessibility.md.
 - [ ] **Contrast** — : body text passes AA; `--text-faint` only used for 12 px+ captions.
   - *Verify:* Verify body text contrast ≥ 4.5:1 against background-primary in both light and dark mode using Contrast.app or browser devtools.
+## Two-week dogfood
+
+- [ ] **Yvette completes a normal workday entirely inside WorkDesk for 10 consecutive workdays** — Yvette completes a normal workday entirely inside WorkDesk for 10 consecutive workdays. No workarounds. No expert calls. No "this is broken so I went back to plain Obsidian".
+  - *Verify:* Yvette completes 10 consecutive workdays inside WorkDesk with no workarounds, no expert calls, no fallback to plain Obsidian. Multi-day observation — not auto-verifiable.
 
 ## Yvette flow
 

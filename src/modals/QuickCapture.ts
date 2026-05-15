@@ -39,10 +39,6 @@ export class QuickCaptureModal extends Modal {
     this.flow = this.deps.flow ?? this.buildFlow(this.plugin.app);
     this.contentEl.replaceChildren();
     this.contentEl.classList.add('qc');
-    this.titleEl.id = 'qc-title';
-    this.containerEl.setAttribute('role', 'dialog');
-    this.containerEl.setAttribute('aria-modal', 'true');
-    this.containerEl.setAttribute('aria-labelledby', 'qc-title');
 
     const head = document.createElement('div');
     head.className = 'qc-head';
@@ -58,8 +54,13 @@ export class QuickCaptureModal extends Modal {
     title.className = 'qc-title';
     title.textContent = 'Quick capture';
     title.id = 'qc-title';
-    this.titleEl = title;
     meta.appendChild(title);
+
+    // Set dialog ARIA after the title element exists so aria-labelledby
+    // resolves to a real, non-empty node (axe-core: aria-dialog-name).
+    this.containerEl.setAttribute('role', 'dialog');
+    this.containerEl.setAttribute('aria-modal', 'true');
+    this.containerEl.setAttribute('aria-labelledby', 'qc-title');
     this.statusEl = document.createElement('div');
     this.statusEl.className = 'qc-status';
     meta.appendChild(this.statusEl);

@@ -15,6 +15,8 @@ import { fileURLToPath } from 'node:url';
 import { App, Plugin } from 'obsidian';
 
 import { CommandPalette } from '../src/modals/CommandPalette';
+import { QuickCaptureModal } from '../src/modals/QuickCapture';
+import { CaptureFlow, type CaptureVault } from '../src/services/capture/capture-flow';
 import { renderTreeRow } from '../src/components/TreeRow';
 import { renderZoneCard } from '../src/components/ZoneCard';
 import { renderZoneEmpty } from '../src/components/EmptyStates';
@@ -122,29 +124,90 @@ function buildSettingsFixture(): HTMLElement {
   return tab.containerEl;
 }
 
+// Captured here so the audit closure can drop toast/popover roots back into
+// scope on each fixture build. Toast.ts appends nodes to document.body; the
+// polish fixture stashes their root containers so axe.run() sees them.
+let polishToastStack: HTMLElement | null = null;
+let polishContextMenu: HTMLElement | null = null;
+
 function buildPolishFixture(): HTMLElement {
   const root = document.createElement('div');
   showToast('Capture saved · personal/captures', 'success');
   showToast('Transcribing…', 'loading', { id: 'stt-fixture' });
+  // showToast appends `.toast-stack` directly to document.body. Pull it into
+  // the fixture root so axe.run(root) covers the toast DOM.
+  polishToastStack = document.body.querySelector<HTMLElement>('.toast-stack');
+  if (polishToastStack) root.appendChild(polishToastStack);
+
   const banner = renderBanner(root, {
     severity: 'error',
     message: 'Terminal disconnected · last session ended 12 s ago',
     actions: [{ label: 'Restart', onClick: () => {} }],
   });
   banner.element; // ensure reachable
+
   const popover = showContextMenu(100, 100, [
     { text: 'Rename…', kbd: 'F2', act: () => {} },
     { divider: true },
     { text: 'Delete', danger: true, act: () => {} },
   ]);
-  root.appendChild(popover.element.cloneNode(true) as HTMLElement);
+  // showContextMenu also appends to document.body — adopt the actual node so
+  // the audit sees the rendered popover (not a sterile clone).
+  polishContextMenu = popover.element;
+  root.appendChild(polishContextMenu);
+
   root.appendChild(renderSpinner());
   return root;
+}
+
+class NullCaptureFlow extends CaptureFlow {
+  constructor() {
+    super({
+      provider: {
+        name: 'null',
+        model: 'fixture',
+        transcribe: async () => ({ text: 'fixture transcript' }),
+      },
+      vault: { createNote: async () => {}, appendToFile: async () => {} } as CaptureVault,
+    });
+  }
+  async beginRecording(): Promise<void> { /* no-op for a11y fixtures */ }
+  cancel(): void { /* no-op */ }
+  async saveAndTranscribe(): Promise<{ notePath: string; transcript: string }> {
+    return { notePath: 'personal/captures/fixture.md', transcript: 'fixture transcript' };
+  }
+}
+
+function buildQuickCaptureFixture(): HTMLElement {
+  const app = new App();
+  const plugin = new Plugin() as unknown as Plugin & {
+    settings: WorkdeskSettings;
+    saveSettings: () => Promise<void>;
+    loadSettings: () => Promise<void>;
+  };
+  plugin.settings = structuredClone(DEFAULT_SETTINGS);
+  plugin.saveSettings = async () => {};
+  plugin.loadSettings = async () => {};
+  plugin.app = app;
+
+  const flow = new NullCaptureFlow();
+  const vault: CaptureVault = {
+    createNote: async () => {},
+    appendToFile: async () => {},
+  };
+
+  const modal = new QuickCaptureModal(
+    plugin as unknown as Parameters<typeof QuickCaptureModal>[0],
+    { vault, flow },
+  );
+  modal.open();
+  return modal.containerEl;
 }
 
 beforeAll(() => {
   fixtures.push({ name: 'zone-pane', build: buildZoneFixture });
   fixtures.push({ name: 'command-palette', build: buildPaletteFixture });
+  fixtures.push({ name: 'quick-capture', build: buildQuickCaptureFixture });
   fixtures.push({ name: 'settings-tab', build: buildSettingsFixture });
   fixtures.push({ name: 'polish-primitives', build: buildPolishFixture });
 });

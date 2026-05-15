@@ -50,9 +50,21 @@ function parseDoneChecklist(): ParsedItem[] {
       section = sectionMatch[1].trim();
       continue;
     }
-    const m = raw.match(/^- \[\s?\]\s+\*\*([^*]+)\*\*\s*(.*)$/);
-    if (m && m[1]) {
-      items.push({ raw, title: m[1].trim(), body: (m[2] ?? '').trim(), section });
+    // Bold-title checkboxes: "- [ ] **Title** rest".
+    const bold = raw.match(/^- \[\s?\]\s+\*\*([^*]+)\*\*\s*(.*)$/);
+    if (bold && bold[1]) {
+      items.push({ raw, title: bold[1].trim(), body: (bold[2] ?? '').trim(), section });
+      continue;
+    }
+    // Plain checkbox lines without a bold title (e.g., the Yvette dogfood
+    // line). Synthesize a title from the first sentence-fragment so the
+    // classifier and report still have a stable handle.
+    const plain = raw.match(/^- \[\s?\]\s+(.+)$/);
+    if (plain && plain[1]) {
+      const body = plain[1].trim();
+      const firstClauseEnd = body.search(/[.!?]/);
+      const synthetic = (firstClauseEnd > 0 ? body.slice(0, firstClauseEnd) : body).trim();
+      items.push({ raw, title: synthetic, body, section });
     }
   }
   return items;
@@ -435,9 +447,17 @@ afterAll(() => {
 });
 
 describe('phase 6b · DONE checklist machine pass', () => {
-  it('parses every checkbox line in the source checklist', () => {
+  it('parses every checkbox line in the source checklist (including non-bold)', () => {
     const items = parseDoneChecklist();
-    expect(items.length).toBeGreaterThan(20);
+    const sourceText = fs.readFileSync(SOURCE, 'utf8');
+    const sourceCount = (sourceText.match(/^- \[\s?\]/gm) ?? []).length;
+    // Parser must cover every `- [ ]` line — bold-title and plain alike.
+    expect(items.length).toBe(sourceCount);
+    // Yvette dogfood line has no bold title; verify it lands in the parsed set.
+    expect(items.some((i) => i.title.toLowerCase().includes('yvette'))).toBe(true);
+    // And the Yvette classifier routes it to the human/two-week-dogfood track.
+    const yvette = items.find((i) => i.title.toLowerCase().includes('yvette'))!;
+    expect(classifyItem(yvette)).toBe(TWO_WEEK_DOGFOOD);
   });
 
   it('every machine item asserts true against the implementation', () => {

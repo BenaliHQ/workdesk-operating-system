@@ -3,7 +3,7 @@
 import type WorkdeskosPlugin from '../../main';
 import { sectionLabel } from '../../components/forms';
 
-export function mountAboutSection(parent: HTMLElement, _plugin: WorkdeskosPlugin): void {
+export function mountAboutSection(parent: HTMLElement, plugin: WorkdeskosPlugin): void {
   parent.dataset.tab = 'about';
   sectionLabel(parent, 'ABOUT');
 
@@ -16,7 +16,7 @@ export function mountAboutSection(parent: HTMLElement, _plugin: WorkdeskosPlugin
 
   const version = document.createElement('div');
   version.className = 'desc';
-  version.textContent = 'Version 0.1.0 · MIT';
+  version.textContent = `Version ${plugin.manifest.version} · MIT`;
   body.appendChild(version);
 
   const links = document.createElement('div');

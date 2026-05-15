@@ -130,21 +130,79 @@ export default class WorkdeskosPlugin extends Plugin {
     console.log(`[${PLUGIN_ID}] unloaded`);
   }
 
-  private toggleTerminalPane(): void {
-    const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKDESK_TERMINAL);
-    if (leaves.length > 0) {
-      this.app.workspace.revealLeaf(leaves[0]!);
+  private async toggleTerminalPane(): Promise<void> {
+    const workspace = this.app.workspace;
+    const leaves = workspace.getLeavesOfType(VIEW_TYPE_WORKDESK_TERMINAL);
+    if (leaves.length === 0) {
+      const leaf = workspace.getRightLeaf(false);
+      if (!leaf) return;
+      await leaf.setViewState({ type: VIEW_TYPE_WORKDESK_TERMINAL, active: true });
+      await workspace.revealLeaf(leaf);
+      return;
     }
+
+    const rightSplit = (workspace as unknown as { rightSplit?: WorkspaceItemLike }).rightSplit;
+    // Prefer a terminal leaf that actually lives inside the right sidebar so
+    // toggle collapses the dock rather than hiding an unrelated editor tab.
+    const sidebarLeaf = leaves.find((l) => leafIsHostedBy(l, rightSplit));
+
+    if (sidebarLeaf && rightSplit) {
+      if (rightSplit.collapsed) {
+        rightSplit.expand();
+        await workspace.revealLeaf(sidebarLeaf);
+        return;
+      }
+      // Sidebar is open. If the terminal is the active view, collapse;
+      // otherwise just bring it to the front of the sidebar.
+      if (workspace.getActiveViewOfType?.(TerminalView) === sidebarLeaf.view) {
+        rightSplit.collapse();
+        return;
+      }
+      await workspace.revealLeaf(sidebarLeaf);
+      return;
+    }
+
+    // No sidebar-hosted terminal — focus whichever one we have.
+    await workspace.revealLeaf(leaves[0]!);
   }
 
   private async openNewTerminalTab(): Promise<void> {
+    const existing = this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKDESK_TERMINAL);
+    if (existing.length > 0) {
+      const leaf = existing[0]!;
+      // Reveal first so a deferred/collapsed leaf has a chance to call
+      // onOpen() and mount its canvas host. Without this, openNewSession()
+      // can no-op (no canvasHost yet) or attach an xterm to a hidden
+      // container that never gets the correct size.
+      await this.app.workspace.revealLeaf(leaf);
+      const view = leaf.view as TerminalView | undefined;
+      if (view?.openNewSession) {
+        view.openNewSession();
+        return;
+      }
+    }
     const leaf = this.app.workspace.getLeaf('tab');
     await leaf.setViewState({ type: VIEW_TYPE_WORKDESK_TERMINAL, active: true });
-    this.app.workspace.revealLeaf(leaf);
+    await this.app.workspace.revealLeaf(leaf);
   }
 
-  private triageCaptureInbox(): void {
-    // Phase 5A registers the command surface; the capture inbox flow lands in M3.
+  private async triageCaptureInbox(): Promise<void> {
+    // Per design's prototype.js: navigate to gtd zone where unprocessed
+    // captures land. The actual /triage skill runs inside the terminal —
+    // operator invokes it manually once they're looking at the inbox.
+    this.handleSlot('gtd');
+    // handleSlot only updates the plugin's active-zone state + ribbon.
+    // Push the change into every live ZoneView so the visible pane actually
+    // re-renders the gtd inbox, then reveal the first zone leaf so the
+    // operator lands on it instead of having to click the ribbon.
+    const zoneLeaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKDESK_ZONE);
+    for (const leaf of zoneLeaves) {
+      const view = leaf.view as ZoneView | undefined;
+      view?.setActiveZone?.('gtd');
+    }
+    const target = zoneLeaves[0];
+    if (target) await this.app.workspace.revealLeaf(target);
+    showToast('Switched to gtd · run /triage in terminal to process inbox', 'info');
   }
 
   private openQuickCapture(): void {
@@ -177,6 +235,22 @@ export default class WorkdeskosPlugin extends Plugin {
   async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
   }
+}
+
+// Subset of Obsidian's WorkspaceSidedock surface we actually call. Kept here
+// so the toggle path doesn't drag the full type and still narrows correctly
+// when checking sidebar hosting.
+interface WorkspaceItemLike {
+  collapsed: boolean;
+  expand(): void;
+  collapse(): void;
+}
+
+function leafIsHostedBy(leaf: { getRoot?: () => unknown } | unknown, container: unknown): boolean {
+  if (!container) return false;
+  const getRoot = (leaf as { getRoot?: () => unknown }).getRoot;
+  if (typeof getRoot !== 'function') return false;
+  return getRoot.call(leaf) === container;
 }
 
 function mergeDeep<T>(base: T, patch: Partial<T>): T {
