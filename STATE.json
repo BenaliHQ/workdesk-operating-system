@@ -2,7 +2,7 @@
   "schema": 2,
   "plugin_id": "workdeskos-plugin",
   "repo_path": "/Users/khalilbenali/code/workdeskos-plugin",
-  "last_session": "M3",
+  "last_session": "M4",
   "phases": {
     "0": {
       "status": "PASS",
@@ -26,6 +26,12 @@
       "status": "PASS",
       "commit": "b13511f1fac6fc767211fab0bcfc1082632234f4",
       "verified_at": "2026-05-13T14:47:48.100Z",
+      "checkpoint": null
+    },
+    "7": {
+      "status": "PASS",
+      "commit": "f565a9c565e8e5128b30aa477e13a3b504d02404",
+      "verified_at": "2026-05-15T18:42:00.000Z",
       "checkpoint": null
     },
     "4a.1": {
@@ -122,7 +128,13 @@
         "added_in_phase": "3"
       }
     ],
-    "context7_available": false
+    "context7_available": false,
+    "architecture": "standard-plugin-pattern",
+    "architecture_prior": "full-surface-takeover (v1.0.0 — see M4 spec)",
+    "obsidian_scope_css_sha256": "a1b0d5af9d1fd9fcb56f8a684fd90811019a0ee0cb438670ca0bd0724e1c249a",
+    "ribbon_pattern": "addRibbonIcon × 12",
+    "workspace_seed_strategy": "on-demand-reveal (no migrateWorkspaceOnce)",
+    "css_scoping_strategy": "build-time-strip-and-scope (scripts/scope-app-css.mjs)"
   },
   "runtime": {
     "node": "25.6.1",

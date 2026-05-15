@@ -2,7 +2,7 @@
 
 - **plugin_id**: `workdeskos-plugin`
 - **repo_path**: `/Users/khalilbenali/code/workdeskos-plugin`
-- **last_session**: `M3`
+- **last_session**: `M4`
 - **runtime**: node `25.6.1` · pnpm `10.30.3` · python3 `3.9.6`
 
 ## Phases
@@ -20,6 +20,7 @@
 | 5b | **PASS** | `bb6b1c200` | 2026-05-13T17:18:00.000Z |
 | 6a | **PASS** | `67193dad5` | 2026-05-13T17:25:00.000Z |
 | 6b | **PASS** | `00eaa80d3` | 2026-05-13T17:35:00.000Z |
+| 7 | **PASS** | `f565a9c56` | 2026-05-15T18:42:00.000Z |
 
 ## Decisions
 
@@ -50,6 +51,12 @@
 - `min_app_version`: `"1.11.4"`
 - `added_deps`: 2 entries
 - `context7_available`: `false`
+- `architecture`: `"standard-plugin-pattern"`
+- `architecture_prior`: `full-surface-takeove…see M4 spec)`
+- `obsidian_scope_css_sha256`: `a1b0d5af9d1fd9fcb56f…d0724e1c249a`
+- `ribbon_pattern`: `"addRibbonIcon × 12"`
+- `workspace_seed_strategy`: `on-demand-reveal (no…rkspaceOnce)`
+- `css_scoping_strategy`: `build-time-strip-and…app-css.mjs)`
 
 ---
-_Rendered at 2026-05-13T15:26:30.706Z from `STATE.json`._
+_Rendered at 2026-05-15T18:42:21.551Z from `STATE.json`._
