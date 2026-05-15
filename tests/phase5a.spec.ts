@@ -79,14 +79,14 @@ describe('phase 5a · command palette keyboard footer', () => {
   });
 });
 
-describe('phase 5a · settings tab — 6 sub-tabs', () => {
-  it('renders all six nav buttons with the expected labels', () => {
+describe('phase 5a · settings tab — 7 sub-tabs', () => {
+  it('renders all seven nav buttons with the expected labels', () => {
     const app = new App();
     const plugin = makePlugin();
     const tab = new WorkdeskSettingTab(app, plugin);
     tab.display();
     const labels = Array.from(tab.containerEl.querySelectorAll('.settings-nav-item')).map((b) => (b as HTMLElement).textContent);
-    expect(labels).toEqual(['General', 'Zones', 'Terminal', 'Quick capture', 'Claude Code', 'About']);
+    expect(labels).toEqual(['General', 'Zones', 'Terminal', 'Quick capture', 'Claude Code', 'Appearance', 'About']);
   });
 
   it('renderAllSectionsForTest mounts every section body', () => {
@@ -97,11 +97,11 @@ describe('phase 5a · settings tab — 6 sub-tabs', () => {
     const ids = hosts.map((h) => (h.firstElementChild as HTMLElement | null)?.dataset.tab);
     // Each section sets dataset.tab on its parent (the host), not the first child.
     const tabIds = hosts.map((h) => h.dataset.tab ?? h.children[0]?.getAttribute('data-tab'));
-    const expected = ['general', 'zones', 'terminal', 'quick-capture', 'claude-code', 'about'];
+    const expected = ['general', 'zones', 'terminal', 'quick-capture', 'claude-code', 'appearance', 'about'];
     // Some sections write data-tab on the parent host directly via mountX(host, plugin)
     // which sets parent.dataset.tab. Verify at least the section-label per section.
-    expect(ids.length).toBe(6);
-    expect(tabIds.length).toBe(6);
+    expect(ids.length).toBe(7);
+    expect(tabIds.length).toBe(7);
     for (const e of expected) {
       const match = hosts.some((h) => h.dataset.tab === e);
       expect(match).toBe(true);

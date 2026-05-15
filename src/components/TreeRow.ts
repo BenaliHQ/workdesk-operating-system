@@ -50,7 +50,7 @@ export function renderTreeRow(opts: TreeRowOpts): HTMLElement {
   }
 
   row.addEventListener('click', () => {
-    const path = `${opts.pathPrefix}/${node.name}`;
+    const path = opts.pathPrefix ? `${opts.pathPrefix}/${node.name}` : node.name;
     if (node.type === 'folder') {
       const chev = row.querySelector('.chevron');
       chev?.classList.toggle('open');
@@ -61,7 +61,7 @@ export function renderTreeRow(opts: TreeRowOpts): HTMLElement {
 
   row.addEventListener('contextmenu', (evt) => {
     evt.preventDefault();
-    const path = `${opts.pathPrefix}/${node.name}`;
+    const path = opts.pathPrefix ? `${opts.pathPrefix}/${node.name}` : node.name;
     const fire = (action: string) => () => opts.onContextAction?.(action, node, path);
     const items =
       node.type === 'folder'
@@ -95,7 +95,7 @@ export function renderTree(nodes: TreeNode[], opts: Omit<TreeRowOpts, 'node'>): 
     if (node.type === 'folder' && node.expanded && node.children?.length) {
       const sub = renderTree(node.children, {
         ...opts,
-        pathPrefix: `${opts.pathPrefix}/${node.name}`,
+        pathPrefix: opts.pathPrefix ? `${opts.pathPrefix}/${node.name}` : node.name,
       });
       container.appendChild(sub);
     }

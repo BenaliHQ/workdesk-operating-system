@@ -1,63 +1,9 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { Plugin } from '../tests/stubs/obsidian';
-import { WorkdeskRibbon, RIBBON_SLOT_IDS } from '../src/views/RibbonControl';
+import { describe, it, expect } from 'vitest';
 import { clampWidth } from '../src/layout/splitters';
 
-describe('phase 1 · ribbon', () => {
-  let host: HTMLElement;
-  let plugin: Plugin;
-
-  beforeEach(() => {
-    document.body.innerHTML = '';
-    host = document.createElement('div');
-    document.body.appendChild(host);
-    plugin = new Plugin();
-  });
-
-  it('renders 12 ribbon slots in spec order', () => {
-    const r = new WorkdeskRibbon(plugin);
-    r.mount(host);
-    const slots = host.querySelectorAll('.zone-slot, .ribbon-icon');
-    expect(slots.length).toBe(12);
-  });
-
-  it('zone slots appear before utility icons before mic', () => {
-    const r = new WorkdeskRibbon(plugin);
-    r.mount(host);
-    const ordered = Array.from(host.querySelectorAll<HTMLElement>('.zone-slot, .ribbon-icon'))
-      .map((el) => el.dataset.zone ?? el.dataset.slot);
-    expect(ordered).toEqual([
-      'atlas', 'gtd', 'intel', 'personal', 'system', 'config', 'files',
-      'search', 'today', 'terminal', 'focus',
-      'mic',
-    ]);
-  });
-
-  it('exposes RIBBON_SLOT_IDS with 12 entries matching DOM order', () => {
-    expect(RIBBON_SLOT_IDS.length).toBe(12);
-    expect(RIBBON_SLOT_IDS[0]).toBe('atlas');
-    expect(RIBBON_SLOT_IDS[RIBBON_SLOT_IDS.length - 1]).toBe('mic');
-  });
-
-  it('setActiveZone toggles .active on the right slot only', () => {
-    const r = new WorkdeskRibbon(plugin);
-    r.mount(host);
-    r.setActiveZone('gtd');
-    const actives = host.querySelectorAll('.zone-slot.active');
-    expect(actives.length).toBe(1);
-    expect((actives[0] as HTMLElement).dataset.zone).toBe('gtd');
-  });
-
-  it('onSlot fires with slot id on click', () => {
-    const r = new WorkdeskRibbon(plugin);
-    r.mount(host);
-    const calls: string[] = [];
-    r.onSlot((id) => calls.push(id));
-    (host.querySelector('[data-zone="intel"]') as HTMLElement).click();
-    (host.querySelector('[data-slot="mic"]') as HTMLElement).click();
-    expect(calls).toEqual(['intel', 'mic']);
-  });
-});
+// Phase 1 ribbon tests deleted in M4 (phase 7).
+// The plugin no longer mounts a custom WorkdeskRibbon — see
+// `tests/phase7.spec.ts` for the addRibbonIcon × 12 coverage that replaced it.
 
 describe('phase 1 · splitter clamps', () => {
   it('clamps left pane to [240, 560]', () => {

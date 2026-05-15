@@ -703,6 +703,126 @@ function phase6b() {
   summary('phase6b');
 }
 
+// ────────── Phase 7 — Standard plugin pattern pivot ──────────
+function phase7() {
+  logRun('phase7');
+
+  check('TypeScript strict compiles', () => {
+    const r = spawnSync('npx', ['--no-install', 'tsc', '-p', 'tsconfig.json', '--noEmit'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`tsc exit ${r.status}: ${(r.stderr || r.stdout || '').slice(0, 400)}`);
+    return '';
+  });
+
+  check('pnpm build (runs scope-app-css.mjs + bundles)', () => {
+    const r = spawnSync('pnpm', ['build'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`pnpm build exit ${r.status}: ${(r.stderr || r.stdout || '').slice(0, 400)}`);
+    if (!exists('main.js')) throw new Error('main.js missing');
+    if (!exists('styles.css')) throw new Error('styles.css missing');
+    if (!exists('styles/app.scoped.generated.css')) throw new Error('app.scoped.generated.css missing');
+    return '';
+  });
+
+  check('vitest all phases pass (including phase7)', () => {
+    const r = spawnSync('npx', ['--no-install', 'vitest', 'run'], { cwd: root, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`vitest exit ${r.status}: ${(r.stdout || r.stderr || '').slice(-1500)}`);
+    return '';
+  });
+
+  check('main.ts no longer mounts custom shell or WorkdeskRibbon', () => {
+    const main = readFile('src/main.ts');
+    if (/mountShell|new WorkdeskRibbon\(/.test(main)) throw new Error('main.ts still references deleted mounts');
+    return '';
+  });
+
+  check('main.ts registers ribbon icons + revealZone helper', () => {
+    const main = readFile('src/main.ts');
+    if (!main.includes('this.registerRibbonIcons')) throw new Error('registerRibbonIcons not invoked');
+    if (!main.includes('this.registerIcons')) throw new Error('registerIcons not invoked');
+    if (!main.includes('this.revealZone') && !main.includes('revealZone(')) throw new Error('revealZone helper missing');
+    return '';
+  });
+
+  check('main.ts references all 12 ribbon icon names', () => {
+    const main = readFile('src/main.ts');
+    const names = [
+      'workdesk-atlas', 'workdesk-gtd', 'workdesk-intel', 'workdesk-personal', 'workdesk-system', 'workdesk-config', 'workdesk-files',
+      'workdesk-today', 'workdesk-terminal', 'workdesk-focus', 'workdesk-mic', 'workdesk-settings',
+    ];
+    for (const n of names) {
+      if (!main.includes(`'${n}'`)) throw new Error(`main.ts missing ribbon name ${n}`);
+    }
+    return `${names.length} names`;
+  });
+
+  check('shell.ts deleted', () => {
+    if (exists('src/layout/shell.ts')) throw new Error('src/layout/shell.ts still exists');
+    return '';
+  });
+
+  check('RibbonControl.ts deleted', () => {
+    if (exists('src/views/RibbonControl.ts')) throw new Error('src/views/RibbonControl.ts still exists');
+    return '';
+  });
+
+  check('generated app css has no .app or body top-level rules', () => {
+    const generated = readFile('styles/app.scoped.generated.css');
+    if (/^\s*\.app\s*\{/m.test(generated)) throw new Error('generated css has top-level .app rule');
+    if (/^\s*\.app\.no-/m.test(generated)) throw new Error('generated css has .app.no-* rule');
+    if (/^\s*body\s*\{/m.test(generated)) throw new Error('generated css has body rule');
+    if (!/\.app\.term-fullscreen/.test(generated)) throw new Error('generated css missing .app.term-fullscreen');
+    return '';
+  });
+
+  check('bundle includes obsidian-scope.css and no top-level .app grid rule', () => {
+    const bundle = readFile('styles.css');
+    if (!bundle.includes('workdesk-hide-native-ribbon-icons')) throw new Error('bundle missing obsidian-scope.css markers');
+    if (/^\s*\.app\s*\{\s*display:\s*grid/m.test(bundle)) throw new Error('bundle still has top-level .app grid rule');
+    return '';
+  });
+
+  check('manifest.json.version === "1.1.0"', () => {
+    const m = JSON.parse(readFile('manifest.json'));
+    if (m.version !== '1.1.0') throw new Error(`version=${m.version}`);
+    return '';
+  });
+
+  check('M1 SHA decisions unchanged (no drift)', () => {
+    const state = JSON.parse(readFile('STATE.json'));
+    const pairs = [
+      ['tokens_css_sha256', 'styles/tokens.css'],
+      ['app_css_sha256', 'styles/app.css'],
+      ['icons_js_sha256', '_inputs/design-handoff/project/shared/icons.js'],
+      ['vendored_terminal_main_sha256', 'src/vendor/terminal/main.ts'],
+    ];
+    for (const [key, file] of pairs) {
+      const expected = state.decisions[key];
+      const actual = sha256(file);
+      if (!expected) throw new Error(`STATE.decisions.${key} missing`);
+      if (actual !== expected) throw new Error(`${key} drift (file=${file})`);
+    }
+    return `${pairs.length} sha fields intact`;
+  });
+
+  check('STATE.decisions.obsidian_scope_css_sha256 present and matches source', () => {
+    const state = JSON.parse(readFile('STATE.json'));
+    const expected = state.decisions.obsidian_scope_css_sha256;
+    if (!expected) throw new Error('obsidian_scope_css_sha256 missing from STATE');
+    const actual = sha256('styles/obsidian-scope.css');
+    if (actual !== expected) throw new Error(`obsidian_scope_css_sha256 mismatch: expected ${expected.slice(0, 12)}… got ${actual.slice(0, 12)}…`);
+    return actual.slice(0, 12) + '…';
+  });
+
+  check('STATE.phases["7"] is PASS', () => {
+    const state = JSON.parse(readFile('STATE.json'));
+    const p = state.phases['7'];
+    if (!p) throw new Error('phases["7"] missing');
+    if (p.status !== 'PASS') throw new Error(`phase 7 status=${p.status}`);
+    return '';
+  });
+
+  summary('phase7');
+}
+
 // ────────── Fail-closed stubs for later phases ──────────
 function unimplemented(p) {
   throw new Error(
@@ -722,6 +842,7 @@ const dispatch = {
   phase5b,
   phase6a,
   phase6b,
+  phase7,
 };
 
 const fn = dispatch[phase];

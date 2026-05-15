@@ -1,6 +1,6 @@
-// Settings tab — six sub-tabs (General / Zones / Terminal / Quick capture /
-// Claude Code / About) following design's .settings layout. Navigation
-// column on the left switches the displayed section.
+// Settings tab — seven sub-tabs (General / Zones / Terminal / Quick capture /
+// Claude Code / Appearance / About) following design's .settings layout.
+// Navigation column on the left switches the displayed section.
 
 import { PluginSettingTab, type App } from 'obsidian';
 import type WorkdeskosPlugin from '../main';
@@ -9,9 +9,17 @@ import { mountZonesSection } from './sections/zones';
 import { mountTerminalSection } from './sections/terminal';
 import { mountQuickCaptureSection } from './sections/quick-capture';
 import { mountClaudeCodeSection } from './sections/claude-code';
+import { mountAppearanceSection } from './sections/appearance';
 import { mountAboutSection } from './sections/about';
 
-export type SettingsTabId = 'general' | 'zones' | 'terminal' | 'quick-capture' | 'claude-code' | 'about';
+export type SettingsTabId =
+  | 'general'
+  | 'zones'
+  | 'terminal'
+  | 'quick-capture'
+  | 'claude-code'
+  | 'appearance'
+  | 'about';
 
 const TAB_ORDER: Array<{ id: SettingsTabId; label: string }> = [
   { id: 'general', label: 'General' },
@@ -19,6 +27,7 @@ const TAB_ORDER: Array<{ id: SettingsTabId; label: string }> = [
   { id: 'terminal', label: 'Terminal' },
   { id: 'quick-capture', label: 'Quick capture' },
   { id: 'claude-code', label: 'Claude Code' },
+  { id: 'appearance', label: 'Appearance' },
   { id: 'about', label: 'About' },
 ];
 
@@ -112,6 +121,9 @@ function mountSection(id: SettingsTabId, parent: HTMLElement, plugin: Workdeskos
       return;
     case 'claude-code':
       mountClaudeCodeSection(parent, plugin);
+      return;
+    case 'appearance':
+      mountAppearanceSection(parent, plugin);
       return;
     case 'about':
       mountAboutSection(parent, plugin);

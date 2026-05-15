@@ -4,13 +4,25 @@
 
 import esbuild from 'esbuild';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dev = process.argv.includes('--dev');
 
-const cssOrder = ['styles/fonts.css', 'styles/tokens.css', 'styles/app.css', 'styles/reduced-motion.css'];
+// M4 — build-time CSS scoping. Strips destructive global selectors from
+// styles/app.css and writes styles/app.scoped.generated.css. The bundle
+// consumes the generated file instead of the source app.css.
+execSync('node scripts/scope-app-css.mjs', { stdio: 'inherit', cwd: __dirname });
+
+const cssOrder = [
+  'styles/fonts.css',
+  'styles/tokens.css',
+  'styles/app.scoped.generated.css',
+  'styles/reduced-motion.css',
+  'styles/obsidian-scope.css',
+];
 const concatenated = cssOrder
   .map((p) => {
     const full = resolve(__dirname, p);

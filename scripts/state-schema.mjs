@@ -21,7 +21,7 @@ const Phase = z.object({
   partial_files: z.array(z.string()).optional(),
 });
 
-const PhaseIds = z.enum(['0', '1', '2', '3', '4a.1', '4a.2', '4b', '5a', '5b', '6a', '6b']);
+const PhaseIds = z.enum(['0', '1', '2', '3', '4a.1', '4a.2', '4b', '5a', '5b', '6a', '6b', '7']);
 
 const FontShas = z.object({
   'dm-sans-400': z.string(),
@@ -62,6 +62,13 @@ const Decisions = z.object({
   min_app_version: z.literal('1.11.4'),
   added_deps: z.array(z.object({ name: z.string(), version: z.string(), reason: z.string(), added_in_session: z.string(), added_in_phase: z.string() })),
   context7_available: z.boolean(),
+  // M4 — standard plugin pattern pivot. Optional so pre-M4 STATE.json still validates.
+  architecture: z.string().optional(),
+  architecture_prior: z.string().optional(),
+  obsidian_scope_css_sha256: z.string().optional(),
+  ribbon_pattern: z.string().optional(),
+  workspace_seed_strategy: z.string().optional(),
+  css_scoping_strategy: z.string().optional(),
 });
 
 const Runtime = z.object({

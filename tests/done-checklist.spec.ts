@@ -92,21 +92,36 @@ const CLASSIFICATIONS: Record<string, Classification> = {
     },
   },
 
-  // ── Phase 1 — Shell ───────────────────────────────────────────────────
+  // ── Phase 1 → 7 — Shell (STANDARD_PATTERN_REPLACED in M4) ────────────
+  // The custom four-pane shell was retired in M4. The plugin now coexists
+  // with Obsidian's native chrome and adds 12 ribbon icons via addRibbonIcon.
   'Four-pane shell': {
     kind: 'machine',
     assert: () => {
-      if (!exists('src/layout/shell.ts')) return 'shell.ts missing';
+      const src = readFile('src/main.ts');
+      if (!src.includes('registerRibbonIcons')) return 'main.ts no longer registers ribbon icons';
       const css = readFile('styles/app.css');
-      if (!css.includes('--ws-ribbon-w') || !css.includes('--ws-pane-w')) return 'tokens missing in app.css';
-      if (!css.includes('display: grid')) return 'grid layout missing in .app';
+      if (!css.includes('--ws-ribbon-w') || !css.includes('--ws-pane-w')) return 'tokens missing in source app.css';
       return null;
     },
   },
   'Ribbon zones': {
     kind: 'machine',
     assert: () => {
-      if (!exists('src/views/RibbonControl.ts')) return 'RibbonControl missing';
+      const src = readFile('src/main.ts');
+      // 12 addRibbonIcon calls — 7 zones + 5 utility (today, terminal, focus, mic, settings).
+      const count = (src.match(/this\.addRibbonIcon\(/g) ?? []).length;
+      if (count < 1) return 'main.ts has no addRibbonIcon calls';
+      // Spot-check the 12 expected icon names are referenced.
+      const expected = [
+        'workdesk-atlas', 'workdesk-gtd', 'workdesk-intel', 'workdesk-personal',
+        'workdesk-system', 'workdesk-config', 'workdesk-files',
+        'workdesk-today', 'workdesk-terminal', 'workdesk-focus',
+        'workdesk-mic', 'workdesk-settings',
+      ];
+      for (const name of expected) {
+        if (!src.includes(name)) return `main.ts missing ribbon icon ${name}`;
+      }
       return null;
     },
   },
@@ -120,9 +135,10 @@ const CLASSIFICATIONS: Record<string, Classification> = {
   'Toggle left/right buttons': {
     kind: 'machine',
     assert: () => {
-      const css = readFile('styles/app.css');
-      if (!css.includes('.app.no-left') || !css.includes('.app.no-right')) return 'no-left/no-right classes missing';
-      if (!css.includes('.edge-expand')) return 'edge-expand bumpers missing';
+      // M4: left/right toggles are Obsidian-native sidebars; the plugin no
+      // longer ships its own no-left/no-right grid. Verify obsidian-scope.css
+      // exists (the M4 supplement) instead of asserting the deleted classes.
+      if (!exists('styles/obsidian-scope.css')) return 'obsidian-scope.css missing';
       return null;
     },
   },
@@ -259,7 +275,7 @@ const CLASSIFICATIONS: Record<string, Classification> = {
       if (!exists('src/settings/tab.ts')) return 'settings tab missing';
       const dir = path.join(ROOT, 'src/settings/sections');
       const files = fs.readdirSync(dir).filter((f) => f.endsWith('.ts'));
-      if (files.length < 6) return `only ${files.length} sub-tabs (need 6)`;
+      if (files.length < 7) return `only ${files.length} sub-tabs (need 7)`;
       return null;
     },
   },
@@ -468,9 +484,9 @@ describe('phase 6b · DONE checklist machine pass', () => {
     }
   });
 
-  it('manifest.json is bumped to 1.0.0', () => {
+  it('manifest.json is bumped to 1.1.0', () => {
     const manifest = JSON.parse(readFile('manifest.json'));
-    expect(manifest.version).toBe('1.0.0');
+    expect(manifest.version).toBe('1.1.0');
   });
 
   it('tests/manual-checklist.md is generated with the Yvette flow + 2-week dogfood', () => {

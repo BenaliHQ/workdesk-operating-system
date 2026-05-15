@@ -71,6 +71,10 @@ export interface WorkdeskSettings {
     previewMode: 'inline' | 'browser';
     allowScripts: boolean;
   };
+  appearance: {
+    /** When true, hides ribbon icons not contributed by WorkdeskOS Plugin via a body class hook. */
+    hideNonWorkdeskRibbonIcons: boolean;
+  };
 }
 
 export const DEFAULT_SETTINGS: WorkdeskSettings = {
@@ -133,6 +137,9 @@ export const DEFAULT_SETTINGS: WorkdeskSettings = {
   html: {
     previewMode: 'inline',
     allowScripts: false,
+  },
+  appearance: {
+    hideNonWorkdeskRibbonIcons: false,
   },
 };
 

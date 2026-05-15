@@ -1,0 +1,59 @@
+/* obsidian-scope.css
+ * Positive scoping for the standard-plugin-pattern architecture (M4).
+ * Does NOT override Obsidian's chrome — destructive selectors are stripped
+ * from app.css at bundle time by scripts/scope-app-css.mjs.
+ */
+
+/* ZoneView fills its sidebar leaf and scrolls its object list. */
+.workspace-leaf-content[data-type="workdesk-zone"] .workdesk-zone-pane {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.workspace-leaf-content[data-type="workdesk-zone"] .object-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* TerminalView fills its sidebar leaf. */
+.workspace-leaf-content[data-type="workdesk-terminal"] .terminal-body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Active zone hint on the plugin's ribbon icons. Per-zone CSS variables
+ * applied to each icon at registration time via .style.setProperty. */
+.workspace-ribbon .workdesk-icon.workdesk-active {
+  background: var(--workdesk-active-bg, rgba(90, 107, 122, 0.16));
+  color: var(--workdesk-active-fg, var(--text-normal));
+}
+
+/* Opt-in: hide non-WorkDesk ribbon icons. Body class toggled by the plugin
+ * when settings.appearance.hideNonWorkdeskRibbonIcons is true. */
+body.workdesk-hide-native-ribbon-icons .workspace-ribbon .side-dock-ribbon-action:not(.workdesk-icon) {
+  display: none;
+}
+
+/* Focus mode — map onto Obsidian's native chrome.
+ * The design's `body.focus-on .ribbon/.editor-tabs/.breadcrumb` opacity rules
+ * targeted plugin-owned classes that no longer render. Re-target Obsidian's
+ * own classes so focus mode stays visibly meaningful in the standard pattern. */
+body.focus-on .workspace-ribbon,
+body.focus-on .workspace-tab-header-container,
+body.focus-on .view-header,
+body.focus-on .status-bar {
+  opacity: 0.4;
+  transition: opacity 200ms ease-out;
+}
+body.focus-on .workspace-ribbon:hover,
+body.focus-on .workspace-tab-header-container:hover,
+body.focus-on .view-header:hover,
+body.focus-on .status-bar:hover { opacity: 1; }
+
+/* Focus mode ribbon icon active-state hint. */
+.workspace-ribbon .workdesk-icon.workdesk-focus-active {
+  background: rgba(90, 107, 122, 0.20);
+  color: var(--text-normal);
+}

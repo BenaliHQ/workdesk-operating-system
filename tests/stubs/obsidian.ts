@@ -5,8 +5,10 @@
 
 export class Plugin {
   app: App = new App();
-  manifest = { id: 'workdeskos-plugin' } as { id: string };
+  manifest = { id: 'workdeskos-plugin', dir: '.obsidian/plugins/workdeskos-plugin' } as { id: string; dir: string };
   private _data: unknown = null;
+  _ribbonCalls: Array<{ icon: string; title: string }> = [];
+  _ribbonElements: HTMLElement[] = [];
   async loadData(): Promise<unknown> { return this._data; }
   async saveData(v: unknown): Promise<void> { this._data = v; }
   registerView(_type: string, _factory: unknown): void {}
@@ -17,8 +19,14 @@ export class Plugin {
     this.app.commands.commands[c.id] = c;
   }
   addSettingTab(_tab: unknown): void {}
-  addRibbonIcon(_icon: string, _title: string, _cb: unknown): HTMLElement {
-    return document.createElement('div');
+  addRibbonIcon(icon: string, title: string, cb: (evt: MouseEvent) => unknown): HTMLElement {
+    this._ribbonCalls.push({ icon, title });
+    const el = document.createElement('div');
+    el.classList.add('side-dock-ribbon-action');
+    el.dataset.iconName = icon;
+    el.addEventListener('click', (e) => { cb(e as MouseEvent); });
+    this._ribbonElements.push(el);
+    return el;
   }
   async onload(): Promise<void> {}
   async onunload(): Promise<void> {}
@@ -48,10 +56,74 @@ export class App {
 
 export class Workspace {
   layoutReady = true;
+  _getLeftLeafCalls = 0;
+  _getRightLeafCalls = 0;
+  _getLeafTabCalls = 0;
+  _setViewStateCalls: Array<{ type: string }> = [];
+  _revealLeafCalls = 0;
+  _openLinkTextCalls: Array<{ link: string; src: string; newLeaf: boolean }> = [];
+  _seededLeavesByType: Record<string, Array<{ view: unknown; setViewState: (s: { type: string }) => Promise<void> }>> = {};
+
   on(_evt: string, _cb: unknown): void {}
-  getLeavesOfType(_t: string): WorkspaceLeaf[] { return []; }
-  getLeaf(_split?: boolean): WorkspaceLeaf { return new WorkspaceLeaf(); }
-  async openLinkText(_link: string, _src: string, _newLeaf?: boolean): Promise<void> {}
+
+  _seedLeaf(type: string, viewMock: unknown): void {
+    this._seededLeavesByType[type] = this._seededLeavesByType[type] ?? [];
+    this._seededLeavesByType[type]!.push({
+      view: viewMock,
+      setViewState: async (s: { type: string }) => { this._setViewStateCalls.push(s); },
+    });
+  }
+
+  getLeavesOfType(type: string): WorkspaceLeaf[] {
+    const seeded = this._seededLeavesByType[type] ?? [];
+    return seeded as unknown as WorkspaceLeaf[];
+  }
+
+  getLeftLeaf(_split: boolean): WorkspaceLeaf | null {
+    this._getLeftLeafCalls += 1;
+    const view = {
+      setZones: (..._args: unknown[]) => { /* mock */ },
+      setActiveZone: (..._args: unknown[]) => { /* mock */ },
+    };
+    const stub = {
+      view,
+      setViewState: async (s: { type: string }) => { this._setViewStateCalls.push(s); },
+    };
+    this._seededLeavesByType['workdesk-zone'] = this._seededLeavesByType['workdesk-zone'] ?? [];
+    this._seededLeavesByType['workdesk-zone']!.push(stub);
+    return stub as unknown as WorkspaceLeaf;
+  }
+
+  getRightLeaf(_split: boolean): WorkspaceLeaf | null {
+    this._getRightLeafCalls += 1;
+    const view = { openNewSession: () => { /* mock */ } };
+    const stub = {
+      view,
+      setViewState: async (s: { type: string }) => { this._setViewStateCalls.push(s); },
+    };
+    this._seededLeavesByType['workdesk-terminal'] = this._seededLeavesByType['workdesk-terminal'] ?? [];
+    this._seededLeavesByType['workdesk-terminal']!.push(stub);
+    return stub as unknown as WorkspaceLeaf;
+  }
+
+  getLeaf(_mode?: boolean | 'tab' | 'split'): WorkspaceLeaf {
+    this._getLeafTabCalls += 1;
+    const stub = {
+      view: {},
+      setViewState: async (s: { type: string }) => { this._setViewStateCalls.push(s); },
+    };
+    return stub as unknown as WorkspaceLeaf;
+  }
+
+  async revealLeaf(_leaf: unknown): Promise<void> {
+    this._revealLeafCalls += 1;
+  }
+
+  async openLinkText(link: string, src: string, newLeaf?: boolean): Promise<void> {
+    this._openLinkTextCalls.push({ link, src, newLeaf: !!newLeaf });
+  }
+
+  getActiveViewOfType<T>(_ctor: new (...args: never[]) => T): T | null { return null; }
 }
 
 export class WorkspaceLeaf {
@@ -121,7 +193,18 @@ export class Vault {
 
 export class Notice { constructor(_msg: string, _ms?: number) {} }
 export function setIcon(_el: HTMLElement, _name: string): void {}
-export function addIcon(_name: string, _svg: string): void {}
+
+// Module-level addIcon registry — Obsidian's addIcon is a top-level export.
+const _iconCalls: Array<{ name: string; svg: string }> = [];
+export function addIcon(name: string, svg: string): void {
+  _iconCalls.push({ name, svg });
+}
+export function _getIconCalls(): ReadonlyArray<{ name: string; svg: string }> {
+  return _iconCalls;
+}
+export function _resetTestStubs(): void {
+  _iconCalls.length = 0;
+}
 
 export interface RequestUrlParam {
   url: string;
