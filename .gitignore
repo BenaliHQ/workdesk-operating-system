@@ -5,3 +5,8 @@ styles/app.scoped.generated.css
 .tmp/
 .DS_Store
 scripts/logs/
+
+# When the repo is symlinked as a plugin folder into a vault, Obsidian writes
+# the plugin's runtime settings to data.json at the repo root. Operator-private,
+# never committed.
+data.json
