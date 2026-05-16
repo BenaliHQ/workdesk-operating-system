@@ -82,7 +82,11 @@ export class ZoneView extends ItemView {
         childrenWrap.className = 'obj-children';
         childrenWrap.appendChild(
           renderTree(obj.children, {
-            pathPrefix: obj.id,
+            // `obj.folder` is the vault-relative folder (e.g. 'atlas/people')
+            // so file rows resolve to full vault-relative paths and
+            // openLinkText can find them. Falls back to `id` for legacy
+            // shapes that don't carry a folder.
+            pathPrefix: obj.folder ?? obj.id,
             onActivate: (node, path) => this.handleActivate(node, path),
           }),
         );

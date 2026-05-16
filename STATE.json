@@ -131,7 +131,7 @@
     "context7_available": false,
     "architecture": "standard-plugin-pattern",
     "architecture_prior": "full-surface-takeover (v1.0.0 — see M4 spec)",
-    "obsidian_scope_css_sha256": "96df6ac36f253ca10e78b7fe34598d7c2cdee1e0a9761ccc2a065e530f7c0951",
+    "obsidian_scope_css_sha256": "74513d259119f6251c2dcc3b21d90259dc2ac05c82011cefb9f534526b611f4f",
     "ribbon_pattern": "addRibbonIcon × 12",
     "workspace_seed_strategy": "on-demand-reveal (no migrateWorkspaceOnce)",
     "css_scoping_strategy": "build-time-strip-and-scope (scripts/scope-app-css.mjs)"

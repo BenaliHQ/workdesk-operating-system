@@ -4,16 +4,28 @@
  * from app.css at bundle time by scripts/scope-app-css.mjs.
  */
 
-/* ZoneView fills its sidebar leaf and scrolls its object list. */
+/* ZoneView fills its sidebar leaf and scrolls its object list.
+ *
+ * `min-height: 0` on the flex children is load-bearing — without it, flex
+ * items default to `min-height: auto` (= the intrinsic content size), which
+ * prevents the column from shrinking below its content and breaks the
+ * `overflow-y: auto` scroll trigger. With `min-height: 0`, the object-list
+ * can shrink, content overflows it, and a scrollbar appears. */
+.workspace-leaf-content[data-type="workdesk-zone"] {
+  display: flex;
+  flex-direction: column;
+}
 .workspace-leaf-content[data-type="workdesk-zone"] .workdesk-zone-pane {
-  height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 .workspace-leaf-content[data-type="workdesk-zone"] .object-list {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
-  flex: 1;
 }
 
 /* TerminalView fills its sidebar leaf. */

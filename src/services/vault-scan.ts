@@ -140,6 +140,7 @@ export function scanZones(fs: FsAdapter, opts: ScanOptions): Record<Exclude<Zone
       }
       objects.push({
         id: obj.id,
+        folder: obj.folder,
         title: obj.title,
         sub: obj.sub,
         count,

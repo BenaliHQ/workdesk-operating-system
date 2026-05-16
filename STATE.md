@@ -53,10 +53,10 @@
 - `context7_available`: `false`
 - `architecture`: `"standard-plugin-pattern"`
 - `architecture_prior`: `full-surface-takeove…see M4 spec)`
-- `obsidian_scope_css_sha256`: `96df6ac36f253ca10e78…5e530f7c0951`
+- `obsidian_scope_css_sha256`: `74513d259119f6251c2d…34526b611f4f`
 - `ribbon_pattern`: `"addRibbonIcon × 12"`
 - `workspace_seed_strategy`: `on-demand-reveal (no…rkspaceOnce)`
 - `css_scoping_strategy`: `build-time-strip-and…app-css.mjs)`
 
 ---
-_Rendered at 2026-05-16T17:07:48.229Z from `STATE.json`._
+_Rendered at 2026-05-16T20:02:27.103Z from `STATE.json`._

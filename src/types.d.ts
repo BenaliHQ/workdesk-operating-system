@@ -52,6 +52,10 @@ export interface TreeNode {
 export interface ZoneObject {
   /** Stable id used in URL params + scripts. lowercase-hyphenated. */
   id: string;
+  /** Vault-relative folder path (e.g. `atlas/people`). Used as the path
+   *  prefix when rendering children, so file activation can resolve full
+   *  vault-relative paths. Falls back to `id` if unset. */
+  folder?: string;
   /** Display title — title-cased via CSS, so keep lowercase here. */
   title: string;
   /** Single-line description shown under the title in the zone card. */
