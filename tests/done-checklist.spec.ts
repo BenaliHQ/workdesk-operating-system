@@ -484,9 +484,10 @@ describe('phase 6b · DONE checklist machine pass', () => {
     }
   });
 
-  it('manifest.json is bumped to 1.1.0', () => {
-    const manifest = JSON.parse(readFile('manifest.json'));
-    expect(manifest.version).toBe('1.1.0');
+  it('manifest.json is bumped to at least 1.1.0 (phase 7 shipped at 1.1.0)', () => {
+    const manifest = JSON.parse(readFile('manifest.json')) as { version: string };
+    const [maj, min] = manifest.version.split('.').map((s) => Number(s));
+    expect(maj > 1 || (maj === 1 && min >= 1)).toBe(true);
   });
 
   it('tests/manual-checklist.md is generated with the Yvette flow + 2-week dogfood', () => {

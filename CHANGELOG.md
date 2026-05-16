@@ -6,8 +6,14 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-Targeted as the next minor release (1.2.0) once the GitHub repo is renamed and
-this work is pushed to `main`.
+_No unreleased changes._
+
+## [1.2.0] — 2026-05-16
+
+Bundle release combining the post-M4 review-bot parity cleanup, the plugin
+rename to "Workdesk Operating System", and four real-runtime bug fixes
+surfaced in the spike-vault smoke test (`activeDocument.createDiv()`
+regression, zone-pane scroll, file-activation vault paths, font 404s).
 
 ### Changed
 

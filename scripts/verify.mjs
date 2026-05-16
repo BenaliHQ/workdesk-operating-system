@@ -780,9 +780,10 @@ function phase7() {
     return '';
   });
 
-  check('manifest.json.version === "1.1.0"', () => {
+  check('manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)', () => {
     const m = JSON.parse(readFile('manifest.json'));
-    if (m.version !== '1.1.0') throw new Error(`version=${m.version}`);
+    const [maj, min] = String(m.version).split('.').map((s) => Number(s));
+    if (!(maj > 1 || (maj === 1 && min >= 1))) throw new Error(`version=${m.version}`);
     return '';
   });
 

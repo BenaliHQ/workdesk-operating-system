@@ -700,3 +700,94 @@
   - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
   - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — ab66fb00d03b…
   - [ok] STATE.phases["7"] is PASS
+## 2026-05-16T20:24:04.032Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [FAIL] vitest all phases pass (including phase7) — vitest exit 1: 
+ RUN  v2.1.8 /Users/khalilbenali/code/workdesk-operating-system
+
+ ✓ tests/phase6a.spec.ts (16 tests) 13ms
+ ✓ tests/phase4a-2.spec.ts (12 tests) 15ms
+ ✓ tests/phase2.spec.ts (11 tests) 24ms
+ ❯ tests/done-checklist.spec.ts (4 tests | 1 failed) 8ms
+   × phase 6b · DONE checklist machine pass > manifest.json is bumped to 1.1.0 3ms
+     → expected '1.2.0' to be '1.1.0' // Object.is equality
+ ✓ tests/phase5b.spec.ts (20 tests) 13ms
+ ✓ tests/phase4b.spec.ts (21 tests) 26ms
+ ✓ tests/phase5a.spec.ts (8 tests) 19ms
+ ✓ tests/a11y-audit.spec.ts (3 tests) 119ms
+ ✓ tests/phase7.spec.ts (21 tests) 67ms
+ ✓ tests/phase1.spec.ts (3 tests) 1ms
+ ✓ tests/phase3.spec.ts (9 tests) 7ms
+ ✓ tests/phase4a-1.spec.ts (4 tests) 160ms
+
+ Test Files  1 failed | 11 passed (12)
+      Tests  1 failed | 131 passed (132)
+   Start at  15:24:05
+   Duration  1.00s (transform 476ms, setup 60ms, collect 1.01s, tests 473ms, environment 1.72s, prepare 545ms)
+
+
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — ab66fb00d03b…
+  - [ok] STATE.phases["7"] is PASS
+## 2026-05-16T20:24:16.263Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [FAIL] vitest all phases pass (including phase7) — vitest exit 1: 
+ RUN  v2.1.8 /Users/khalilbenali/code/workdesk-operating-system
+
+ ❯ tests/done-checklist.spec.ts (4 tests | 1 failed) 8ms
+   × phase 6b · DONE checklist machine pass > manifest.json is bumped to 1.1.0 3ms
+     → expected '1.2.0' to be '1.1.0' // Object.is equality
+ ✓ tests/phase4a-2.spec.ts (12 tests) 13ms
+ ✓ tests/phase6a.spec.ts (16 tests) 11ms
+ ✓ tests/phase2.spec.ts (11 tests) 22ms
+ ✓ tests/phase5b.spec.ts (20 tests) 12ms
+ ✓ tests/phase5a.spec.ts (8 tests) 17ms
+ ✓ tests/phase4b.spec.ts (21 tests) 23ms
+ ✓ tests/a11y-audit.spec.ts (3 tests) 136ms
+ ✓ tests/phase7.spec.ts (21 tests) 41ms
+ ✓ tests/phase3.spec.ts (9 tests) 7ms
+ ✓ tests/phase1.spec.ts (3 tests) 1ms
+ ✓ tests/phase4a-1.spec.ts (4 tests) 160ms
+
+ Test Files  1 failed | 11 passed (12)
+      Tests  1 failed | 131 passed (132)
+   Start at  15:24:17
+   Duration  967ms (transform 474ms, setup 65ms, collect 1.16s, tests 450ms, environment 1.71s, prepare 555ms)
+
+
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — ab66fb00d03b…
+  - [ok] STATE.phases["7"] is PASS
+## 2026-05-16T20:24:43.067Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [ok] vitest all phases pass (including phase7)
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — ab66fb00d03b…
+  - [ok] STATE.phases["7"] is PASS
