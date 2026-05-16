@@ -10,3 +10,9 @@ scripts/logs/
 # the plugin's runtime settings to data.json at the repo root. Operator-private,
 # never committed.
 data.json
+
+# Per-developer AI-assist tooling (Claude Code skills, slash commands). The
+# obsidian-plugin skill is documented in
+# `~/Workdesk-OS/intel/research/obsidian-plugin-development.md` §9 — contributors
+# install it globally at `~/.claude/skills/obsidian-plugin/` rather than per-repo.
+.claude/
