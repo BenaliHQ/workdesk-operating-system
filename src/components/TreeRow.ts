@@ -1,6 +1,6 @@
 // .row tree row — chevron + folder/file glyph + name + count + active highlight.
 
-import { wsSvg } from '../icons';
+import { wsSvgEl } from '../icons';
 import { showContextMenu, fileMenuItems, folderMenuItems } from './ContextMenu';
 import type { TreeNode } from '../types';
 
@@ -13,7 +13,7 @@ export interface TreeRowOpts {
 
 export function renderTreeRow(opts: TreeRowOpts): HTMLElement {
   const { node } = opts;
-  const row = document.createElement('div');
+  const row = activeDocument.createDiv();
   row.className = 'row';
   row.dataset.depth = String(node.depth);
   if (node.type === 'folder') row.classList.add('is-folder');
@@ -21,29 +21,29 @@ export function renderTreeRow(opts: TreeRowOpts): HTMLElement {
   row.style.setProperty('--depth', String(node.depth));
 
   if (node.type === 'folder') {
-    const chev = document.createElement('span');
+    const chev = activeDocument.createSpan();
     chev.className = 'chevron';
     if (node.expanded) chev.classList.add('open');
-    chev.innerHTML = wsSvg('chevron', 10);
+    chev.appendChild(wsSvgEl('chevron', 10));
     row.appendChild(chev);
   } else {
-    const spacer = document.createElement('span');
+    const spacer = activeDocument.createSpan();
     spacer.className = 'chevron empty';
     row.appendChild(spacer);
   }
 
-  const glyph = document.createElement('span');
+  const glyph = activeDocument.createSpan();
   glyph.className = 'row-glyph';
-  glyph.innerHTML = wsSvg(node.type === 'folder' ? 'folder' : 'file', 12);
+  glyph.appendChild(wsSvgEl(node.type === 'folder' ? 'folder' : 'file', 12));
   row.appendChild(glyph);
 
-  const name = document.createElement('span');
+  const name = activeDocument.createSpan();
   name.className = 'name';
   name.textContent = node.name;
   row.appendChild(name);
 
   if (typeof node.count === 'number' || node.count === '—') {
-    const count = document.createElement('span');
+    const count = activeDocument.createSpan();
     count.className = 'count';
     count.textContent = String(node.count);
     row.appendChild(count);
@@ -107,7 +107,7 @@ export function renderTreeRow(opts: TreeRowOpts): HTMLElement {
 }
 
 export function renderTree(nodes: TreeNode[], opts: Omit<TreeRowOpts, 'node'>): HTMLElement {
-  const container = document.createElement('div');
+  const container = activeDocument.createDiv();
   container.className = 'tree';
   container.setAttribute('role', 'tree');
   for (const node of nodes) {

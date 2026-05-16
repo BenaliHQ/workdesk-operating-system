@@ -31,21 +31,25 @@ export function mountAutocomplete(parent: HTMLElement, opts: AutocompleteOptions
   let filtered: AutocompleteEntry[] = [];
   let selected = 0;
 
-  const root = document.createElement('div');
+  const root = activeDocument.createDiv();
   root.className = 'term-autocomplete';
   root.setAttribute('role', 'listbox');
 
-  const queryEl = document.createElement('div');
+  const queryEl = activeDocument.createDiv();
   queryEl.className = 'tac-query';
   root.appendChild(queryEl);
 
-  const listEl = document.createElement('ul');
+  const listEl = activeDocument.createEl('ul');
   listEl.className = 'tac-list';
   root.appendChild(listEl);
 
-  const footerEl = document.createElement('div');
+  const footerEl = activeDocument.createDiv();
   footerEl.className = 'tac-footer';
-  footerEl.innerHTML = '<kbd>↑↓</kbd> nav · <kbd>↵</kbd> insert · <kbd>esc</kbd> close';
+  appendKbdFooter(footerEl, [
+    { keys: ['↑↓'], label: 'nav' },
+    { keys: ['↵'], label: 'insert' },
+    { keys: ['esc'], label: 'close' },
+  ]);
   root.appendChild(footerEl);
 
   parent.appendChild(root);
@@ -61,20 +65,20 @@ export function mountAutocomplete(parent: HTMLElement, opts: AutocompleteOptions
 
   const render = (): void => {
     queryEl.textContent = `[[${query}`;
-    listEl.innerHTML = '';
+    listEl.empty();
     filtered.forEach((entry, i) => {
-      const li = document.createElement('li');
+      const li = activeDocument.createEl('li');
       li.className = 'tac-item';
       if (i === selected) li.classList.add('selected');
       li.dataset.index = String(i);
 
-      const name = document.createElement('span');
+      const name = activeDocument.createSpan();
       name.className = 'tac-name';
       name.textContent = entry.name;
       li.appendChild(name);
 
       if (entry.folder && entry.folder.length > 0) {
-        const folder = document.createElement('span');
+        const folder = activeDocument.createSpan();
         folder.className = 'tac-folder';
         folder.textContent = entry.folder;
         li.appendChild(folder);
@@ -90,9 +94,24 @@ export function mountAutocomplete(parent: HTMLElement, opts: AutocompleteOptions
 
   function positionRoot(): void {
     const pos = typeof opts.anchor === 'function' ? opts.anchor() : opts.anchor;
-    root.style.position = 'absolute';
-    root.style.left = `${pos.x}px`;
-    root.style.top = `${pos.y}px`;
+    root.addClass('wd-autocomplete-popover');
+    root.style.setProperty('--wd-x', `${pos.x}px`);
+    root.style.setProperty('--wd-y', `${pos.y}px`);
+  }
+
+  function appendKbdFooter(
+    el: HTMLElement,
+    items: Array<{ keys: string[]; label: string }>,
+  ): void {
+    items.forEach((item, idx) => {
+      if (idx > 0) el.appendText(' · ');
+      for (const k of item.keys) {
+        const kbd = activeDocument.createEl('kbd');
+        kbd.textContent = k;
+        el.appendChild(kbd);
+      }
+      el.appendText(` ${item.label}`);
+    });
   }
 
   const api: AutocompleteHandle = {

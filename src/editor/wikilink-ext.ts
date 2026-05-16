@@ -11,7 +11,7 @@ import { RangeSetBuilder } from '@codemirror/state';
 const wikilinkMark = Decoration.mark({ class: 'wikilink' });
 const tagMark = Decoration.mark({ class: 'tag' });
 
-const WIKILINK = /\[\[([^\[\]\n]+?)\]\]/g;
+const WIKILINK = /\[\[([^[\]\n]+?)\]\]/g;
 const TAG = /(^|[\s,;])#([A-Za-z][A-Za-z0-9/_-]*)/g;
 
 function buildDecorations(view: EditorView): DecorationSet {

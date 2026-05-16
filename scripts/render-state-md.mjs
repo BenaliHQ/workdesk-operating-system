@@ -10,7 +10,7 @@ const state = JSON.parse(fs.readFileSync(path.join(root, 'STATE.json'), 'utf8'))
 const phaseOrder = ['0', '1', '2', '3', '4a.1', '4a.2', '4b', '5a', '5b', '6a', '6b', '7'];
 
 const lines = [];
-lines.push('# WorkdeskOS Plugin — STATE');
+lines.push('# Workdesk Operating System — STATE');
 lines.push('');
 lines.push(`- **plugin_id**: \`${state.plugin_id}\``);
 lines.push(`- **repo_path**: \`${state.repo_path}\``);

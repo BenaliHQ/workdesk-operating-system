@@ -1,7 +1,7 @@
-# WorkdeskOS Plugin — STATE
+# Workdesk Operating System — STATE
 
-- **plugin_id**: `workdeskos-plugin`
-- **repo_path**: `/Users/khalilbenali/code/workdeskos-plugin`
+- **plugin_id**: `workdesk-operating-system`
+- **repo_path**: `/Users/khalilbenali/code/workdesk-operating-system`
 - **last_session**: `M4`
 - **runtime**: node `25.6.1` · pnpm `10.30.3` · python3 `3.9.6`
 
@@ -53,10 +53,10 @@
 - `context7_available`: `false`
 - `architecture`: `"standard-plugin-pattern"`
 - `architecture_prior`: `full-surface-takeove…see M4 spec)`
-- `obsidian_scope_css_sha256`: `7680bafb25ea71999cc1…be9a5da01918`
+- `obsidian_scope_css_sha256`: `96df6ac36f253ca10e78…5e530f7c0951`
 - `ribbon_pattern`: `"addRibbonIcon × 12"`
 - `workspace_seed_strategy`: `on-demand-reveal (no…rkspaceOnce)`
 - `css_scoping_strategy`: `build-time-strip-and…app-css.mjs)`
 
 ---
-_Rendered at 2026-05-16T16:05:34.080Z from `STATE.json`._
+_Rendered at 2026-05-16T17:07:48.229Z from `STATE.json`._

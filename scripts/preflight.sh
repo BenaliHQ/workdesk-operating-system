@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Preflight checks for the WorkdeskOS Plugin build.
+# Preflight checks for the Workdesk Operating System build.
 #
 # Verifies the toolchain, auth, and network reachability that every
 # downstream phase relies on. Does NOT check target-repo emptiness — that
@@ -17,7 +17,7 @@ ok()   { printf "  ok  · %s\n" "$1"; PASS=$((PASS+1)); }
 fail() { printf "  FAIL · %s\n" "$1"; FAIL=$((FAIL+1)); }
 warn() { printf "  warn · %s\n" "$1"; WARN=$((WARN+1)); }
 
-echo "[preflight] WorkdeskOS Plugin"
+echo "[preflight] Workdesk Operating System"
 
 # node ≥ 22
 if command -v node >/dev/null 2>&1; then

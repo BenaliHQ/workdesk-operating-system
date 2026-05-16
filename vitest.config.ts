@@ -5,6 +5,7 @@ export default defineConfig({
     environment: 'happy-dom',
     include: ['tests/**/*.spec.ts'],
     exclude: ['tests/fixtures/**', 'tests/stubs/**'],
+    setupFiles: ['./tests/setup.ts'],
   },
   resolve: {
     alias: {

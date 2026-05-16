@@ -30,14 +30,15 @@ export interface TabStripHandle {
 }
 
 export function mountTabStrip(parent: HTMLElement, opts: TabStripOptions): TabStripHandle {
-  const root = document.createElement('div');
+  const root = activeDocument.createDiv();
   root.className = 'term-tabs';
   parent.appendChild(root);
 
-  const tabs = new Map<number, { desc: TabDescriptor; el: HTMLButtonElement }>();
+  interface TabEntry { desc: TabDescriptor; el: HTMLButtonElement }
+  const tabs = new Map<number, TabEntry>();
   let activeId: number | null = null;
 
-  const newButton = document.createElement('button');
+  const newButton = activeDocument.createEl('button');
   newButton.type = 'button';
   newButton.className = 'term-tab tt-new';
   newButton.textContent = '+';
@@ -51,18 +52,18 @@ export function mountTabStrip(parent: HTMLElement, opts: TabStripOptions): TabSt
   };
 
   const renderTab = (desc: TabDescriptor): HTMLButtonElement => {
-    const el = document.createElement('button');
+    const el = activeDocument.createEl('button');
     el.type = 'button';
     el.className = 'term-tab';
     el.dataset.tab = String(desc.id);
     el.dataset.status = desc.status;
 
-    const name = document.createElement('span');
+    const name = activeDocument.createSpan();
     name.className = 'tt-name';
     name.textContent = desc.name;
     el.appendChild(name);
 
-    const closeBtn = document.createElement('span');
+    const closeBtn = activeDocument.createSpan();
     closeBtn.className = 'tt-x';
     closeBtn.setAttribute('aria-label', 'Close');
     closeBtn.textContent = '×';
@@ -77,6 +78,7 @@ export function mountTabStrip(parent: HTMLElement, opts: TabStripOptions): TabSt
       opts.onClose(desc.id);
     });
     name.addEventListener('dblclick', () => {
+      // eslint-disable-next-line no-alert -- inline rename UX; TODO: replace with Modal for parity with Obsidian conventions.
       const next = window.prompt('Rename tab', desc.name);
       if (next && next.trim().length > 0) {
         api.rename(desc.id, next.trim());
@@ -87,6 +89,7 @@ export function mountTabStrip(parent: HTMLElement, opts: TabStripOptions): TabSt
       evt.preventDefault();
       const items = terminalTabMenuItems({
         rename: () => {
+          // eslint-disable-next-line no-alert -- inline rename UX; TODO: replace with Modal for parity with Obsidian conventions.
           const next = window.prompt('Rename tab', desc.name);
           if (next && next.trim().length > 0) api.rename(desc.id, next.trim());
         },
@@ -115,8 +118,9 @@ export function mountTabStrip(parent: HTMLElement, opts: TabStripOptions): TabSt
       entry.el.remove();
       tabs.delete(id);
       if (activeId === id) {
-        const next = tabs.values().next().value;
-        activeId = next ? next.desc.id : null;
+        const nextResult = tabs.values().next();
+        const nextEntry: TabEntry | undefined = nextResult.done ? undefined : nextResult.value;
+        activeId = nextEntry ? nextEntry.desc.id : null;
         if (activeId !== null) api.setActive(activeId);
       }
     },

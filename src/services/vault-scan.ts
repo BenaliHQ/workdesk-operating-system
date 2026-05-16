@@ -7,7 +7,8 @@
 // Production runs on Obsidian's Vault adapter; unit tests pass a Node fs
 // adapter so the scanner is testable without a live workspace.
 
-import * as yaml from 'js-yaml';
+import * as fsNs from 'node:fs';
+import { parseYaml } from 'obsidian';
 import type { Zone, ZoneId, ZoneObject, TreeNode, IconName } from '../types';
 
 // ───────── Adapter shapes ─────────
@@ -43,7 +44,7 @@ export interface ZoneManifest {
 export function loadZoneManifest(fs: FsAdapter, primaryPath: string, fallbackPath: string): ZoneManifest {
   const path = fs.exists(primaryPath) ? primaryPath : fallbackPath;
   if (!fs.exists(path)) throw new Error(`zone manifest not found at ${primaryPath} or ${fallbackPath}`);
-  const parsed = yaml.load(fs.read(path)) as ZoneManifest;
+  const parsed = parseYaml(fs.read(path)) as ZoneManifest;
   if (!parsed?.zones?.length) throw new Error(`zone manifest at ${path} produced no zones`);
   return parsed;
 }
@@ -51,7 +52,7 @@ export function loadZoneManifest(fs: FsAdapter, primaryPath: string, fallbackPat
 export function loadIconManifest(fs: FsAdapter, paths: string[]): Record<string, IconName> {
   for (const p of paths) {
     if (fs.exists(p)) {
-      const parsed = yaml.load(fs.read(p)) as { icons?: Record<string, IconName> };
+      const parsed = parseYaml(fs.read(p)) as { icons?: Record<string, IconName> };
       return parsed?.icons ?? {};
     }
   }
@@ -162,11 +163,10 @@ export function scanFilesView(fs: FsAdapter, opts: { vaultRoot: string }): TreeN
 // ───────── Node fs adapter (tests + dev) ─────────
 
 export function nodeFsAdapter(): FsAdapter {
-  const fs = require('node:fs') as typeof import('node:fs');
   return {
-    exists: (p) => fs.existsSync(p),
-    read: (p) => fs.readFileSync(p, 'utf8'),
+    exists: (p) => fsNs.existsSync(p),
+    read: (p) => fsNs.readFileSync(p, 'utf8'),
     list: (p) =>
-      fs.readdirSync(p, { withFileTypes: true }).map((d) => ({ name: d.name, isDir: d.isDirectory() })),
+      fsNs.readdirSync(p, { withFileTypes: true }).map((d) => ({ name: d.name, isDir: d.isDirectory() })),
   };
 }

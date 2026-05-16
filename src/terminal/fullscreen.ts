@@ -40,24 +40,24 @@ export function createFullscreenToggle(opts: FullscreenOptions): FullscreenHandl
 
   const renderRail = (): void => {
     if (!railEl) return;
-    railEl.innerHTML = '';
-    const label = document.createElement('div');
+    railEl.empty();
+    const label = activeDocument.createDiv();
     label.className = 'fs-rail-label';
     label.textContent = 'SESSIONS';
     railEl.appendChild(label);
 
     for (const s of opts.sessions()) {
-      const row = document.createElement('button');
+      const row = activeDocument.createEl('button');
       row.type = 'button';
       row.className = 'fs-session-row';
       row.dataset.session = String(s.id);
       if (s.active) row.classList.add('is-active');
 
-      const dot = document.createElement('span');
+      const dot = activeDocument.createSpan();
       dot.className = 'fs-dot';
       row.appendChild(dot);
 
-      const name = document.createElement('span');
+      const name = activeDocument.createSpan();
       name.className = 'fs-session-name';
       name.textContent = s.name;
       row.appendChild(name);
@@ -66,10 +66,10 @@ export function createFullscreenToggle(opts: FullscreenOptions): FullscreenHandl
       railEl.appendChild(row);
     }
 
-    const newBtn = document.createElement('button');
+    const newBtn = activeDocument.createEl('button');
     newBtn.type = 'button';
     newBtn.className = 'fs-new-session';
-    newBtn.textContent = '+ New session';
+    newBtn.textContent = '+ new session';
     newBtn.addEventListener('click', () => opts.onNew());
     railEl.appendChild(newBtn);
   };
@@ -79,11 +79,11 @@ export function createFullscreenToggle(opts: FullscreenOptions): FullscreenHandl
       if (active) return;
       active = true;
       opts.appEl.classList.add('term-fullscreen');
-      railEl = document.createElement('aside');
+      railEl = activeDocument.createEl('aside');
       railEl.className = 'fs-session-rail';
       opts.appEl.appendChild(railEl);
       renderRail();
-      document.addEventListener('keydown', onKeyDown);
+      activeDocument.addEventListener('keydown', onKeyDown);
     },
     exit() {
       if (!active) return;
@@ -91,7 +91,7 @@ export function createFullscreenToggle(opts: FullscreenOptions): FullscreenHandl
       opts.appEl.classList.remove('term-fullscreen');
       railEl?.remove();
       railEl = null;
-      document.removeEventListener('keydown', onKeyDown);
+      activeDocument.removeEventListener('keydown', onKeyDown);
       opts.onExit();
     },
     isActive: () => active,

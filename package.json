@@ -1,36 +1,43 @@
 {
-  "name": "workdeskos-plugin",
+  "name": "workdesk-operating-system",
   "version": "0.1.0",
   "private": true,
-  "description": "WorkdeskOS Plugin for Obsidian.",
+  "description": "Workdesk Operating System for Obsidian.",
   "license": "MIT",
   "packageManager": "pnpm@10.30.3",
   "scripts": {
     "build": "node esbuild.config.mjs && node scripts/copy-fonts.mjs",
     "dev": "node esbuild.config.mjs --dev",
     "verify": "node scripts/verify.mjs",
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "precommit": "pnpm typecheck && pnpm lint"
   },
   "dependencies": {
-    "@xterm/xterm": "5.5.0",
     "@xterm/addon-fit": "0.10.0",
-    "js-yaml": "4.1.0",
+    "@xterm/xterm": "5.5.0",
     "fuse.js": "7.1.0"
   },
   "devDependencies": {
+    "@codemirror/state": "6.4.1",
+    "@codemirror/view": "6.34.1",
+    "@eslint/js": "9.15.0",
+    "@fontsource-variable/dm-sans": "5.2.5",
+    "@fontsource-variable/geist-mono": "5.2.5",
+    "@fontsource-variable/manrope": "5.2.5",
+    "@types/js-yaml": "4.0.9",
+    "@types/node": "22.10.0",
+    "js-yaml": "4.1.0",
+    "axe-core": "4.10.2",
+    "esbuild": "0.25.0",
+    "eslint": "9.15.0",
+    "eslint-plugin-obsidianmd": "0.2.8",
+    "happy-dom": "15.11.0",
     "obsidian": "1.11.4",
     "typescript": "5.4.5",
-    "esbuild": "0.25.0",
-    "@types/node": "22.10.0",
-    "@types/js-yaml": "4.0.9",
+    "typescript-eslint": "8.16.0",
     "vitest": "2.1.8",
-    "happy-dom": "15.11.0",
-    "axe-core": "4.10.2",
-    "zod": "3.23.8",
-    "@fontsource-variable/dm-sans": "5.2.5",
-    "@fontsource-variable/manrope": "5.2.5",
-    "@fontsource-variable/geist-mono": "5.2.5",
-    "@codemirror/view": "6.34.1",
-    "@codemirror/state": "6.4.1"
+    "zod": "3.23.8"
   }
 }

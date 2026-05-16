@@ -1,28 +1,28 @@
 // About sub-tab — plugin metadata + links.
 
-import type WorkdeskosPlugin from '../../main';
+import type WorkdeskOSPlugin from '../../main';
 import { sectionLabel } from '../../components/forms';
 
-export function mountAboutSection(parent: HTMLElement, plugin: WorkdeskosPlugin): void {
+export function mountAboutSection(parent: HTMLElement, plugin: WorkdeskOSPlugin): void {
   parent.dataset.tab = 'about';
   sectionLabel(parent, 'ABOUT');
 
-  const body = document.createElement('div');
+  const body = activeDocument.createDiv();
   body.className = 'about-body';
 
-  const title = document.createElement('h3');
-  title.textContent = 'WorkdeskOS Plugin';
+  const title = activeDocument.createEl('h3');
+  title.textContent = plugin.manifest.name;
   body.appendChild(title);
 
-  const version = document.createElement('div');
+  const version = activeDocument.createDiv();
   version.className = 'desc';
   version.textContent = `Version ${plugin.manifest.version} · MIT`;
   body.appendChild(version);
 
-  const links = document.createElement('div');
+  const links = activeDocument.createDiv();
   links.className = 'about-links';
-  const repo = document.createElement('a');
-  repo.href = 'https://github.com/BenaliHQ/workdeskos-plugin';
+  const repo = activeDocument.createEl('a');
+  repo.href = 'https://github.com/BenaliHQ/workdesk-operating-system';
   repo.textContent = 'GitHub';
   repo.target = '_blank';
   links.appendChild(repo);

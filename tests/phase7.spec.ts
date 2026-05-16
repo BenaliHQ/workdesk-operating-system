@@ -1,16 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { _getIconCalls, _resetTestStubs } from './stubs/obsidian';
-import WorkdeskosPlugin from '../src/main';
+import WorkdeskOSPlugin from '../src/main';
 import type { ZoneId } from '../src/types';
 
 describe('phase 7 · standard plugin pattern', () => {
-  let plugin: WorkdeskosPlugin;
+  let plugin: WorkdeskOSPlugin;
 
   beforeEach(async () => {
     document.body.replaceChildren();
     document.body.className = '';
     _resetTestStubs();
-    plugin = new WorkdeskosPlugin();
+    plugin = new WorkdeskOSPlugin();
     // Stub data-storage so loadSettings + scanZones work in jsdom.
     (plugin as unknown as { loadData: () => Promise<unknown> }).loadData = async () => null;
     (plugin as unknown as { saveData: (d: unknown) => Promise<void> }).saveData = async () => {};

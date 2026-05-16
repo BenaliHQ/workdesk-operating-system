@@ -80,7 +80,7 @@ const Runtime = z.object({
 
 export const StateSchema = z.object({
   schema: z.literal(2),
-  plugin_id: z.literal('workdeskos-plugin'),
+  plugin_id: z.literal('workdesk-operating-system'),
   repo_path: z.string(),
   last_session: z.string(),
   phases: z.record(PhaseIds, Phase),

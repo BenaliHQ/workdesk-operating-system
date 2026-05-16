@@ -29,7 +29,7 @@ const DEFAULT_STATE: StatusbarState = {
 
 export function mountStatusbar(parent: HTMLElement, initial?: Partial<StatusbarState>): StatusbarHandle {
   const state: StatusbarState = { ...DEFAULT_STATE, ...initial };
-  const root = document.createElement('div');
+  const root = activeDocument.createDiv();
   root.className = 'terminal-statusbar';
 
   const segModel = makeSegment('sb-model', state.model);
@@ -37,7 +37,7 @@ export function mountStatusbar(parent: HTMLElement, initial?: Partial<StatusbarS
   const segSession = makeSegment('sb-session', `⏱ ${state.sessionLength}`);
   const segCost = makeSegment('sb-cost', `⚡ ${state.cost}`);
 
-  const spacer = document.createElement('span');
+  const spacer = activeDocument.createSpan();
   spacer.className = 'sb-spacer';
 
   const segSkills = makeSegment('sb-skills', `${state.skillsCount} skills`);
@@ -67,23 +67,23 @@ export function mountStatusbar(parent: HTMLElement, initial?: Partial<StatusbarS
 }
 
 function makeSegment(cls: string, text: string): HTMLSpanElement {
-  const el = document.createElement('span');
+  const el = activeDocument.createSpan();
   el.className = `sb-segment ${cls}`;
   el.textContent = text;
   return el;
 }
 
 function makeContextBar(pct: number): { element: HTMLElement; setPct(p: number): void } {
-  const wrapper = document.createElement('span');
+  const wrapper = activeDocument.createSpan();
   wrapper.className = 'sb-segment sb-context';
 
-  const label = document.createElement('span');
+  const label = activeDocument.createSpan();
   label.className = 'sb-context-label';
   wrapper.appendChild(label);
 
-  const track = document.createElement('span');
+  const track = activeDocument.createSpan();
   track.className = 'sb-context-track';
-  const fill = document.createElement('span');
+  const fill = activeDocument.createSpan();
   fill.className = 'sb-context-fill';
   track.appendChild(fill);
   wrapper.appendChild(track);
@@ -99,7 +99,7 @@ function makeContextBar(pct: number): { element: HTMLElement; setPct(p: number):
 }
 
 function makeReady(ready: boolean): HTMLSpanElement {
-  const el = document.createElement('span');
+  const el = activeDocument.createSpan();
   el.className = 'sb-segment sb-ready';
   el.dataset.ready = ready ? '1' : '0';
   el.textContent = ready ? '✓ ready' : '○ busy';

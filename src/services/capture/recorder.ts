@@ -84,7 +84,7 @@ export class AudioRecorder {
       };
       handle.onerror = (err) => {
         this.releaseStream();
-        reject(err);
+        reject(err instanceof Error ? err : new Error(String(err)));
       };
       handle.requestData();
       handle.stop();
@@ -119,6 +119,7 @@ export class AudioRecorder {
 }
 
 function assembleBlob(chunks: BlobLike[], mimeType: string): BlobLike {
+  // eslint-disable-next-line obsidianmd/prefer-active-doc -- Blob lives on globalThis; activeDocument does not expose constructors.
   const BlobCtor = (globalThis as unknown as { Blob?: typeof Blob }).Blob;
   const allRealBlobs = !!BlobCtor && chunks.every((c) => c instanceof BlobCtor);
   if (BlobCtor && allRealBlobs) {
@@ -137,6 +138,7 @@ function assembleBlob(chunks: BlobLike[], mimeType: string): BlobLike {
 function defaultRecorderFactory(): RecorderFactory {
   return {
     create(stream, mimeType) {
+      // eslint-disable-next-line obsidianmd/prefer-active-doc -- MediaRecorder lives on globalThis; activeDocument does not expose constructors.
       const ctor = (globalThis as unknown as { MediaRecorder?: typeof MediaRecorder }).MediaRecorder;
       if (!ctor) throw new Error('MediaRecorder not available in this environment');
       const r = new ctor(stream, mimeType ? { mimeType } : undefined);
@@ -148,6 +150,7 @@ function defaultRecorderFactory(): RecorderFactory {
 function defaultPermissionGate(): PermissionGate {
   return {
     async requestMic(constraints) {
+      // eslint-disable-next-line obsidianmd/prefer-active-doc -- navigator lives on globalThis; activeDocument does not expose it.
       const md = (globalThis as unknown as { navigator?: Navigator }).navigator?.mediaDevices;
       if (!md) throw new Error('mediaDevices not available');
       return md.getUserMedia(constraints ?? { audio: true });

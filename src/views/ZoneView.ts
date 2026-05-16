@@ -4,26 +4,26 @@
 // that expands into its child tree. Files mode renders a flat tree at root.
 
 import { ItemView, WorkspaceLeaf } from 'obsidian';
-import type WorkdeskosPlugin from '../main';
+import type WorkdeskOSPlugin from '../main';
 import { VIEW_TYPE_WORKDESK_ZONE } from '../constants';
 import { renderZoneCard } from '../components/ZoneCard';
 import { renderTree } from '../components/TreeRow';
 import { renderZoneEmpty, renderCaughtUpRow } from '../components/EmptyStates';
-import { wsSvg } from '../icons';
+import { wsSvgEl } from '../icons';
 import type { Zone, ZoneId } from '../types';
 
 export class ZoneView extends ItemView {
-  private plugin: WorkdeskosPlugin;
+  private plugin: WorkdeskOSPlugin;
   private activeZone: ZoneId = 'atlas';
   private zones: Record<string, Zone> = {};
 
-  constructor(leaf: WorkspaceLeaf, plugin: WorkdeskosPlugin) {
+  constructor(leaf: WorkspaceLeaf, plugin: WorkdeskOSPlugin) {
     super(leaf);
     this.plugin = plugin;
   }
 
   getViewType(): string { return VIEW_TYPE_WORKDESK_ZONE; }
-  getDisplayText(): string { return 'WorkDesk · zones'; }
+  getDisplayText(): string { return 'Workdesk · zones'; }
   getIcon(): string { return 'folder'; }
 
   setZones(zones: Record<string, Zone>): void {
@@ -38,8 +38,7 @@ export class ZoneView extends ItemView {
 
   render(): void {
     const root = this.contentEl;
-    root.empty?.();
-    root.innerHTML = '';
+    root.empty();
     root.classList.add('workdesk-zone-pane');
 
     const zone = this.zones[this.activeZone];
@@ -54,12 +53,19 @@ export class ZoneView extends ItemView {
       return;
     }
 
-    const hero = document.createElement('div');
+    const hero = activeDocument.createDiv();
     hero.className = 'pane-hero';
-    hero.innerHTML = `${wsSvg(zone.icon, 24)}<h1>${zone.name}</h1><div class="sub">${zone.sub}</div>`;
+    hero.appendChild(wsSvgEl(zone.icon, 24));
+    const h1 = activeDocument.createEl('h1');
+    h1.textContent = zone.name;
+    hero.appendChild(h1);
+    const sub = activeDocument.createDiv();
+    sub.className = 'sub';
+    sub.textContent = zone.sub;
+    hero.appendChild(sub);
     root.appendChild(hero);
 
-    const list = document.createElement('div');
+    const list = activeDocument.createDiv();
     list.className = 'object-list';
     for (const obj of zone.objects) {
       const card = renderZoneCard({
@@ -72,7 +78,7 @@ export class ZoneView extends ItemView {
       } else if (obj.children?.length) {
         // Wrap the tree in .obj-children so the existing CSS
         // (.obj.collapsed .obj-children { display: none }) actually matches.
-        const childrenWrap = document.createElement('div');
+        const childrenWrap = activeDocument.createDiv();
         childrenWrap.className = 'obj-children';
         childrenWrap.appendChild(
           renderTree(obj.children, {
@@ -89,7 +95,7 @@ export class ZoneView extends ItemView {
 
   private handleActivate(node: { type: string; name: string }, path: string): void {
     if (node.type === 'file') {
-      this.plugin.app.workspace.openLinkText(path, '', false);
+      void this.plugin.app.workspace.openLinkText(path, '', false);
     }
   }
 }

@@ -10,7 +10,7 @@ if [ -z "$VAULT" ]; then
   exit 2
 fi
 
-DEST="$VAULT/.obsidian/plugins/workdeskos-plugin"
+DEST="$VAULT/.obsidian/plugins/workdesk-operating-system"
 if [ ! -d "$DEST" ] && [ ! -L "$DEST" ]; then
   echo "[install-check] FAIL: $DEST missing (symlink the repo there first)" >&2
   exit 2
@@ -26,7 +26,7 @@ done
 
 if [ -f "$DEST/manifest.json" ]; then
   id=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$DEST/manifest.json','utf8')).id)")
-  [ "$id" = "workdeskos-plugin" ] && ok "manifest id = $id" || nope "manifest id = $id"
+  [ "$id" = "workdesk-operating-system" ] && ok "manifest id = $id" || nope "manifest id = $id"
 fi
 
 if [ -d "$DEST/fonts" ]; then

@@ -1,9 +1,9 @@
 // General sub-tab — vault, auto-open daily, theme, motion.
 
-import type WorkdeskosPlugin from '../../main';
+import type WorkdeskOSPlugin from '../../main';
 import { field, toggle, segmented, sectionLabel } from '../../components/forms';
 
-export function mountGeneralSection(parent: HTMLElement, plugin: WorkdeskosPlugin): void {
+export function mountGeneralSection(parent: HTMLElement, plugin: WorkdeskOSPlugin): void {
   parent.dataset.tab = 'general';
   sectionLabel(parent, 'GENERAL');
 
@@ -13,7 +13,7 @@ export function mountGeneralSection(parent: HTMLElement, plugin: WorkdeskosPlugi
     initial: plugin.settings.vault.path,
     onChange: (v) => {
       plugin.settings.vault.path = v;
-      plugin.saveSettings();
+      void plugin.saveSettings();
     },
   });
 
@@ -23,7 +23,7 @@ export function mountGeneralSection(parent: HTMLElement, plugin: WorkdeskosPlugi
     initial: plugin.settings.vault.autoOpenDaily,
     onChange: (v) => {
       plugin.settings.vault.autoOpenDaily = v;
-      plugin.saveSettings();
+      void plugin.saveSettings();
     },
   });
 
@@ -38,7 +38,7 @@ export function mountGeneralSection(parent: HTMLElement, plugin: WorkdeskosPlugi
     ],
     onChange: (v) => {
       plugin.settings.theme.reduceMotion = v as 'auto' | 'on' | 'off';
-      plugin.saveSettings();
+      void plugin.saveSettings();
     },
   });
 }

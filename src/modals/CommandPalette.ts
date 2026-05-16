@@ -39,32 +39,39 @@ export class CommandPalette extends Modal {
     this.contentEl.replaceChildren();
     this.contentEl.classList.add('cmd-palette');
 
-    const inputRow = document.createElement('div');
+    const inputRow = activeDocument.createDiv();
     inputRow.className = 'cmd-input-row';
     this.contentEl.appendChild(inputRow);
 
-    const glyph = document.createElement('span');
+    const glyph = activeDocument.createSpan();
     glyph.className = 'cmd-glyph';
     glyph.textContent = '⌕';
     inputRow.appendChild(glyph);
 
-    this.input = document.createElement('input');
+    this.input = activeDocument.createEl('input');
     this.input.className = 'cmd-input';
     this.input.placeholder = 'Type a command…';
     inputRow.appendChild(this.input);
 
-    const pill = document.createElement('span');
+    const pill = activeDocument.createSpan();
     pill.className = 'cmd-pill';
-    pill.innerHTML = '<kbd>⌘K</kbd>';
+    const pillKbd = activeDocument.createEl('kbd');
+    // eslint-disable-next-line obsidianmd/ui/sentence-case -- ⌘K is a shortcut glyph, not sentence text.
+    pillKbd.textContent = '⌘K';
+    pill.appendChild(pillKbd);
     inputRow.appendChild(pill);
 
-    this.listEl = document.createElement('div');
+    this.listEl = activeDocument.createDiv();
     this.listEl.className = 'cmd-list';
     this.contentEl.appendChild(this.listEl);
 
-    const footer = document.createElement('div');
+    const footer = activeDocument.createDiv();
     footer.className = 'cmd-footer';
-    footer.innerHTML = '<kbd>↑↓</kbd> navigate · <kbd>↵</kbd> select · <kbd>esc</kbd> close';
+    appendKbdHint(footer, [
+      { keys: ['↑↓'], label: 'navigate' },
+      { keys: ['↵'], label: 'select' },
+      { keys: ['esc'], label: 'close' },
+    ]);
     this.contentEl.appendChild(footer);
 
     this.input.addEventListener('input', () => this.refilter());
@@ -96,7 +103,7 @@ export class CommandPalette extends Modal {
   private renderList(): void {
     this.listEl.replaceChildren();
     if (this.results.length === 0) {
-      const empty = document.createElement('div');
+      const empty = activeDocument.createDiv();
       empty.className = 'cmd-empty';
       empty.textContent = 'No commands match.';
       this.listEl.appendChild(empty);
@@ -110,25 +117,27 @@ export class CommandPalette extends Modal {
     }
     let i = 0;
     for (const [group, entries] of groups.entries()) {
-      const heading = document.createElement('div');
+      const heading = activeDocument.createDiv();
       heading.className = 'cmd-group';
       heading.textContent = group;
       this.listEl.appendChild(heading);
       for (const entry of entries) {
-        const row = document.createElement('div');
+        const row = activeDocument.createDiv();
         row.className = 'cmd-item';
         if (i === this.selected) row.classList.add('selected');
         row.dataset.id = entry.id;
 
-        const name = document.createElement('span');
+        const name = activeDocument.createSpan();
         name.className = 'cmd-name';
         name.textContent = entry.name;
         row.appendChild(name);
 
         if (entry.hotkey) {
-          const hk = document.createElement('span');
+          const hk = activeDocument.createSpan();
           hk.className = 'hk';
-          hk.innerHTML = `<kbd>${entry.hotkey}</kbd>`;
+          const hkKbd = activeDocument.createEl('kbd');
+          hkKbd.textContent = entry.hotkey;
+          hk.appendChild(hkKbd);
           row.appendChild(hk);
         }
 
@@ -193,4 +202,19 @@ function deriveGroup(id: string): string {
 
 function formatHotkey(hk: { modifiers: string[]; key: string }): string {
   return `${hk.modifiers.join('+')}+${hk.key}`;
+}
+
+function appendKbdHint(
+  el: HTMLElement,
+  items: Array<{ keys: string[]; label: string }>,
+): void {
+  items.forEach((item, idx) => {
+    if (idx > 0) el.appendText(' · ');
+    for (const k of item.keys) {
+      const kbd = activeDocument.createEl('kbd');
+      kbd.textContent = k;
+      el.appendChild(kbd);
+    }
+    el.appendText(` ${item.label}`);
+  });
 }

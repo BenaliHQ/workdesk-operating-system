@@ -146,7 +146,7 @@ function pickTranscriptText(payload: Record<string, unknown> | undefined): strin
   const results = payload['results'] as Record<string, unknown> | undefined;
   const channels = (results?.['channels'] as Array<Record<string, unknown>> | undefined) ?? [];
   const alt = (channels[0]?.['alternatives'] as Array<Record<string, unknown>> | undefined) ?? [];
-  if (typeof alt[0]?.['transcript'] === 'string') return alt[0]['transcript'] as string;
+  if (typeof alt[0]?.['transcript'] === 'string') return alt[0]['transcript'];
   return '';
 }
 

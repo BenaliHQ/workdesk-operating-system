@@ -21,11 +21,11 @@ const DEFAULT_DURATION = 4000;
 const stickyById = new Map<string, HTMLElement>();
 
 function ensureStack(): HTMLElement {
-  let stack = document.querySelector<HTMLElement>(`.${STACK_CLASS}`);
+  let stack = activeDocument.querySelector<HTMLElement>(`.${STACK_CLASS}`);
   if (!stack) {
-    stack = document.createElement('div');
+    stack = activeDocument.createDiv();
     stack.className = STACK_CLASS;
-    document.body.appendChild(stack);
+    activeDocument.body.appendChild(stack);
   }
   return stack;
 }
@@ -41,39 +41,39 @@ export function showToast(
   }
 
   const stack = ensureStack();
-  const toast = document.createElement('div');
+  const toast = activeDocument.createDiv();
   toast.className = `toast ${severity}`;
   toast.setAttribute('role', 'status');
   toast.setAttribute('aria-live', 'polite');
   if (opts.id) toast.dataset.id = opts.id;
 
-  const glyph = document.createElement('span');
+  const glyph = activeDocument.createSpan();
   glyph.className = 'glyph';
   glyph.setAttribute('aria-hidden', 'true');
   glyph.textContent = severity === 'success' ? '✓' : severity === 'error' ? '!' : severity === 'loading' ? '◐' : 'ℹ';
   toast.appendChild(glyph);
 
-  const body = document.createElement('span');
+  const body = activeDocument.createSpan();
   body.className = 'body';
   if (opts.title) {
-    const t = document.createElement('strong');
+    const t = activeDocument.createEl('strong');
     t.textContent = opts.title;
     body.appendChild(t);
-    const m = document.createElement('span');
+    const m = activeDocument.createSpan();
     m.textContent = message;
     body.appendChild(m);
   } else {
     body.textContent = message;
   }
   if (opts.sub) {
-    const sub = document.createElement('span');
+    const sub = activeDocument.createSpan();
     sub.className = 'sub';
     sub.textContent = opts.sub;
     body.appendChild(sub);
   }
   toast.appendChild(body);
 
-  const close = document.createElement('button');
+  const close = activeDocument.createEl('button');
   close.className = 'close';
   close.setAttribute('aria-label', 'Dismiss');
   close.textContent = '×';

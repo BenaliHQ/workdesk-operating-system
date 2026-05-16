@@ -1,4 +1,4 @@
-// Settings schema for WorkdeskOS Plugin.
+// Settings schema for Workdesk Operating System.
 //
 // The shape follows design-handoff/handoff/manifest.md § Settings schema.
 // API keys are intentionally OMITTED from this interface: per design's
@@ -72,7 +72,7 @@ export interface WorkdeskSettings {
     allowScripts: boolean;
   };
   appearance: {
-    /** When true, hides ribbon icons not contributed by WorkdeskOS Plugin via a body class hook. */
+    /** When true, hides ribbon icons not contributed by Workdesk Operating System via a body class hook. */
     hideNonWorkdeskRibbonIcons: boolean;
   };
 }

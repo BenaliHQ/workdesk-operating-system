@@ -2,7 +2,7 @@
 // 5 buttons per components.md: toggle-left, toggle-right, settings, theme toggle,
 // command palette.
 
-import { wsSvg } from '../icons';
+import { wsSvgEl } from '../icons';
 import type { IconName } from '../types';
 
 export type ToolbarSlot =
@@ -25,17 +25,17 @@ export interface ToolbarOpts {
 }
 
 export function renderEditorToolbar(opts: ToolbarOpts): HTMLElement {
-  const el = document.createElement('div');
+  const el = activeDocument.createDiv();
   el.className = 'editor-toolbar';
 
   for (const slot of SLOTS) {
-    const btn = document.createElement('button');
+    const btn = activeDocument.createEl('button');
     btn.className = 'icon-btn';
     btn.type = 'button';
     btn.dataset.slot = slot.id;
     btn.title = slot.title;
     btn.setAttribute('aria-label', slot.title);
-    btn.innerHTML = wsSvg(slot.icon, 16);
+    btn.appendChild(wsSvgEl(slot.icon, 16));
     btn.addEventListener('click', () => opts.onAction(slot.id));
     el.appendChild(btn);
   }

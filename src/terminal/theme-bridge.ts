@@ -57,7 +57,7 @@ export function getAnsiKeys(): readonly AnsiKey[] {
   return ANSI_KEYS;
 }
 
-export function getXtermTheme(rootEl: HTMLElement = document.body): ITheme {
+export function getXtermTheme(rootEl: HTMLElement = activeDocument.body): ITheme {
   const s = getComputedStyle(rootEl);
   const get = (token: string, fallback: string): string => {
     const v = s.getPropertyValue(token).trim();

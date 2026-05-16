@@ -101,8 +101,11 @@ describe('phase 6a · context menu', () => {
   it('opens at viewport coords and closes on outside click', () => {
     const handle = showContextMenu(120, 200, [{ text: 'Rename', act: () => {} }]);
     expect(handle.element.classList.contains('ws-popover')).toBe(true);
-    expect(handle.element.style.left).toBe('120px');
-    expect(handle.element.style.top).toBe('200px');
+    // Position is conveyed via CSS variables (consumed by .workdesk-context-menu
+    // rule) rather than inline left/top, so the menu can be themed and reused
+    // without static style assignment. See styles/obsidian-scope.css.
+    expect(handle.element.style.getPropertyValue('--wd-x')).toBe('120px');
+    expect(handle.element.style.getPropertyValue('--wd-y')).toBe('200px');
     expect(document.querySelector('.ws-popover')).toBe(handle.element);
 
     vi.advanceTimersByTime(10);

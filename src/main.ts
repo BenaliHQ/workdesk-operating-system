@@ -1,4 +1,5 @@
 import { Plugin, addIcon } from 'obsidian';
+import { FileSystemAdapter } from 'obsidian';
 import {
   COMMAND_ID_PREFIX,
   PLUGIN_ID,
@@ -42,7 +43,7 @@ const ZONE_RIBBON_IDS: readonly ZoneId[] = [
   'atlas', 'gtd', 'intel', 'personal', 'system', 'config', 'files',
 ];
 
-export default class WorkdeskosPlugin extends Plugin {
+export default class WorkdeskOSPlugin extends Plugin {
   settings!: WorkdeskSettings;
   activeZone: ZoneId = 'atlas';
   focus: FocusController | null = null;
@@ -52,7 +53,6 @@ export default class WorkdeskosPlugin extends Plugin {
   // not a plugin modal. STATE.json.decisions.onboarding_enabled = false.
 
   async onload(): Promise<void> {
-    console.log(`[${PLUGIN_ID}] loaded`);
     await this.loadSettings();
     installGlobalToast();
 
@@ -70,8 +70,7 @@ export default class WorkdeskosPlugin extends Plugin {
 
     this.addCommand({
       id: `${COMMAND_ID_PREFIX}:open-palette`,
-      name: 'Open command palette',
-      hotkeys: [{ modifiers: ['Mod'], key: 'k' }],
+      name: 'Open palette',
       callback: () => new CommandPalette(this.app).open(),
     });
 
@@ -96,14 +95,12 @@ export default class WorkdeskosPlugin extends Plugin {
     this.addCommand({
       id: `${COMMAND_ID_PREFIX}:capture:open`,
       name: 'Quick capture',
-      hotkeys: [{ modifiers: ['Mod', 'Shift'], key: 'm' }],
       callback: () => this.openQuickCapture(),
     });
 
     this.addCommand({
       id: `${COMMAND_ID_PREFIX}:focus:toggle`,
       name: 'Toggle focus mode',
-      hotkeys: [{ modifiers: ['Mod', 'Shift'], key: 'f' }],
       callback: () => this.toggleFocus(),
     });
 
@@ -119,9 +116,9 @@ export default class WorkdeskosPlugin extends Plugin {
 
     this.applyAppearance();
 
-    this.registerDomEvent(document, 'keydown', (evt: KeyboardEvent) => {
+    this.registerDomEvent(activeDocument, 'keydown', (evt: KeyboardEvent) => {
       if (evt.key !== 'Escape') return;
-      const modalOpen = document.querySelector('.modal-container.mod-shown, .scrim.open');
+      const modalOpen = activeDocument.querySelector('.modal-container.mod-shown, .scrim.open');
       if (modalOpen) return;
       if (this.focus?.isOn()) {
         this.focus.off();
@@ -130,13 +127,12 @@ export default class WorkdeskosPlugin extends Plugin {
     });
   }
 
-  async onunload(): Promise<void> {
-    document.body.classList.remove('workdesk-hide-native-ribbon-icons');
+  onunload(): void {
+    activeDocument.body.classList.remove('workdesk-hide-native-ribbon-icons');
     for (const el of this.ribbonElements) {
       el.classList.remove('workdesk-icon', 'workdesk-active', 'workdesk-focus-active');
     }
     this.ribbonElements = [];
-    console.log(`[${PLUGIN_ID}] unloaded`);
   }
 
   private registerIcons(): void {
@@ -164,7 +160,7 @@ export default class WorkdeskosPlugin extends Plugin {
 
   private registerRibbonIcons(): void {
     for (const zone of ZONE_RIBBON_IDS) {
-      const label = `WorkDesk: ${zone[0]!.toUpperCase()}${zone.slice(1)} zone`;
+      const label = `WorkDesk: ${zone[0].toUpperCase()}${zone.slice(1)} zone`;
       const el = this.addRibbonIcon(`workdesk-${zone}`, label, () => {
         void this.revealZone(zone);
       });
@@ -247,15 +243,16 @@ export default class WorkdeskosPlugin extends Plugin {
   }
 
   applyAppearance(): void {
-    document.body.classList.toggle(
+    activeDocument.body.classList.toggle(
       'workdesk-hide-native-ribbon-icons',
       this.settings.appearance.hideNonWorkdeskRibbonIcons,
     );
   }
 
   private getVaultRoot(): string {
-    const adapter = this.app.vault.adapter as unknown as { basePath?: string };
-    return adapter.basePath ?? this.settings.vault.path;
+    const adapter = this.app.vault.adapter;
+    if (adapter instanceof FileSystemAdapter) return adapter.getBasePath();
+    return this.settings.vault.path;
   }
 
   private async toggleTerminalPane(): Promise<void> {
@@ -286,7 +283,7 @@ export default class WorkdeskosPlugin extends Plugin {
       return;
     }
 
-    await workspace.revealLeaf(leaves[0]!);
+    await workspace.revealLeaf(leaves[0]);
   }
 
   async openNewTerminalTab(): Promise<void> {
@@ -299,7 +296,7 @@ export default class WorkdeskosPlugin extends Plugin {
       await workspace.revealLeaf(right);
       return;
     }
-    const leaf = leaves[0]!;
+    const leaf = leaves[0];
     await workspace.revealLeaf(leaf);
     const view = leaf.view as TerminalView | undefined;
     if (view?.openNewSession) view.openNewSession();
@@ -373,7 +370,7 @@ interface WorkspaceItemLike {
   collapse(): void;
 }
 
-function leafIsHostedBy(leaf: { getRoot?: () => unknown } | unknown, container: unknown): boolean {
+function leafIsHostedBy(leaf: unknown, container: unknown): boolean {
   if (!container) return false;
   const getRoot = (leaf as { getRoot?: () => unknown }).getRoot;
   if (typeof getRoot !== 'function') return false;

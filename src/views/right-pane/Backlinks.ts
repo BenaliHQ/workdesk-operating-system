@@ -18,13 +18,13 @@ export function renderBacklinks(parent: HTMLElement, entries: BacklinkEntry[]): 
   parent.classList.add('rp-body');
   parent.dataset.pane = 'backlinks';
 
-  const label = document.createElement('div');
+  const label = activeDocument.createDiv();
   label.className = 'rp-section-label';
   label.textContent = `BACKLINKS · ${entries.length}`;
   parent.appendChild(label);
 
   if (entries.length === 0) {
-    const empty = document.createElement('div');
+    const empty = activeDocument.createDiv();
     empty.className = 'rp-empty';
     empty.textContent = 'No backlinks yet.';
     parent.appendChild(empty);
@@ -32,26 +32,26 @@ export function renderBacklinks(parent: HTMLElement, entries: BacklinkEntry[]): 
   }
 
   for (const entry of entries) {
-    const row = document.createElement('div');
+    const row = activeDocument.createDiv();
     row.className = 'rp-link';
     row.dataset.path = entry.notePath;
 
-    const glyph = document.createElement('span');
+    const glyph = activeDocument.createSpan();
     glyph.className = 'rp-link-glyph';
     glyph.textContent = '↩';
     row.appendChild(glyph);
 
-    const body = document.createElement('div');
+    const body = activeDocument.createDiv();
     body.className = 'rp-link-body';
 
-    const name = document.createElement('span');
+    const name = activeDocument.createSpan();
     name.className = 'rp-link-name';
     name.textContent = entry.noteName;
     body.appendChild(name);
 
-    const ctx = document.createElement('div');
+    const ctx = activeDocument.createDiv();
     ctx.className = 'ctx';
-    ctx.innerHTML = highlightMatch(entry.excerpt, entry.matchText);
+    appendHighlightedMatch(ctx, entry.excerpt, entry.matchText);
     body.appendChild(ctx);
 
     row.appendChild(body);
@@ -83,19 +83,13 @@ export function collectBacklinks(app: App, file: TFile | null): BacklinkEntry[] 
   return out;
 }
 
-function highlightMatch(excerpt: string, term: string): string {
-  if (!term) return escapeHtml(excerpt);
+function appendHighlightedMatch(parent: HTMLElement, excerpt: string, term: string): void {
+  if (!term) { parent.appendText(excerpt); return; }
   const idx = excerpt.toLowerCase().indexOf(term.toLowerCase());
-  if (idx < 0) return escapeHtml(excerpt);
-  const before = escapeHtml(excerpt.slice(0, idx));
-  const match = escapeHtml(excerpt.slice(idx, idx + term.length));
-  const after = escapeHtml(excerpt.slice(idx + term.length));
-  return `${before}<em>${match}</em>${after}`;
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  if (idx < 0) { parent.appendText(excerpt); return; }
+  parent.appendText(excerpt.slice(0, idx));
+  const em = activeDocument.createEl('em');
+  em.textContent = excerpt.slice(idx, idx + term.length);
+  parent.appendChild(em);
+  parent.appendText(excerpt.slice(idx + term.length));
 }

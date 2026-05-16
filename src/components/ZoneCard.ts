@@ -1,6 +1,6 @@
 // .obj zone-card — 32×32 pastel dot + title + sub + count + shadow + hover-lift.
 
-import { wsSvg } from '../icons';
+import { wsSvgEl } from '../icons';
 import type { ZoneObject } from '../types';
 
 export interface ZoneCardOpts {
@@ -10,39 +10,39 @@ export interface ZoneCardOpts {
 }
 
 export function renderZoneCard(opts: ZoneCardOpts): HTMLElement {
-  const card = document.createElement('div');
+  const card = activeDocument.createDiv();
   card.className = 'obj';
   card.dataset.objId = opts.obj.id;
   card.dataset.zone = opts.zoneId;
   if (!opts.obj.expanded) card.classList.add('collapsed');
 
-  const row = document.createElement('div');
+  const row = activeDocument.createDiv();
   row.className = 'obj-row';
   row.tabIndex = 0;
   row.setAttribute('role', 'button');
 
-  const dot = document.createElement('span');
+  const dot = activeDocument.createSpan();
   dot.className = 'obj-dot';
-  dot.innerHTML = wsSvg(opts.obj.icon, 16);
+  dot.appendChild(wsSvgEl(opts.obj.icon, 16));
   row.appendChild(dot);
 
-  const text = document.createElement('div');
+  const text = activeDocument.createDiv();
   text.className = 'obj-text';
-  const title = document.createElement('div');
+  const title = activeDocument.createDiv();
   title.className = 'obj-title';
   title.textContent = opts.obj.title;
-  const sub = document.createElement('div');
+  const sub = activeDocument.createDiv();
   sub.className = 'obj-sub';
   sub.textContent = opts.obj.sub;
   text.appendChild(title);
   text.appendChild(sub);
   row.appendChild(text);
 
-  const meta = document.createElement('div');
+  const meta = activeDocument.createDiv();
   meta.className = 'obj-meta';
   if (opts.obj.empty === 'caught-up') {
     meta.classList.add('caught-up');
-    meta.innerHTML = wsSvg('check', 12);
+    meta.appendChild(wsSvgEl('check', 12));
   } else {
     meta.textContent = String(opts.obj.count);
   }

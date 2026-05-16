@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// WorkdeskOS Plugin — acceptance gate.
+// Workdesk Operating System — acceptance gate.
 //
 // Usage: node scripts/verify.mjs phase{0|1|2|3|4a.1|4a.2|4b|5a|5b|6a|6b}
 //
@@ -149,7 +149,7 @@ function phase0() {
   // manifest.json id + minAppVersion + isDesktopOnly
   check('manifest.json id + minAppVersion + isDesktopOnly', () => {
     const m = JSON.parse(readFile('manifest.json'));
-    if (m.id !== 'workdeskos-plugin') throw new Error(`id = ${m.id}`);
+    if (m.id !== 'workdesk-operating-system') throw new Error(`id = ${m.id}`);
     if (m.minAppVersion !== '1.11.4') throw new Error(`minAppVersion = ${m.minAppVersion}`);
     if (m.isDesktopOnly !== true) throw new Error('isDesktopOnly must be true');
     return `id=${m.id} minAppVersion=${m.minAppVersion}`;

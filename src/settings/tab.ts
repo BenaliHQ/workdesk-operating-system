@@ -3,7 +3,7 @@
 // Navigation column on the left switches the displayed section.
 
 import { PluginSettingTab, type App } from 'obsidian';
-import type WorkdeskosPlugin from '../main';
+import type WorkdeskOSPlugin from '../main';
 import { mountGeneralSection } from './sections/general';
 import { mountZonesSection } from './sections/zones';
 import { mountTerminalSection } from './sections/terminal';
@@ -32,11 +32,11 @@ const TAB_ORDER: Array<{ id: SettingsTabId; label: string }> = [
 ];
 
 export class WorkdeskSettingTab extends PluginSettingTab {
-  private plugin: WorkdeskosPlugin;
+  private plugin: WorkdeskOSPlugin;
   private activeId: SettingsTabId = 'general';
   private bodyEl: HTMLElement | null = null;
 
-  constructor(app: App, plugin: WorkdeskosPlugin) {
+  constructor(app: App, plugin: WorkdeskOSPlugin) {
     super(app, plugin);
     this.plugin = plugin;
   }
@@ -45,18 +45,18 @@ export class WorkdeskSettingTab extends PluginSettingTab {
     this.containerEl.replaceChildren();
     this.containerEl.classList.add('settings');
 
-    const nav = document.createElement('aside');
+    const nav = activeDocument.createEl('aside');
     nav.className = 'settings-nav';
     this.containerEl.appendChild(nav);
 
-    const groupLabel = document.createElement('div');
+    const groupLabel = activeDocument.createDiv();
     groupLabel.className = 'settings-nav-group';
-    groupLabel.textContent = 'WorkDesk';
+    groupLabel.textContent = 'Workdesk';
     nav.appendChild(groupLabel);
 
     const navButtons = new Map<SettingsTabId, HTMLButtonElement>();
     for (const t of TAB_ORDER) {
-      const item = document.createElement('button');
+      const item = activeDocument.createEl('button');
       item.type = 'button';
       item.className = 'settings-nav-item';
       item.dataset.tab = t.id;
@@ -67,7 +67,7 @@ export class WorkdeskSettingTab extends PluginSettingTab {
       navButtons.set(t.id, item);
     }
 
-    this.bodyEl = document.createElement('div');
+    this.bodyEl = activeDocument.createDiv();
     this.bodyEl.className = 'settings-body';
     this.containerEl.appendChild(this.bodyEl);
 
@@ -81,7 +81,7 @@ export class WorkdeskSettingTab extends PluginSettingTab {
   renderAllSectionsForTest(): HTMLElement[] {
     const results: HTMLElement[] = [];
     for (const t of TAB_ORDER) {
-      const host = document.createElement('div');
+      const host = activeDocument.createDiv();
       host.className = `settings-section settings-${t.id}`;
       mountSection(t.id, host, this.plugin);
       this.containerEl.appendChild(host);
@@ -105,7 +105,7 @@ export class WorkdeskSettingTab extends PluginSettingTab {
   }
 }
 
-function mountSection(id: SettingsTabId, parent: HTMLElement, plugin: WorkdeskosPlugin): void {
+function mountSection(id: SettingsTabId, parent: HTMLElement, plugin: WorkdeskOSPlugin): void {
   switch (id) {
     case 'general':
       mountGeneralSection(parent, plugin);

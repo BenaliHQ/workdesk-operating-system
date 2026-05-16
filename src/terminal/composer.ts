@@ -29,57 +29,57 @@ export interface ComposerHandle {
 }
 
 export function mountComposer(parent: HTMLElement, opts: ComposerOptions): ComposerHandle {
-  const root = document.createElement('div');
+  const root = activeDocument.createDiv();
   root.className = 'term-composer';
 
-  const inner = document.createElement('div');
+  const inner = activeDocument.createDiv();
   inner.className = 'composer-inner';
   root.appendChild(inner);
 
-  const shell = document.createElement('div');
+  const shell = activeDocument.createDiv();
   shell.className = 'composer-shell';
   inner.appendChild(shell);
 
-  const promptGlyph = document.createElement('span');
+  const promptGlyph = activeDocument.createSpan();
   promptGlyph.className = 'composer-prompt';
   promptGlyph.textContent = '▌';
   shell.appendChild(promptGlyph);
 
-  const textarea = document.createElement('textarea');
+  const textarea = activeDocument.createEl('textarea');
   textarea.className = 'composer-input';
   textarea.placeholder = PLACEHOLDER;
   textarea.rows = 1;
   textarea.style.height = `${MIN_HEIGHT}px`;
   shell.appendChild(textarea);
 
-  const actions = document.createElement('div');
+  const actions = activeDocument.createDiv();
   actions.className = 'composer-actions';
   shell.appendChild(actions);
 
-  const attachButton = document.createElement('button');
+  const attachButton = activeDocument.createEl('button');
   attachButton.type = 'button';
   attachButton.className = 'composer-icon';
   attachButton.setAttribute('aria-label', 'Attach wikilink');
   attachButton.textContent = '📎';
   actions.appendChild(attachButton);
 
-  const sendButton = document.createElement('button');
+  const sendButton = activeDocument.createEl('button');
   sendButton.type = 'button';
   sendButton.className = 'composer-send';
   sendButton.setAttribute('aria-label', 'Send');
   sendButton.textContent = '↵';
   actions.appendChild(sendButton);
 
-  const metaStrip = document.createElement('div');
+  const metaStrip = activeDocument.createDiv();
   metaStrip.className = 'composer-meta';
   inner.appendChild(metaStrip);
 
-  const metaL = document.createElement('span');
+  const metaL = activeDocument.createSpan();
   metaL.className = 'composer-meta-l';
   metaL.textContent = opts.metaLeft ?? 'opus 4.7';
   metaStrip.appendChild(metaL);
 
-  const metaR = document.createElement('span');
+  const metaR = activeDocument.createSpan();
   metaR.className = 'composer-meta-r';
   metaR.textContent = opts.metaRight ?? '⌘↵ send · esc blur';
   metaStrip.appendChild(metaR);

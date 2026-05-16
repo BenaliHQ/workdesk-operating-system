@@ -1,4 +1,4 @@
-# WorkdeskOS Plugin
+# Workdesk Operating System
 
 Curated visual surface for WorkdeskOS vaults — zones, command palette, quick capture, and a Claude Code terminal. macOS desktop only.
 
@@ -7,11 +7,11 @@ This plugin is built from the Claude Design handoff at `_inputs/design-handoff/`
 ## Install
 
 ```bash
-ln -s /Users/khalilbenali/code/workdeskos-plugin <vault>/.obsidian/plugins/workdeskos-plugin
+ln -s /Users/khalilbenali/code/workdesk-operating-system <vault>/.obsidian/plugins/workdesk-operating-system
 bash scripts/install-check.sh <vault>
 ```
 
-Reload Obsidian and enable **WorkdeskOS Plugin** under Community plugins.
+Reload Obsidian and enable **Workdesk Operating System** under Community plugins.
 
 ## Build
 

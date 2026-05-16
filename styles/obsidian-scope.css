@@ -86,3 +86,24 @@ body.focus-on .status-bar:hover { opacity: 1; }
   opacity: 1;
   transform: none;
 }
+
+/* HtmlView iframe — sized to fit pane via class rather than inline styles. */
+.workdesk-html-view .wd-html-iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* ContextMenu — fixed at viewport coords set by JS via CSS variables. */
+.workdesk-context-menu {
+  position: fixed;
+  left: var(--wd-x, 0);
+  top: var(--wd-y, 0);
+}
+
+/* Autocomplete dropdown — positioned by JS via CSS variables. */
+.wd-autocomplete-popover {
+  position: absolute;
+  left: var(--wd-x, 0);
+  top: var(--wd-y, 0);
+}

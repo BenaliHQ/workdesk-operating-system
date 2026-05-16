@@ -6,13 +6,13 @@
 // schema; this view reads the resolved settings from the plugin instance.
 
 import { FileView, TFile, WorkspaceLeaf } from 'obsidian';
-import type WorkdeskosPlugin from '../main';
+import type WorkdeskOSPlugin from '../main';
 import { VIEW_TYPE_WORKDESK_HTML } from '../constants';
 
 export class HtmlView extends FileView {
   allowNoFile = false;
   private iframe: HTMLIFrameElement | null = null;
-  constructor(leaf: WorkspaceLeaf, private plugin: WorkdeskosPlugin) {
+  constructor(leaf: WorkspaceLeaf, private plugin: WorkdeskOSPlugin) {
     super(leaf);
   }
 
@@ -22,20 +22,17 @@ export class HtmlView extends FileView {
 
   async onLoadFile(file: TFile): Promise<void> {
     const text = await this.app.vault.read(file);
-    this.contentEl.empty?.();
-    this.contentEl.innerHTML = '';
+    this.contentEl.empty();
     this.contentEl.classList.add('workdesk-html-view');
     this.renderChip(file);
 
     const sandboxFlags = ['allow-same-origin'];
     if (this.plugin.settings.html.allowScripts) sandboxFlags.push('allow-scripts');
 
-    const iframe = document.createElement('iframe');
+    const iframe = activeDocument.createEl('iframe');
+    iframe.addClass('wd-html-iframe');
     iframe.setAttribute('sandbox', sandboxFlags.join(' '));
     iframe.setAttribute('srcdoc', text);
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    iframe.style.border = '0';
     this.contentEl.appendChild(iframe);
     this.iframe = iframe;
   }
@@ -46,17 +43,17 @@ export class HtmlView extends FileView {
   }
 
   private renderChip(file: TFile): void {
-    const chip = document.createElement('div');
+    const chip = activeDocument.createDiv();
     chip.className = 'workdesk-html-chip';
-    const name = document.createElement('span');
+    const name = activeDocument.createSpan();
     name.className = 'name';
     name.textContent = `${file.basename}.${file.extension}`;
     chip.appendChild(name);
-    const sub = document.createElement('span');
+    const sub = activeDocument.createSpan();
     sub.className = 'sub';
-    sub.textContent = 'rendered inline · workdesk-html-view';
+    sub.textContent = 'Rendered inline · workdesk-HTML-view';
     chip.appendChild(sub);
-    const btn = document.createElement('button');
+    const btn = activeDocument.createEl('button');
     btn.className = 'btn ghost';
     btn.type = 'button';
     btn.textContent = 'Open in browser ↗';

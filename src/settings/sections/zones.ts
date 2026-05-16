@@ -1,9 +1,9 @@
 // Zones sub-tab — density, file counts, manifest paths.
 
-import type WorkdeskosPlugin from '../../main';
+import type WorkdeskOSPlugin from '../../main';
 import { field, toggle, segmented, sectionLabel } from '../../components/forms';
 
-export function mountZonesSection(parent: HTMLElement, plugin: WorkdeskosPlugin): void {
+export function mountZonesSection(parent: HTMLElement, plugin: WorkdeskOSPlugin): void {
   parent.dataset.tab = 'zones';
   sectionLabel(parent, 'ZONES');
 
@@ -18,7 +18,7 @@ export function mountZonesSection(parent: HTMLElement, plugin: WorkdeskosPlugin)
     ],
     onChange: (v) => {
       plugin.settings.zones.density = v as 'compact' | 'cozy' | 'spacious';
-      plugin.saveSettings();
+      void plugin.saveSettings();
     },
   });
 
@@ -28,7 +28,7 @@ export function mountZonesSection(parent: HTMLElement, plugin: WorkdeskosPlugin)
     initial: plugin.settings.zones.showFilesView,
     onChange: (v) => {
       plugin.settings.zones.showFilesView = v;
-      plugin.saveSettings();
+      void plugin.saveSettings();
     },
   });
 
@@ -38,7 +38,7 @@ export function mountZonesSection(parent: HTMLElement, plugin: WorkdeskosPlugin)
     initial: plugin.settings.zones.showFileCounts,
     onChange: (v) => {
       plugin.settings.zones.showFileCounts = v;
-      plugin.saveSettings();
+      void plugin.saveSettings();
     },
   });
 
@@ -48,7 +48,7 @@ export function mountZonesSection(parent: HTMLElement, plugin: WorkdeskosPlugin)
     mono: true,
     onChange: (v) => {
       plugin.settings.zones.manifestPath = v;
-      plugin.saveSettings();
+      void plugin.saveSettings();
     },
   });
 }

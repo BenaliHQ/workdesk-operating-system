@@ -43,7 +43,7 @@ export function renderCalendar(parent: HTMLElement, opts: CalendarOptions): HTML
 
   const dowRow = el('div', 'cal-dow');
   for (const d of DOW) {
-    const cell = document.createElement('div');
+    const cell = activeDocument.createDiv();
     cell.textContent = d;
     dowRow.appendChild(cell);
   }
@@ -71,7 +71,7 @@ export function renderCalendar(parent: HTMLElement, opts: CalendarOptions): HTML
   if (opts.recentNotes && opts.recentNotes.length > 0) {
     const section = el('div', 'cal-section');
     const label = el('div', 'cal-section-label');
-    label.textContent = 'RECENT DAILY NOTES';
+    label.textContent = 'Recent daily notes';
     section.appendChild(label);
     for (const note of opts.recentNotes) {
       const row = el('div', 'cal-note');
@@ -92,14 +92,14 @@ export function renderCalendar(parent: HTMLElement, opts: CalendarOptions): HTML
   return parent;
 }
 
-function el(tag: string, cls: string): HTMLElement {
-  const e = document.createElement(tag);
+function el(tag: keyof HTMLElementTagNameMap, cls: string): HTMLElement {
+  const e = activeDocument.createEl(tag);
   e.className = cls;
   return e;
 }
 
 function button(cls: string, text: string): HTMLButtonElement {
-  const b = document.createElement('button');
+  const b = activeDocument.createEl('button');
   b.type = 'button';
   b.className = cls;
   b.textContent = text;

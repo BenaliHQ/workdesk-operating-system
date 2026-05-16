@@ -1,9 +1,9 @@
 // Claude Code sub-tab — binary path, tab status auto-detection, status flags.
 
-import type WorkdeskosPlugin from '../../main';
+import type WorkdeskOSPlugin from '../../main';
 import { field, toggle, sectionLabel } from '../../components/forms';
 
-export function mountClaudeCodeSection(parent: HTMLElement, plugin: WorkdeskosPlugin): void {
+export function mountClaudeCodeSection(parent: HTMLElement, plugin: WorkdeskOSPlugin): void {
   parent.dataset.tab = 'claude-code';
   sectionLabel(parent, 'CLAUDE CODE');
 
@@ -13,7 +13,7 @@ export function mountClaudeCodeSection(parent: HTMLElement, plugin: WorkdeskosPl
     mono: true,
     onChange: (v) => {
       plugin.settings.claude.binaryPath = v;
-      plugin.saveSettings();
+      void plugin.saveSettings();
     },
   });
 
@@ -23,7 +23,7 @@ export function mountClaudeCodeSection(parent: HTMLElement, plugin: WorkdeskosPl
     initial: plugin.settings.claude.autoDetectTabStatus,
     onChange: (v) => {
       plugin.settings.claude.autoDetectTabStatus = v;
-      plugin.saveSettings();
+      void plugin.saveSettings();
     },
   });
 
@@ -32,7 +32,7 @@ export function mountClaudeCodeSection(parent: HTMLElement, plugin: WorkdeskosPl
     initial: plugin.settings.claude.showContextPct,
     onChange: (v) => {
       plugin.settings.claude.showContextPct = v;
-      plugin.saveSettings();
+      void plugin.saveSettings();
     },
   });
 
@@ -41,7 +41,7 @@ export function mountClaudeCodeSection(parent: HTMLElement, plugin: WorkdeskosPl
     initial: plugin.settings.claude.showCostEstimate,
     onChange: (v) => {
       plugin.settings.claude.showCostEstimate = v;
-      plugin.saveSettings();
+      void plugin.saveSettings();
     },
   });
 
@@ -51,7 +51,7 @@ export function mountClaudeCodeSection(parent: HTMLElement, plugin: WorkdeskosPl
     mono: true,
     onChange: (v) => {
       plugin.settings.claude.skillsDir = v;
-      plugin.saveSettings();
+      void plugin.saveSettings();
     },
   });
 }

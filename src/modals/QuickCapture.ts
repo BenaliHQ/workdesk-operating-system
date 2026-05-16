@@ -7,7 +7,7 @@
 import { Modal, type App } from 'obsidian';
 import { CaptureFlow, type CaptureDestination, type CaptureVault } from '../services/capture/capture-flow';
 import { getProvider } from '../services/stt/provider';
-import type WorkdeskosPlugin from '../main';
+import type WorkdeskOSPlugin from '../main';
 
 const STT_SECRET_KEY = 'stt-groq';
 
@@ -18,7 +18,7 @@ export interface QuickCaptureDeps {
 }
 
 export class QuickCaptureModal extends Modal {
-  private plugin: WorkdeskosPlugin;
+  private plugin: WorkdeskOSPlugin;
   private deps: QuickCaptureDeps;
   private flow!: CaptureFlow;
   private dest: CaptureDestination;
@@ -28,7 +28,7 @@ export class QuickCaptureModal extends Modal {
   private saveBtn!: HTMLButtonElement;
   private unsubscribe: (() => void) | null = null;
 
-  constructor(plugin: WorkdeskosPlugin, deps: QuickCaptureDeps) {
+  constructor(plugin: WorkdeskOSPlugin, deps: QuickCaptureDeps) {
     super(plugin.app);
     this.plugin = plugin;
     this.deps = deps;
@@ -40,17 +40,17 @@ export class QuickCaptureModal extends Modal {
     this.contentEl.replaceChildren();
     this.contentEl.classList.add('qc');
 
-    const head = document.createElement('div');
+    const head = activeDocument.createDiv();
     head.className = 'qc-head';
 
-    this.micEl = document.createElement('div');
+    this.micEl = activeDocument.createDiv();
     this.micEl.className = 'qc-mic';
     this.micEl.setAttribute('aria-hidden', 'true');
     head.appendChild(this.micEl);
 
-    const meta = document.createElement('div');
+    const meta = activeDocument.createDiv();
     meta.className = 'qc-meta';
-    const title = document.createElement('div');
+    const title = activeDocument.createDiv();
     title.className = 'qc-title';
     title.textContent = 'Quick capture';
     title.id = 'qc-title';
@@ -61,38 +61,38 @@ export class QuickCaptureModal extends Modal {
     this.containerEl.setAttribute('role', 'dialog');
     this.containerEl.setAttribute('aria-modal', 'true');
     this.containerEl.setAttribute('aria-labelledby', 'qc-title');
-    this.statusEl = document.createElement('div');
+    this.statusEl = activeDocument.createDiv();
     this.statusEl.className = 'qc-status';
     meta.appendChild(this.statusEl);
     head.appendChild(meta);
     this.contentEl.appendChild(head);
 
-    const body = document.createElement('div');
+    const body = activeDocument.createDiv();
     body.className = 'qc-body';
-    this.transcriptEl = document.createElement('div');
+    this.transcriptEl = activeDocument.createDiv();
     this.transcriptEl.className = 'qc-transcript';
     body.appendChild(this.transcriptEl);
     this.contentEl.appendChild(body);
 
-    const foot = document.createElement('div');
+    const foot = activeDocument.createDiv();
     foot.className = 'qc-foot';
     foot.appendChild(this.buildDestChip('personal/captures', 'personal'));
     foot.appendChild(this.buildDestChip('system/inbox', 'system'));
     foot.appendChild(this.buildDestChip('gtd/inbox', 'gtd'));
-    const spacer = document.createElement('div');
+    const spacer = activeDocument.createDiv();
     spacer.className = 'spacer';
     foot.appendChild(spacer);
 
-    const cancel = document.createElement('button');
+    const cancel = activeDocument.createEl('button');
     cancel.className = 'btn ghost';
     cancel.textContent = 'Cancel';
     cancel.addEventListener('click', () => this.handleCancel());
     foot.appendChild(cancel);
 
-    this.saveBtn = document.createElement('button');
+    this.saveBtn = activeDocument.createEl('button');
     this.saveBtn.className = 'btn primary';
     this.saveBtn.textContent = 'Save';
-    this.saveBtn.addEventListener('click', () => this.handleSave());
+    this.saveBtn.addEventListener('click', () => { void this.handleSave(); });
     foot.appendChild(this.saveBtn);
     this.contentEl.appendChild(foot);
 
@@ -121,15 +121,15 @@ export class QuickCaptureModal extends Modal {
   }
 
   private buildDestChip(dest: CaptureDestination, zone: string): HTMLButtonElement {
-    const chip = document.createElement('button');
+    const chip = activeDocument.createEl('button');
     chip.className = 'dest';
     chip.dataset.dest = dest;
     if (dest === this.dest) chip.classList.add('active');
-    const dot = document.createElement('span');
+    const dot = activeDocument.createSpan();
     dot.className = 'dot';
     dot.dataset.zone = zone;
     chip.appendChild(dot);
-    const label = document.createElement('span');
+    const label = activeDocument.createSpan();
     label.textContent = dest;
     chip.appendChild(label);
     chip.addEventListener('click', () => this.setDestination(dest));
@@ -145,9 +145,14 @@ export class QuickCaptureModal extends Modal {
       case 'requesting-permission':
         this.statusEl.textContent = 'Requesting microphone…';
         break;
-      case 'recording':
-        this.statusEl.innerHTML = '<span class="dot"></span>Recording';
+      case 'recording': {
+        this.statusEl.empty();
+        const dot = activeDocument.createSpan();
+        dot.className = 'dot';
+        this.statusEl.appendChild(dot);
+        this.statusEl.appendText('Recording');
         break;
+      }
       case 'uploading':
         this.statusEl.textContent = 'Transcribing…';
         this.saveBtn.disabled = true;

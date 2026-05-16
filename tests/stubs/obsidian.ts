@@ -5,7 +5,7 @@
 
 export class Plugin {
   app: App = new App();
-  manifest = { id: 'workdeskos-plugin', dir: '.obsidian/plugins/workdeskos-plugin' } as { id: string; dir: string };
+  manifest = { id: 'workdesk-operating-system', dir: '.obsidian/plugins/workdesk-operating-system' } as { id: string; dir: string };
   private _data: unknown = null;
   _ribbonCalls: Array<{ icon: string; title: string }> = [];
   _ribbonElements: HTMLElement[] = [];
@@ -203,6 +203,31 @@ export class Vault {
 
 export class Notice { constructor(_msg: string, _ms?: number) {} }
 export function setIcon(_el: HTMLElement, _name: string): void {}
+
+// FileSystemAdapter — desktop adapter type. Real Obsidian narrows
+// app.vault.adapter via `instanceof FileSystemAdapter`; the stub lets that
+// guard fall through to the test fallback path.
+export class FileSystemAdapter {
+  getBasePath(): string { return ''; }
+}
+
+// Minimal YAML loader using JSON-only subset. Tests that exercise the zone
+// scanner stub their own data, so the loader only needs to handle the test
+// fixtures' shapes. parseYaml in real Obsidian uses js-yaml under the hood.
+export function parseYaml(input: string): unknown {
+  // Lightweight YAML — supports the subset used by fixtures/zones.yaml +
+  // fixtures/object-icons.yaml. Empty strings → undefined.
+  if (!input.trim()) return undefined;
+  // Lazy require so the dep stays test-only.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const yaml = require('js-yaml') as { load(s: string): unknown };
+  return yaml.load(input);
+}
+export function stringifyYaml(input: unknown): string {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const yaml = require('js-yaml') as { dump(o: unknown): string };
+  return yaml.dump(input);
+}
 
 // Module-level addIcon registry — Obsidian's addIcon is a top-level export.
 const _iconCalls: Array<{ name: string; svg: string }> = [];

@@ -33,7 +33,7 @@ export function clampWidth(side: Side, width: number, totalWidth = Number.POSITI
 const DEFAULT_PANE_WIDTH = 340;
 
 export function makeSplitter(opts: SplitterOpts): HTMLElement {
-  const el = document.createElement('div');
+  const el = activeDocument.createDiv();
   el.className = `splitter splitter-${opts.side}`;
   el.dataset.side = opts.side;
   el.setAttribute('role', 'separator');
@@ -70,8 +70,8 @@ export function makeSplitter(opts: SplitterOpts): HTMLElement {
     opts.onCommit(clampWidth(opts.side, final));
   };
 
-  document.addEventListener('mousemove', move);
-  document.addEventListener('mouseup', up);
+  activeDocument.addEventListener('mousemove', move);
+  activeDocument.addEventListener('mouseup', up);
 
   el.addEventListener('dblclick', () => {
     const reset = clampWidth(opts.side, DEFAULT_PANE_WIDTH);

@@ -38,7 +38,7 @@ export interface FocusOptions {
 }
 
 export function createFocusController(opts: FocusOptions): FocusController {
-  const body = opts.bodyEl ?? document.body;
+  const body = opts.bodyEl ?? activeDocument.body;
   let priorLeftCollapsed = opts.workspace?.leftSplit?.collapsed ?? false;
   let priorRightCollapsed = opts.workspace?.rightSplit?.collapsed ?? false;
 

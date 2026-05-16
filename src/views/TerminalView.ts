@@ -14,10 +14,10 @@ import { parseStatusFromChunk, type TabStatus } from '../terminal/status-parser'
 import { createFullscreenToggle, type FullscreenHandle } from '../terminal/fullscreen';
 import { attachDropzone } from '../terminal/dropzone';
 import { mountAutocomplete, type AutocompleteHandle, type AutocompleteEntry } from '../terminal/autocomplete';
-import type WorkdeskosPlugin from '../main';
+import type WorkdeskOSPlugin from '../main';
 
 export class TerminalView extends ItemView {
-  private plugin: WorkdeskosPlugin;
+  private plugin: WorkdeskOSPlugin;
   private sessions = new Map<number, TerminalSession>();
   private activeId: number | null = null;
   composer: ComposerHandle | null = null;
@@ -29,7 +29,7 @@ export class TerminalView extends ItemView {
   private autocomplete: AutocompleteHandle | null = null;
   private tabStatuses = new Map<number, TabStatus>();
 
-  constructor(leaf: WorkspaceLeaf, plugin: WorkdeskosPlugin) {
+  constructor(leaf: WorkspaceLeaf, plugin: WorkdeskOSPlugin) {
     super(leaf);
     this.plugin = plugin;
   }
@@ -83,7 +83,8 @@ export class TerminalView extends ItemView {
       onPathDropped: (escaped) => this.session?.write(escaped + ' '),
     });
 
-    const appEl = (this.contentEl.closest('.app') as HTMLElement | null) ?? document.body;
+    const closest = this.contentEl.closest('.app');
+    const appEl: HTMLElement = (closest instanceof HTMLElement ? closest : null) ?? activeDocument.body;
     this.fullscreen = createFullscreenToggle({
       appEl,
       sessions: () => Array.from(this.sessions.values()).map((s) => ({
@@ -164,9 +165,10 @@ export class TerminalView extends ItemView {
     this.tabStatuses.delete(id);
     this.tabs?.removeTab(id);
     if (this.activeId === id) {
-      const next = this.sessions.keys().next().value;
-      this.activeId = next ?? null;
-      if (this.activeId !== null) this.setActiveSession(this.activeId);
+      const result = this.sessions.keys().next();
+      const nextId: number | null = result.done ? null : result.value;
+      this.activeId = nextId;
+      if (nextId !== null) this.setActiveSession(nextId);
     }
     this.fullscreen?.refresh();
   }
@@ -204,7 +206,7 @@ export class TerminalView extends ItemView {
   }
 }
 
-function resolveVaultPath(plugin: WorkdeskosPlugin): string {
+function resolveVaultPath(plugin: WorkdeskOSPlugin): string {
   const adapter = plugin.app.vault.adapter as unknown as { basePath?: string };
   if (typeof adapter.basePath === 'string') return adapter.basePath;
   return plugin.settings.vault.path;

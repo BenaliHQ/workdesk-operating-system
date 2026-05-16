@@ -1,9 +1,9 @@
 // Terminal sub-tab — shell, font, cursor, wrap, scrollback.
 
-import type WorkdeskosPlugin from '../../main';
+import type WorkdeskOSPlugin from '../../main';
 import { field, toggle, select, sectionLabel } from '../../components/forms';
 
-export function mountTerminalSection(parent: HTMLElement, plugin: WorkdeskosPlugin): void {
+export function mountTerminalSection(parent: HTMLElement, plugin: WorkdeskOSPlugin): void {
   parent.dataset.tab = 'terminal';
   sectionLabel(parent, 'TERMINAL');
 
@@ -13,7 +13,7 @@ export function mountTerminalSection(parent: HTMLElement, plugin: WorkdeskosPlug
     mono: true,
     onChange: (v) => {
       plugin.settings.terminal.shell = v;
-      plugin.saveSettings();
+      void plugin.saveSettings();
     },
   });
 
@@ -27,8 +27,8 @@ export function mountTerminalSection(parent: HTMLElement, plugin: WorkdeskosPlug
       { value: 'SF Mono', label: 'SF Mono' },
     ],
     onChange: (v) => {
-      plugin.settings.terminal.font = v as WorkdeskosPlugin['settings']['terminal']['font'];
-      plugin.saveSettings();
+      plugin.settings.terminal.font = v as WorkdeskOSPlugin['settings']['terminal']['font'];
+      void plugin.saveSettings();
     },
   });
 
@@ -41,8 +41,8 @@ export function mountTerminalSection(parent: HTMLElement, plugin: WorkdeskosPlug
       { value: 'underline', label: 'Underline' },
     ],
     onChange: (v) => {
-      plugin.settings.terminal.cursorStyle = v as WorkdeskosPlugin['settings']['terminal']['cursorStyle'];
-      plugin.saveSettings();
+      plugin.settings.terminal.cursorStyle = v as WorkdeskOSPlugin['settings']['terminal']['cursorStyle'];
+      void plugin.saveSettings();
     },
   });
 
@@ -51,7 +51,7 @@ export function mountTerminalSection(parent: HTMLElement, plugin: WorkdeskosPlug
     initial: plugin.settings.terminal.wrap,
     onChange: (v) => {
       plugin.settings.terminal.wrap = v;
-      plugin.saveSettings();
+      void plugin.saveSettings();
     },
   });
 }

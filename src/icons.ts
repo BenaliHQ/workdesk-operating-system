@@ -71,3 +71,34 @@ export function wsSvg(name: IconName, size = 16, extraAttrs = ''): string {
   const inner = ICONS[name] || '';
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" ${extraAttrs}>${inner}</svg>`;
 }
+
+// Builds the SVG via createElementNS so callers can append the element
+// directly without violating obsidianmd's no-innerHTML rule. The ICONS map
+// is hardcoded — its values are tiny lists of `<path/>`, `<circle/>`, and
+// `<rect/>` elements with stable attribute shapes — so a small regex-based
+// parser handles them without dragging in DOMParser (which produces
+// cross-document nodes that happy-dom rejects).
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const TAG_RE = /<(\w+)\s+([^/]*?)\/>/g;
+const ATTR_RE = /(\w[\w-]*)\s*=\s*"([^"]*)"/g;
+
+export function wsSvgEl(name: IconName, size = 16): SVGElement {
+  const svg = activeDocument.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('width', String(size));
+  svg.setAttribute('height', String(size));
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '1.75');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  const inner = ICONS[name] ?? '';
+  for (const match of inner.matchAll(TAG_RE)) {
+    const child = activeDocument.createElementNS(SVG_NS, match[1]);
+    for (const attr of match[2].matchAll(ATTR_RE)) {
+      child.setAttribute(attr[1], attr[2]);
+    }
+    svg.appendChild(child);
+  }
+  return svg;
+}

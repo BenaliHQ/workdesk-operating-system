@@ -59,16 +59,18 @@ export function attachDropzone(opts: DropzoneOptions): () => void {
     }
   };
 
+  const onDropSync = (e: DragEvent): void => { void onDrop(e); };
+
   el.addEventListener('dragenter', onDragEnter);
   el.addEventListener('dragover', onDragOver);
   el.addEventListener('dragleave', onDragLeave);
-  el.addEventListener('drop', onDrop);
+  el.addEventListener('drop', onDropSync);
 
   return () => {
     el.removeEventListener('dragenter', onDragEnter);
     el.removeEventListener('dragover', onDragOver);
     el.removeEventListener('dragleave', onDragLeave);
-    el.removeEventListener('drop', onDrop);
+    el.removeEventListener('drop', onDropSync);
   };
 }
 

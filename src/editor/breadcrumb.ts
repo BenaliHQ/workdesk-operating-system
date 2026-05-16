@@ -8,14 +8,14 @@ export interface BreadcrumbOpts {
 }
 
 export function renderBreadcrumb(opts: BreadcrumbOpts): HTMLElement {
-  const el = document.createElement('div');
+  const el = activeDocument.createDiv();
   el.className = 'breadcrumb';
   el.setAttribute('role', 'navigation');
-  el.setAttribute('aria-label', 'file path');
+  el.setAttribute('aria-label', 'File path');
 
   const parts = opts.filePath.split('/').filter(Boolean);
   parts.forEach((seg, i) => {
-    const span = document.createElement('span');
+    const span = activeDocument.createSpan();
     span.className = 'bc-seg';
     if (i === parts.length - 1) span.classList.add('bc-active');
     span.textContent = seg;
@@ -25,7 +25,7 @@ export function renderBreadcrumb(opts: BreadcrumbOpts): HTMLElement {
     el.appendChild(span);
 
     if (i < parts.length - 1) {
-      const sep = document.createElement('span');
+      const sep = activeDocument.createSpan();
       sep.className = 'bc-sep';
       sep.textContent = '/';
       el.appendChild(sep);

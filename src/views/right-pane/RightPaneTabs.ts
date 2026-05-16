@@ -25,12 +25,12 @@ const LABEL: Record<RightPaneId, string> = {
 
 export function mountRightPaneTabs(parent: HTMLElement, opts: RightPaneTabsOptions): RightPaneTabsHandle {
   let activeId: RightPaneId = opts.initial ?? 'terminal';
-  const root = document.createElement('div');
+  const root = activeDocument.createDiv();
   root.className = 'right-tabs';
 
   const buttons = new Map<RightPaneId, HTMLButtonElement>();
   for (const id of ORDER) {
-    const btn = document.createElement('button');
+    const btn = activeDocument.createEl('button');
     btn.type = 'button';
     btn.className = 'right-tab';
     btn.dataset.tab = id;

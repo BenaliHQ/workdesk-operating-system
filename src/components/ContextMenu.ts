@@ -25,25 +25,24 @@ let activeMenu: ContextMenuHandle | null = null;
 export function showContextMenu(x: number, y: number, items: MenuItem[]): ContextMenuHandle {
   if (activeMenu) activeMenu.close();
 
-  const menu = document.createElement('div');
-  menu.className = 'ws-popover';
+  const menu = activeDocument.createDiv();
+  menu.className = 'ws-popover workdesk-context-menu';
   menu.setAttribute('role', 'menu');
-  menu.style.position = 'fixed';
-  menu.style.left = `${x}px`;
-  menu.style.top = `${y}px`;
+  menu.style.setProperty('--wd-x', `${x}px`);
+  menu.style.setProperty('--wd-y', `${y}px`);
 
   for (const item of items) {
     menu.appendChild(renderItem(item, () => close()));
   }
 
-  document.body.appendChild(menu);
+  activeDocument.body.appendChild(menu);
 
   // Flip if overflowing the viewport.
   const rect = menu.getBoundingClientRect();
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  if (rect.right > vw) menu.style.left = `${Math.max(8, x - rect.width)}px`;
-  if (rect.bottom > vh) menu.style.top = `${Math.max(8, y - rect.height)}px`;
+  const vw = activeWindow.innerWidth;
+  const vh = activeWindow.innerHeight;
+  if (rect.right > vw) menu.style.setProperty('--wd-x', `${Math.max(8, x - rect.width)}px`);
+  if (rect.bottom > vh) menu.style.setProperty('--wd-y', `${Math.max(8, y - rect.height)}px`);
 
   const onDocClick = (evt: MouseEvent) => {
     if (!menu.contains(evt.target as Node)) close();
@@ -55,14 +54,14 @@ export function showContextMenu(x: number, y: number, items: MenuItem[]): Contex
     }
   };
   // Defer so the click that opened the menu doesn't immediately close it.
-  window.setTimeout(() => {
-    document.addEventListener('mousedown', onDocClick, true);
-    document.addEventListener('keydown', onKey, true);
+  activeWindow.setTimeout(() => {
+    activeDocument.addEventListener('mousedown', onDocClick, true);
+    activeDocument.addEventListener('keydown', onKey, true);
   }, 0);
 
   function close(): void {
-    document.removeEventListener('mousedown', onDocClick, true);
-    document.removeEventListener('keydown', onKey, true);
+    activeDocument.removeEventListener('mousedown', onDocClick, true);
+    activeDocument.removeEventListener('keydown', onKey, true);
     menu.remove();
     if (activeMenu?.element === menu) activeMenu = null;
   }
@@ -74,35 +73,35 @@ export function showContextMenu(x: number, y: number, items: MenuItem[]): Contex
 
 function renderItem(item: MenuItem, dismiss: () => void): HTMLElement {
   if ('divider' in item) {
-    const d = document.createElement('div');
+    const d = activeDocument.createDiv();
     d.className = 'ws-popover-divider';
     return d;
   }
   if (!('text' in item) && 'label' in item) {
-    const label = document.createElement('div');
+    const label = activeDocument.createDiv();
     label.className = 'ws-popover-label';
     label.textContent = item.label;
     return label;
   }
-  const it = item as Exclude<MenuItem, { divider: true } | { label: string }>;
-  const row = document.createElement('button');
+  const it = item;
+  const row = activeDocument.createEl('button');
   row.type = 'button';
   row.className = 'ws-popover-item';
   row.setAttribute('role', 'menuitem');
   if (it.danger) row.classList.add('danger');
 
-  const glyph = document.createElement('span');
+  const glyph = activeDocument.createSpan();
   glyph.className = 'glyph';
   glyph.setAttribute('aria-hidden', 'true');
   glyph.textContent = it.icon ?? '';
   row.appendChild(glyph);
 
-  const text = document.createElement('span');
+  const text = activeDocument.createSpan();
   text.textContent = it.text;
   row.appendChild(text);
 
   if (it.kbd) {
-    const k = document.createElement('span');
+    const k = activeDocument.createSpan();
     k.className = 'kbd-hint';
     k.textContent = it.kbd;
     row.appendChild(k);
