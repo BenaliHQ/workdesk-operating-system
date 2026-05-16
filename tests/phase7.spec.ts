@@ -145,6 +145,12 @@ describe('phase 7 · standard plugin pattern', () => {
   });
 
   it('appearance.hideNonWorkdeskRibbonIcons toggles body class', () => {
+    // Default is true (flipped in the post-spike-vault fix-up) so the body
+    // class is already applied after onload. Flip off → class removed,
+    // flip back on → class re-added.
+    expect(document.body.classList.contains('workdesk-hide-native-ribbon-icons')).toBe(true);
+    plugin.settings.appearance.hideNonWorkdeskRibbonIcons = false;
+    plugin.applyAppearance();
     expect(document.body.classList.contains('workdesk-hide-native-ribbon-icons')).toBe(false);
     plugin.settings.appearance.hideNonWorkdeskRibbonIcons = true;
     plugin.applyAppearance();
@@ -201,5 +207,111 @@ describe('phase 7 · standard plugin pattern', () => {
     const css = fs.readFileSync(stylesPath, 'utf8');
     expect(css).toContain('workdesk-hide-native-ribbon-icons');
     expect(/^\s*\.app\s*\{\s*display:\s*grid/m.test(css)).toBe(false);
+  });
+
+  // ── Post-spike-vault fix-ups (M4 round 2) ───────────────────────────────
+
+  it('ZoneCard click mutates obj.expanded so re-renders preserve the state', async () => {
+    const { renderZoneCard } = await import('../src/components/ZoneCard');
+    const obj = { id: 'atlas/people', title: 'people', sub: '', icon: 'person' as const, count: 0, expanded: false };
+    let toggles = 0;
+    const card = renderZoneCard({ zoneId: 'atlas', obj, onToggle: () => { toggles++; } });
+    document.body.appendChild(card);
+    expect(card.classList.contains('collapsed')).toBe(true);
+    (card.querySelector('.obj-row') as HTMLElement).click();
+    expect(obj.expanded).toBe(true);
+    expect(card.classList.contains('collapsed')).toBe(false);
+    expect(toggles).toBe(1);
+    (card.querySelector('.obj-row') as HTMLElement).click();
+    expect(obj.expanded).toBe(false);
+    expect(card.classList.contains('collapsed')).toBe(true);
+  });
+
+  it('ZoneView wraps the per-card tree in .obj-children so the collapse CSS matches', async () => {
+    const { ZoneView } = await import('../src/views/ZoneView');
+    const leaf = { containerEl: document.createElement('div') } as unknown as import('obsidian').WorkspaceLeaf;
+    const view = new ZoneView(leaf, plugin);
+    (view as unknown as { contentEl: HTMLElement }).contentEl = document.createElement('div');
+    view.setZones({
+      atlas: {
+        name: 'atlas', sub: '', icon: 'globe',
+        objects: [{
+          id: 'atlas/people', title: 'people', sub: '', icon: 'person', count: 1, expanded: true,
+          children: [{ type: 'file', name: 'martin.md', depth: 1 }],
+        }],
+      },
+    } as never);
+    view.setActiveZone('atlas');
+    const root = (view as unknown as { contentEl: HTMLElement }).contentEl;
+    const card = root.querySelector('.obj');
+    expect(card).not.toBeNull();
+    expect(card!.querySelector('.obj-children')).not.toBeNull();
+    expect(card!.querySelector('.obj-children .tree')).not.toBeNull();
+  });
+
+  it('TreeRow folder click inserts a .tree sibling and a second click removes it', async () => {
+    const { renderTree } = await import('../src/components/TreeRow');
+    const tree = [{
+      type: 'folder' as const,
+      name: 'atlas',
+      depth: 0,
+      expanded: false,
+      children: [{ type: 'file' as const, name: 'martin-holland.md', depth: 1 }],
+    }];
+    const container = renderTree(tree, { pathPrefix: '' });
+    document.body.appendChild(container);
+    const folderRow = container.querySelector<HTMLElement>('.row.is-folder')!;
+    expect(folderRow).not.toBeNull();
+    // Initially collapsed — no .tree sibling.
+    expect(folderRow.nextElementSibling?.classList.contains('tree')).toBeFalsy();
+    folderRow.click();
+    // Now expanded — .tree sibling inserted.
+    expect(folderRow.nextElementSibling?.classList.contains('tree')).toBe(true);
+    expect(folderRow.nextElementSibling?.querySelector('.row')?.textContent).toContain('martin-holland');
+    folderRow.click();
+    // Collapsed again — sibling removed.
+    expect(folderRow.nextElementSibling?.classList.contains('tree')).toBeFalsy();
+  });
+
+  it('focus controller collapses both Obsidian sidebars on enter and expands on exit', async () => {
+    const { createFocusController } = await import('../src/services/focus');
+    document.body.className = '';
+    const workspace = {
+      leftSplit: {
+        collapsed: false, _collapseCalls: 0, _expandCalls: 0,
+        collapse(): void { this.collapsed = true; this._collapseCalls += 1; },
+        expand(): void { this.collapsed = false; this._expandCalls += 1; },
+      },
+      rightSplit: {
+        collapsed: false, _collapseCalls: 0, _expandCalls: 0,
+        collapse(): void { this.collapsed = true; this._collapseCalls += 1; },
+        expand(): void { this.collapsed = false; this._expandCalls += 1; },
+      },
+    };
+    const focus = createFocusController({
+      workspace,
+      settings: plugin.settings,
+      saveSettings: () => {},
+    });
+    focus.on();
+    expect(document.body.classList.contains('focus-on')).toBe(true);
+    expect(workspace.leftSplit._collapseCalls).toBe(1);
+    expect(workspace.rightSplit._collapseCalls).toBe(1);
+    focus.off();
+    expect(document.body.classList.contains('focus-on')).toBe(false);
+    expect(workspace.leftSplit._expandCalls).toBe(1);
+    expect(workspace.rightSplit._expandCalls).toBe(1);
+  });
+
+  it('bundle contains a .tooltip contrast override so cream tokens cannot collide with white text', async () => {
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const stylesPath = path.resolve(__dirname, '..', 'styles.css');
+    if (!fs.existsSync(stylesPath)) return;
+    const css = fs.readFileSync(stylesPath, 'utf8');
+    // The override sets explicit dark background + white text on .tooltip.
+    // Loose match so future palette tweaks don't brittlely break this test.
+    const tooltipBlockRe = /\.tooltip\s*\{[\s\S]*?background:\s*#[0-9a-f]{3,6}[^}]*color:\s*#[0-9a-f]{3,6}/i;
+    expect(tooltipBlockRe.test(css)).toBe(true);
   });
 });

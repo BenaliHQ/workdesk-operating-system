@@ -53,8 +53,28 @@ export function renderTreeRow(opts: TreeRowOpts): HTMLElement {
     const path = opts.pathPrefix ? `${opts.pathPrefix}/${node.name}` : node.name;
     if (node.type === 'folder') {
       const chev = row.querySelector('.chevron');
-      chev?.classList.toggle('open');
-      node.expanded = !node.expanded;
+      if (node.expanded) {
+        // Currently expanded — collapse: drop chevron-open + remove the
+        // .tree sibling that holds this folder's children.
+        node.expanded = false;
+        chev?.classList.remove('open');
+        const next = row.nextElementSibling;
+        if (next?.classList.contains('tree')) {
+          next.remove();
+        }
+      } else {
+        // Currently collapsed — expand: set chevron-open + render the
+        // subtree once and insert it as a sibling right after this row.
+        node.expanded = true;
+        chev?.classList.add('open');
+        if (node.children?.length) {
+          const sub = renderTree(node.children, {
+            ...opts,
+            pathPrefix: opts.pathPrefix ? `${opts.pathPrefix}/${node.name}` : node.name,
+          });
+          row.after(sub);
+        }
+      }
     }
     opts.onActivate?.(node, path);
   });

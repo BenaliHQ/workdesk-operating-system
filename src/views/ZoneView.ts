@@ -70,12 +70,17 @@ export class ZoneView extends ItemView {
       if (obj.empty === 'caught-up') {
         card.appendChild(renderCaughtUpRow());
       } else if (obj.children?.length) {
-        card.appendChild(
+        // Wrap the tree in .obj-children so the existing CSS
+        // (.obj.collapsed .obj-children { display: none }) actually matches.
+        const childrenWrap = document.createElement('div');
+        childrenWrap.className = 'obj-children';
+        childrenWrap.appendChild(
           renderTree(obj.children, {
             pathPrefix: obj.id,
             onActivate: (node, path) => this.handleActivate(node, path),
           }),
         );
+        card.appendChild(childrenWrap);
       }
       list.appendChild(card);
     }

@@ -139,7 +139,10 @@ export const DEFAULT_SETTINGS: WorkdeskSettings = {
     allowScripts: false,
   },
   appearance: {
-    hideNonWorkdeskRibbonIcons: false,
+    // On for new installs — operators picking WorkDesk as their primary surface
+    // want a tight ribbon. The Appearance settings sub-tab lets them flip back
+    // if they prefer the native icons visible.
+    hideNonWorkdeskRibbonIcons: true,
   },
 };
 

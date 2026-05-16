@@ -201,63 +201,82 @@ describe('phase 5b · focus mode', () => {
     return structuredClone(DEFAULT_SETTINGS);
   }
 
-  it('toggle adds body.focus-on + .no-left/.no-right on .app', () => {
-    const app = document.createElement('div');
-    app.className = 'app';
-    document.body.appendChild(app);
+  function makeWorkspace(initial?: { left?: boolean; right?: boolean }) {
+    return {
+      leftSplit: {
+        collapsed: initial?.left ?? false,
+        _collapseCalls: 0,
+        _expandCalls: 0,
+        collapse(): void { this.collapsed = true; this._collapseCalls += 1; },
+        expand(): void { this.collapsed = false; this._expandCalls += 1; },
+      },
+      rightSplit: {
+        collapsed: initial?.right ?? false,
+        _collapseCalls: 0,
+        _expandCalls: 0,
+        collapse(): void { this.collapsed = true; this._collapseCalls += 1; },
+        expand(): void { this.collapsed = false; this._expandCalls += 1; },
+      },
+    };
+  }
 
+  it('toggle adds body.focus-on and collapses both Obsidian sidebars', () => {
+    document.body.className = '';
+    const workspace = makeWorkspace();
     const settings = makeSettings();
     let saved = 0;
     const focus = createFocusController({
-      appEl: app,
+      workspace,
       settings,
-      saveSettings: () => {
-        saved++;
-      },
+      saveSettings: () => { saved++; },
     });
 
     expect(focus.isOn()).toBe(false);
     focus.toggle();
     expect(document.body.classList.contains('focus-on')).toBe(true);
-    expect(app.classList.contains('no-left')).toBe(true);
-    expect(app.classList.contains('no-right')).toBe(true);
+    expect(workspace.leftSplit.collapsed).toBe(true);
+    expect(workspace.rightSplit.collapsed).toBe(true);
+    expect(workspace.leftSplit._collapseCalls).toBe(1);
+    expect(workspace.rightSplit._collapseCalls).toBe(1);
     expect(settings.focus.completed).toBe(true);
     expect(saved).toBeGreaterThan(0);
 
     focus.toggle();
     expect(document.body.classList.contains('focus-on')).toBe(false);
-    expect(app.classList.contains('no-left')).toBe(false);
-    expect(app.classList.contains('no-right')).toBe(false);
+    expect(workspace.leftSplit.collapsed).toBe(false);
+    expect(workspace.rightSplit.collapsed).toBe(false);
+    expect(workspace.leftSplit._expandCalls).toBe(1);
+    expect(workspace.rightSplit._expandCalls).toBe(1);
     expect(settings.focus.completed).toBe(false);
   });
 
   it('restore re-applies persisted state on plugin load', () => {
-    const app = document.createElement('div');
-    app.className = 'app';
-    document.body.appendChild(app);
-
+    document.body.className = '';
+    const workspace = makeWorkspace();
     const settings = makeSettings();
     settings.focus.completed = true;
-    const focus = createFocusController({ appEl: app, settings, saveSettings: () => {} });
+    const focus = createFocusController({ workspace, settings, saveSettings: () => {} });
     focus.restore();
     expect(document.body.classList.contains('focus-on')).toBe(true);
-    expect(app.classList.contains('no-left')).toBe(true);
-    expect(app.classList.contains('no-right')).toBe(true);
+    expect(workspace.leftSplit.collapsed).toBe(true);
+    expect(workspace.rightSplit.collapsed).toBe(true);
   });
 
-  it('preserves prior pane state when focus exits', () => {
-    const app = document.createElement('div');
-    app.className = 'app no-left';
-    document.body.appendChild(app);
-
+  it('preserves prior sidebar collapsed state when focus exits', () => {
+    document.body.className = '';
+    // Operator had the left sidebar already collapsed before focus mode.
+    const workspace = makeWorkspace({ left: true, right: false });
     const settings = makeSettings();
-    const focus = createFocusController({ appEl: app, settings, saveSettings: () => {} });
+    const focus = createFocusController({ workspace, settings, saveSettings: () => {} });
     focus.on();
-    expect(app.classList.contains('no-left')).toBe(true);
-    expect(app.classList.contains('no-right')).toBe(true);
+    expect(workspace.leftSplit.collapsed).toBe(true);
+    expect(workspace.rightSplit.collapsed).toBe(true);
     focus.off();
-    expect(app.classList.contains('no-left')).toBe(true); // prior state
-    expect(app.classList.contains('no-right')).toBe(false);
+    // Left was collapsed before — leave it collapsed; right was open — restore.
+    expect(workspace.leftSplit.collapsed).toBe(true);
+    expect(workspace.rightSplit.collapsed).toBe(false);
+    expect(workspace.leftSplit._expandCalls).toBe(0);
+    expect(workspace.rightSplit._expandCalls).toBe(1);
   });
 });
 

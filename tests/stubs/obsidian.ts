@@ -54,8 +54,18 @@ export class App {
   };
 }
 
+export class WorkspaceSidedock {
+  collapsed = false;
+  _collapseCalls = 0;
+  _expandCalls = 0;
+  collapse(): void { this.collapsed = true; this._collapseCalls += 1; }
+  expand(): void { this.collapsed = false; this._expandCalls += 1; }
+}
+
 export class Workspace {
   layoutReady = true;
+  leftSplit: WorkspaceSidedock = new WorkspaceSidedock();
+  rightSplit: WorkspaceSidedock = new WorkspaceSidedock();
   _getLeftLeafCalls = 0;
   _getRightLeafCalls = 0;
   _getLeafTabCalls = 0;

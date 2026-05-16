@@ -57,3 +57,20 @@ body.focus-on .status-bar:hover { opacity: 1; }
   background: rgba(90, 107, 122, 0.20);
   color: var(--text-normal);
 }
+
+/* Tooltip contrast — tokens.css redefines --background-secondary-alt /
+ * --background-modifier-message / --text-on-accent at :root, which is what
+ * Obsidian's native tooltip pulls from. That landed our tooltip on cream
+ * with white text (unreadable). Explicit override here pins a high-contrast
+ * dark-on-light tooltip regardless of token drift. */
+.tooltip {
+  background: #2a2a2a;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.tooltip .tooltip-arrow {
+  border-top-color: #2a2a2a;
+  border-bottom-color: #2a2a2a;
+  border-left-color: #2a2a2a;
+  border-right-color: #2a2a2a;
+}

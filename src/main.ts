@@ -110,7 +110,7 @@ export default class WorkdeskosPlugin extends Plugin {
     this.registerRibbonIcons();
 
     this.focus = createFocusController({
-      appEl: document.body,
+      workspace: this.app.workspace as unknown as Parameters<typeof createFocusController>[0]['workspace'],
       settings: this.settings,
       saveSettings: () => this.saveSettings(),
     });

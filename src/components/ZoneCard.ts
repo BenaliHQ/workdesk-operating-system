@@ -49,7 +49,11 @@ export function renderZoneCard(opts: ZoneCardOpts): HTMLElement {
   row.appendChild(meta);
 
   row.addEventListener('click', () => {
-    card.classList.toggle('collapsed');
+    // Mutate the model so a parent re-render reads the new state.
+    // Without this, ZoneView.render() rebuilds the card from obj.expanded
+    // (unchanged) and the visual toggle reverts immediately.
+    opts.obj.expanded = !opts.obj.expanded;
+    card.classList.toggle('collapsed', !opts.obj.expanded);
     opts.onToggle?.(opts.obj.id);
   });
 
