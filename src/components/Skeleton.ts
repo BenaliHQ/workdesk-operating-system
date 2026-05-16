@@ -4,14 +4,14 @@
 // Mount via `renderObjCardSkeletons` / `renderRowSkeletons` / `renderSpinner`.
 
 export function renderObjCardSkeleton(): HTMLElement {
-  const el = activeDocument.createDiv();
+  const el = createDiv();
   el.className = 'skel-obj-card skeleton';
   el.setAttribute('aria-hidden', 'true');
   return el;
 }
 
 export function renderRowSkeleton(): HTMLElement {
-  const el = activeDocument.createDiv();
+  const el = createDiv();
   el.className = 'skel-row skeleton';
   el.setAttribute('aria-hidden', 'true');
   return el;
@@ -38,7 +38,7 @@ export function renderRowSkeletons(host: HTMLElement, count: number): HTMLElemen
 }
 
 export function renderSpinner(): HTMLElement {
-  const el = activeDocument.createSpan();
+  const el = createSpan();
   el.className = 'spinner';
   el.setAttribute('role', 'progressbar');
   el.setAttribute('aria-label', 'Loading');

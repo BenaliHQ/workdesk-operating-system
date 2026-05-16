@@ -30,7 +30,7 @@ export interface TabStripHandle {
 }
 
 export function mountTabStrip(parent: HTMLElement, opts: TabStripOptions): TabStripHandle {
-  const root = activeDocument.createDiv();
+  const root = createDiv();
   root.className = 'term-tabs';
   parent.appendChild(root);
 
@@ -38,7 +38,7 @@ export function mountTabStrip(parent: HTMLElement, opts: TabStripOptions): TabSt
   const tabs = new Map<number, TabEntry>();
   let activeId: number | null = null;
 
-  const newButton = activeDocument.createEl('button');
+  const newButton = createEl('button');
   newButton.type = 'button';
   newButton.className = 'term-tab tt-new';
   newButton.textContent = '+';
@@ -52,18 +52,18 @@ export function mountTabStrip(parent: HTMLElement, opts: TabStripOptions): TabSt
   };
 
   const renderTab = (desc: TabDescriptor): HTMLButtonElement => {
-    const el = activeDocument.createEl('button');
+    const el = createEl('button');
     el.type = 'button';
     el.className = 'term-tab';
     el.dataset.tab = String(desc.id);
     el.dataset.status = desc.status;
 
-    const name = activeDocument.createSpan();
+    const name = createSpan();
     name.className = 'tt-name';
     name.textContent = desc.name;
     el.appendChild(name);
 
-    const closeBtn = activeDocument.createSpan();
+    const closeBtn = createSpan();
     closeBtn.className = 'tt-x';
     closeBtn.setAttribute('aria-label', 'Close');
     closeBtn.textContent = '×';

@@ -33,7 +33,7 @@ export function clampWidth(side: Side, width: number, totalWidth = Number.POSITI
 const DEFAULT_PANE_WIDTH = 340;
 
 export function makeSplitter(opts: SplitterOpts): HTMLElement {
-  const el = activeDocument.createDiv();
+  const el = createDiv();
   el.className = `splitter splitter-${opts.side}`;
   el.dataset.side = opts.side;
   el.setAttribute('role', 'separator');

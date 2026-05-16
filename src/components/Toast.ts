@@ -23,7 +23,7 @@ const stickyById = new Map<string, HTMLElement>();
 function ensureStack(): HTMLElement {
   let stack = activeDocument.querySelector<HTMLElement>(`.${STACK_CLASS}`);
   if (!stack) {
-    stack = activeDocument.createDiv();
+    stack = createDiv();
     stack.className = STACK_CLASS;
     activeDocument.body.appendChild(stack);
   }
@@ -41,39 +41,39 @@ export function showToast(
   }
 
   const stack = ensureStack();
-  const toast = activeDocument.createDiv();
+  const toast = createDiv();
   toast.className = `toast ${severity}`;
   toast.setAttribute('role', 'status');
   toast.setAttribute('aria-live', 'polite');
   if (opts.id) toast.dataset.id = opts.id;
 
-  const glyph = activeDocument.createSpan();
+  const glyph = createSpan();
   glyph.className = 'glyph';
   glyph.setAttribute('aria-hidden', 'true');
   glyph.textContent = severity === 'success' ? '✓' : severity === 'error' ? '!' : severity === 'loading' ? '◐' : 'ℹ';
   toast.appendChild(glyph);
 
-  const body = activeDocument.createSpan();
+  const body = createSpan();
   body.className = 'body';
   if (opts.title) {
-    const t = activeDocument.createEl('strong');
+    const t = createEl('strong');
     t.textContent = opts.title;
     body.appendChild(t);
-    const m = activeDocument.createSpan();
+    const m = createSpan();
     m.textContent = message;
     body.appendChild(m);
   } else {
     body.textContent = message;
   }
   if (opts.sub) {
-    const sub = activeDocument.createSpan();
+    const sub = createSpan();
     sub.className = 'sub';
     sub.textContent = opts.sub;
     body.appendChild(sub);
   }
   toast.appendChild(body);
 
-  const close = activeDocument.createEl('button');
+  const close = createEl('button');
   close.className = 'close';
   close.setAttribute('aria-label', 'Dismiss');
   close.textContent = '×';

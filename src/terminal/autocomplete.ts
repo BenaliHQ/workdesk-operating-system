@@ -31,19 +31,19 @@ export function mountAutocomplete(parent: HTMLElement, opts: AutocompleteOptions
   let filtered: AutocompleteEntry[] = [];
   let selected = 0;
 
-  const root = activeDocument.createDiv();
+  const root = createDiv();
   root.className = 'term-autocomplete';
   root.setAttribute('role', 'listbox');
 
-  const queryEl = activeDocument.createDiv();
+  const queryEl = createDiv();
   queryEl.className = 'tac-query';
   root.appendChild(queryEl);
 
-  const listEl = activeDocument.createEl('ul');
+  const listEl = createEl('ul');
   listEl.className = 'tac-list';
   root.appendChild(listEl);
 
-  const footerEl = activeDocument.createDiv();
+  const footerEl = createDiv();
   footerEl.className = 'tac-footer';
   appendKbdFooter(footerEl, [
     { keys: ['↑↓'], label: 'nav' },
@@ -67,18 +67,18 @@ export function mountAutocomplete(parent: HTMLElement, opts: AutocompleteOptions
     queryEl.textContent = `[[${query}`;
     listEl.empty();
     filtered.forEach((entry, i) => {
-      const li = activeDocument.createEl('li');
+      const li = createEl('li');
       li.className = 'tac-item';
       if (i === selected) li.classList.add('selected');
       li.dataset.index = String(i);
 
-      const name = activeDocument.createSpan();
+      const name = createSpan();
       name.className = 'tac-name';
       name.textContent = entry.name;
       li.appendChild(name);
 
       if (entry.folder && entry.folder.length > 0) {
-        const folder = activeDocument.createSpan();
+        const folder = createSpan();
         folder.className = 'tac-folder';
         folder.textContent = entry.folder;
         li.appendChild(folder);
@@ -106,7 +106,7 @@ export function mountAutocomplete(parent: HTMLElement, opts: AutocompleteOptions
     items.forEach((item, idx) => {
       if (idx > 0) el.appendText(' · ');
       for (const k of item.keys) {
-        const kbd = activeDocument.createEl('kbd');
+        const kbd = createEl('kbd');
         kbd.textContent = k;
         el.appendChild(kbd);
       }

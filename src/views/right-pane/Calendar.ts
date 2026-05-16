@@ -43,7 +43,7 @@ export function renderCalendar(parent: HTMLElement, opts: CalendarOptions): HTML
 
   const dowRow = el('div', 'cal-dow');
   for (const d of DOW) {
-    const cell = activeDocument.createDiv();
+    const cell = createDiv();
     cell.textContent = d;
     dowRow.appendChild(cell);
   }
@@ -93,13 +93,13 @@ export function renderCalendar(parent: HTMLElement, opts: CalendarOptions): HTML
 }
 
 function el(tag: keyof HTMLElementTagNameMap, cls: string): HTMLElement {
-  const e = activeDocument.createEl(tag);
+  const e = createEl(tag);
   e.className = cls;
   return e;
 }
 
 function button(cls: string, text: string): HTMLButtonElement {
-  const b = activeDocument.createEl('button');
+  const b = createEl('button');
   b.type = 'button';
   b.className = cls;
   b.textContent = text;

@@ -55,13 +55,13 @@ interface SettingRowHandle {
 }
 
 function settingRow(parent: HTMLElement, label: string, description?: string): SettingRowHandle {
-  const row = activeDocument.createDiv();
+  const row = createDiv();
   row.className = 'setting';
   row.setAttribute('role', 'group');
 
-  const meta = activeDocument.createDiv();
+  const meta = createDiv();
   meta.className = 'setting-meta';
-  const labelEl = activeDocument.createDiv();
+  const labelEl = createDiv();
   labelEl.className = 'label';
   labelEl.textContent = label;
   const labelId = nextId('ws-setting-label');
@@ -69,7 +69,7 @@ function settingRow(parent: HTMLElement, label: string, description?: string): S
   meta.appendChild(labelEl);
   let describedById: string | undefined;
   if (description) {
-    const desc = activeDocument.createDiv();
+    const desc = createDiv();
     desc.className = 'desc';
     desc.textContent = description;
     describedById = nextId('ws-setting-desc');
@@ -79,7 +79,7 @@ function settingRow(parent: HTMLElement, label: string, description?: string): S
   row.setAttribute('aria-labelledby', labelId);
   row.appendChild(meta);
 
-  const control = activeDocument.createDiv();
+  const control = createDiv();
   control.className = 'control';
   row.appendChild(control);
 
@@ -95,7 +95,7 @@ function applyAria(el: HTMLElement, label: string, handle: SettingRowHandle): vo
 
 export function field(parent: HTMLElement, opts: FieldOptions): HTMLInputElement {
   const handle = settingRow(parent, opts.label, opts.description);
-  const input = activeDocument.createEl('input');
+  const input = createEl('input');
   input.type = opts.type ?? 'text';
   input.className = `field${opts.mono ? ' mono' : ''}`;
   input.id = nextId('ws-field');
@@ -111,7 +111,7 @@ export function field(parent: HTMLElement, opts: FieldOptions): HTMLInputElement
 
 export function toggle(parent: HTMLElement, opts: ToggleOptions): HTMLButtonElement {
   const handle = settingRow(parent, opts.label, opts.description);
-  const btn = activeDocument.createEl('button');
+  const btn = createEl('button');
   btn.type = 'button';
   btn.className = 'toggle';
   btn.setAttribute('role', 'switch');
@@ -133,11 +133,11 @@ export function toggle(parent: HTMLElement, opts: ToggleOptions): HTMLButtonElem
 
 export function select(parent: HTMLElement, opts: SelectOptions): HTMLSelectElement {
   const handle = settingRow(parent, opts.label, opts.description);
-  const sel = activeDocument.createEl('select');
+  const sel = createEl('select');
   sel.className = 'select';
   applyAria(sel, opts.label, handle);
   for (const c of opts.choices) {
-    const opt = activeDocument.createEl('option');
+    const opt = createEl('option');
     opt.value = c.value;
     opt.textContent = c.label;
     sel.appendChild(opt);
@@ -150,14 +150,14 @@ export function select(parent: HTMLElement, opts: SelectOptions): HTMLSelectElem
 
 export function segmented(parent: HTMLElement, opts: SegmentedOptions): HTMLElement {
   const handle = settingRow(parent, opts.label, opts.description);
-  const group = activeDocument.createDiv();
+  const group = createDiv();
   group.className = 'segmented';
   group.setAttribute('role', 'radiogroup');
   group.setAttribute('aria-labelledby', handle.labelId);
   let value = opts.initial;
   const buttons: HTMLButtonElement[] = [];
   for (const c of opts.choices) {
-    const b = activeDocument.createEl('button');
+    const b = createEl('button');
     b.type = 'button';
     b.setAttribute('role', 'radio');
     b.setAttribute('aria-checked', c.value === value ? 'true' : 'false');
@@ -182,7 +182,7 @@ export function segmented(parent: HTMLElement, opts: SegmentedOptions): HTMLElem
 }
 
 export function button(parent: HTMLElement, opts: ButtonOptions): HTMLButtonElement {
-  const b = activeDocument.createEl('button');
+  const b = createEl('button');
   b.type = 'button';
   b.className = `btn${opts.variant ? ` ${opts.variant}` : ''}`;
   b.textContent = opts.label;
@@ -192,7 +192,7 @@ export function button(parent: HTMLElement, opts: ButtonOptions): HTMLButtonElem
 }
 
 export function sectionLabel(parent: HTMLElement, text: string): HTMLElement {
-  const el = activeDocument.createDiv();
+  const el = createDiv();
   el.className = 'settings-section-label';
   el.textContent = text;
   parent.appendChild(el);

@@ -26,27 +26,27 @@ export interface BannerHandle {
 }
 
 export function renderBanner(host: HTMLElement, opts: BannerOptions): BannerHandle {
-  const el = activeDocument.createDiv();
+  const el = createDiv();
   const severity = opts.severity ?? 'info';
   el.className = `banner ${severity}`;
   el.setAttribute('role', severity === 'error' ? 'alert' : 'status');
 
-  const glyph = activeDocument.createSpan();
+  const glyph = createSpan();
   glyph.className = 'glyph';
   glyph.setAttribute('aria-hidden', 'true');
   glyph.textContent = opts.glyph ?? (severity === 'error' ? '!' : severity === 'warning' ? '△' : 'ℹ');
   el.appendChild(glyph);
 
-  const body = activeDocument.createDiv();
+  const body = createDiv();
   body.className = 'body';
   body.textContent = opts.message;
   el.appendChild(body);
 
   if (opts.actions && opts.actions.length) {
-    const actions = activeDocument.createDiv();
+    const actions = createDiv();
     actions.className = 'actions';
     for (const action of opts.actions) {
-      const btn = activeDocument.createEl('button');
+      const btn = createEl('button');
       btn.textContent = action.label;
       btn.addEventListener('click', action.onClick);
       actions.appendChild(btn);
@@ -55,7 +55,7 @@ export function renderBanner(host: HTMLElement, opts: BannerOptions): BannerHand
   }
 
   if (opts.dismissible) {
-    const close = activeDocument.createEl('button');
+    const close = createEl('button');
     close.className = 'banner-close';
     close.setAttribute('aria-label', 'Dismiss banner');
     close.textContent = '×';

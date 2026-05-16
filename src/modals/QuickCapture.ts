@@ -40,17 +40,17 @@ export class QuickCaptureModal extends Modal {
     this.contentEl.replaceChildren();
     this.contentEl.classList.add('qc');
 
-    const head = activeDocument.createDiv();
+    const head = createDiv();
     head.className = 'qc-head';
 
-    this.micEl = activeDocument.createDiv();
+    this.micEl = createDiv();
     this.micEl.className = 'qc-mic';
     this.micEl.setAttribute('aria-hidden', 'true');
     head.appendChild(this.micEl);
 
-    const meta = activeDocument.createDiv();
+    const meta = createDiv();
     meta.className = 'qc-meta';
-    const title = activeDocument.createDiv();
+    const title = createDiv();
     title.className = 'qc-title';
     title.textContent = 'Quick capture';
     title.id = 'qc-title';
@@ -61,35 +61,35 @@ export class QuickCaptureModal extends Modal {
     this.containerEl.setAttribute('role', 'dialog');
     this.containerEl.setAttribute('aria-modal', 'true');
     this.containerEl.setAttribute('aria-labelledby', 'qc-title');
-    this.statusEl = activeDocument.createDiv();
+    this.statusEl = createDiv();
     this.statusEl.className = 'qc-status';
     meta.appendChild(this.statusEl);
     head.appendChild(meta);
     this.contentEl.appendChild(head);
 
-    const body = activeDocument.createDiv();
+    const body = createDiv();
     body.className = 'qc-body';
-    this.transcriptEl = activeDocument.createDiv();
+    this.transcriptEl = createDiv();
     this.transcriptEl.className = 'qc-transcript';
     body.appendChild(this.transcriptEl);
     this.contentEl.appendChild(body);
 
-    const foot = activeDocument.createDiv();
+    const foot = createDiv();
     foot.className = 'qc-foot';
     foot.appendChild(this.buildDestChip('personal/captures', 'personal'));
     foot.appendChild(this.buildDestChip('system/inbox', 'system'));
     foot.appendChild(this.buildDestChip('gtd/inbox', 'gtd'));
-    const spacer = activeDocument.createDiv();
+    const spacer = createDiv();
     spacer.className = 'spacer';
     foot.appendChild(spacer);
 
-    const cancel = activeDocument.createEl('button');
+    const cancel = createEl('button');
     cancel.className = 'btn ghost';
     cancel.textContent = 'Cancel';
     cancel.addEventListener('click', () => this.handleCancel());
     foot.appendChild(cancel);
 
-    this.saveBtn = activeDocument.createEl('button');
+    this.saveBtn = createEl('button');
     this.saveBtn.className = 'btn primary';
     this.saveBtn.textContent = 'Save';
     this.saveBtn.addEventListener('click', () => { void this.handleSave(); });
@@ -121,15 +121,15 @@ export class QuickCaptureModal extends Modal {
   }
 
   private buildDestChip(dest: CaptureDestination, zone: string): HTMLButtonElement {
-    const chip = activeDocument.createEl('button');
+    const chip = createEl('button');
     chip.className = 'dest';
     chip.dataset.dest = dest;
     if (dest === this.dest) chip.classList.add('active');
-    const dot = activeDocument.createSpan();
+    const dot = createSpan();
     dot.className = 'dot';
     dot.dataset.zone = zone;
     chip.appendChild(dot);
-    const label = activeDocument.createSpan();
+    const label = createSpan();
     label.textContent = dest;
     chip.appendChild(label);
     chip.addEventListener('click', () => this.setDestination(dest));
@@ -147,7 +147,7 @@ export class QuickCaptureModal extends Modal {
         break;
       case 'recording': {
         this.statusEl.empty();
-        const dot = activeDocument.createSpan();
+        const dot = createSpan();
         dot.className = 'dot';
         this.statusEl.appendChild(dot);
         this.statusEl.appendText('Recording');

@@ -53,19 +53,19 @@ export class ZoneView extends ItemView {
       return;
     }
 
-    const hero = activeDocument.createDiv();
+    const hero = createDiv();
     hero.className = 'pane-hero';
     hero.appendChild(wsSvgEl(zone.icon, 24));
-    const h1 = activeDocument.createEl('h1');
+    const h1 = createEl('h1');
     h1.textContent = zone.name;
     hero.appendChild(h1);
-    const sub = activeDocument.createDiv();
+    const sub = createDiv();
     sub.className = 'sub';
     sub.textContent = zone.sub;
     hero.appendChild(sub);
     root.appendChild(hero);
 
-    const list = activeDocument.createDiv();
+    const list = createDiv();
     list.className = 'object-list';
     for (const obj of zone.objects) {
       const card = renderZoneCard({
@@ -78,7 +78,7 @@ export class ZoneView extends ItemView {
       } else if (obj.children?.length) {
         // Wrap the tree in .obj-children so the existing CSS
         // (.obj.collapsed .obj-children { display: none }) actually matches.
-        const childrenWrap = activeDocument.createDiv();
+        const childrenWrap = createDiv();
         childrenWrap.className = 'obj-children';
         childrenWrap.appendChild(
           renderTree(obj.children, {

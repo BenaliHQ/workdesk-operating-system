@@ -39,33 +39,33 @@ export class CommandPalette extends Modal {
     this.contentEl.replaceChildren();
     this.contentEl.classList.add('cmd-palette');
 
-    const inputRow = activeDocument.createDiv();
+    const inputRow = createDiv();
     inputRow.className = 'cmd-input-row';
     this.contentEl.appendChild(inputRow);
 
-    const glyph = activeDocument.createSpan();
+    const glyph = createSpan();
     glyph.className = 'cmd-glyph';
     glyph.textContent = '⌕';
     inputRow.appendChild(glyph);
 
-    this.input = activeDocument.createEl('input');
+    this.input = createEl('input');
     this.input.className = 'cmd-input';
     this.input.placeholder = 'Type a command…';
     inputRow.appendChild(this.input);
 
-    const pill = activeDocument.createSpan();
+    const pill = createSpan();
     pill.className = 'cmd-pill';
-    const pillKbd = activeDocument.createEl('kbd');
+    const pillKbd = createEl('kbd');
     // eslint-disable-next-line obsidianmd/ui/sentence-case -- ⌘K is a shortcut glyph, not sentence text.
     pillKbd.textContent = '⌘K';
     pill.appendChild(pillKbd);
     inputRow.appendChild(pill);
 
-    this.listEl = activeDocument.createDiv();
+    this.listEl = createDiv();
     this.listEl.className = 'cmd-list';
     this.contentEl.appendChild(this.listEl);
 
-    const footer = activeDocument.createDiv();
+    const footer = createDiv();
     footer.className = 'cmd-footer';
     appendKbdHint(footer, [
       { keys: ['↑↓'], label: 'navigate' },
@@ -103,7 +103,7 @@ export class CommandPalette extends Modal {
   private renderList(): void {
     this.listEl.replaceChildren();
     if (this.results.length === 0) {
-      const empty = activeDocument.createDiv();
+      const empty = createDiv();
       empty.className = 'cmd-empty';
       empty.textContent = 'No commands match.';
       this.listEl.appendChild(empty);
@@ -117,25 +117,25 @@ export class CommandPalette extends Modal {
     }
     let i = 0;
     for (const [group, entries] of groups.entries()) {
-      const heading = activeDocument.createDiv();
+      const heading = createDiv();
       heading.className = 'cmd-group';
       heading.textContent = group;
       this.listEl.appendChild(heading);
       for (const entry of entries) {
-        const row = activeDocument.createDiv();
+        const row = createDiv();
         row.className = 'cmd-item';
         if (i === this.selected) row.classList.add('selected');
         row.dataset.id = entry.id;
 
-        const name = activeDocument.createSpan();
+        const name = createSpan();
         name.className = 'cmd-name';
         name.textContent = entry.name;
         row.appendChild(name);
 
         if (entry.hotkey) {
-          const hk = activeDocument.createSpan();
+          const hk = createSpan();
           hk.className = 'hk';
-          const hkKbd = activeDocument.createEl('kbd');
+          const hkKbd = createEl('kbd');
           hkKbd.textContent = entry.hotkey;
           hk.appendChild(hkKbd);
           row.appendChild(hk);
@@ -211,7 +211,7 @@ function appendKbdHint(
   items.forEach((item, idx) => {
     if (idx > 0) el.appendText(' · ');
     for (const k of item.keys) {
-      const kbd = activeDocument.createEl('kbd');
+      const kbd = createEl('kbd');
       kbd.textContent = k;
       el.appendChild(kbd);
     }

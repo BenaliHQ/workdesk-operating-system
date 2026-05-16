@@ -25,11 +25,11 @@ export interface ToolbarOpts {
 }
 
 export function renderEditorToolbar(opts: ToolbarOpts): HTMLElement {
-  const el = activeDocument.createDiv();
+  const el = createDiv();
   el.className = 'editor-toolbar';
 
   for (const slot of SLOTS) {
-    const btn = activeDocument.createEl('button');
+    const btn = createEl('button');
     btn.className = 'icon-btn';
     btn.type = 'button';
     btn.dataset.slot = slot.id;

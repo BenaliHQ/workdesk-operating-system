@@ -78,3 +78,27 @@ while (q && q !== Object.prototype) {
 
 (globalThis as { activeDocument?: Document }).activeDocument = document;
 (globalThis as { activeWindow?: Window & typeof globalThis }).activeWindow = window as Window & typeof globalThis;
+
+// Obsidian's global factory helpers — return free-standing elements (no
+// auto-append). Source code uses these instead of `activeDocument.createDiv()`
+// because Obsidian's `Document.createDiv` implementation in enhance.js calls
+// `this.appendChild()` on the Document, which throws HierarchyRequestError
+// (Document only allows one root element).
+const g = globalThis as Record<string, unknown>;
+function freeStandingFactory<K extends keyof HTMLElementTagNameMap>(
+  tag: K,
+): (opts?: TagOptsLite) => HTMLElementTagNameMap[K] {
+  return (opts?: TagOptsLite) => {
+    const el = document.createElement(tag);
+    if (opts?.text) el.textContent = opts.text;
+    if (opts?.cls) el.className = opts.cls;
+    return el;
+  };
+}
+if (typeof g.createDiv !== 'function') g.createDiv = freeStandingFactory('div');
+if (typeof g.createSpan !== 'function') g.createSpan = freeStandingFactory('span');
+if (typeof g.createEl !== 'function') {
+  g.createEl = function <K extends keyof HTMLElementTagNameMap>(tag: K, opts?: TagOptsLite) {
+    return freeStandingFactory(tag)(opts);
+  };
+}

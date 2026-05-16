@@ -29,7 +29,7 @@ export class HtmlView extends FileView {
     const sandboxFlags = ['allow-same-origin'];
     if (this.plugin.settings.html.allowScripts) sandboxFlags.push('allow-scripts');
 
-    const iframe = activeDocument.createEl('iframe');
+    const iframe = createEl('iframe');
     iframe.addClass('wd-html-iframe');
     iframe.setAttribute('sandbox', sandboxFlags.join(' '));
     iframe.setAttribute('srcdoc', text);
@@ -43,17 +43,17 @@ export class HtmlView extends FileView {
   }
 
   private renderChip(file: TFile): void {
-    const chip = activeDocument.createDiv();
+    const chip = createDiv();
     chip.className = 'workdesk-html-chip';
-    const name = activeDocument.createSpan();
+    const name = createSpan();
     name.className = 'name';
     name.textContent = `${file.basename}.${file.extension}`;
     chip.appendChild(name);
-    const sub = activeDocument.createSpan();
+    const sub = createSpan();
     sub.className = 'sub';
     sub.textContent = 'Rendered inline · workdesk-HTML-view';
     chip.appendChild(sub);
-    const btn = activeDocument.createEl('button');
+    const btn = createEl('button');
     btn.className = 'btn ghost';
     btn.type = 'button';
     btn.textContent = 'Open in browser ↗';

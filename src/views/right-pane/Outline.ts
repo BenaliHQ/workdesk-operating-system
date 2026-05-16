@@ -36,13 +36,13 @@ export function renderOutline(parent: HTMLElement, entries: OutlineEntry[]): HTM
   parent.classList.add('rp-body');
   parent.dataset.pane = 'outline';
 
-  const label = activeDocument.createDiv();
+  const label = createDiv();
   label.className = 'rp-section-label';
   label.textContent = `OUTLINE · ${entries.length}`;
   parent.appendChild(label);
 
   if (entries.length === 0) {
-    const empty = activeDocument.createDiv();
+    const empty = createDiv();
     empty.className = 'rp-empty';
     empty.textContent = 'No headings.';
     parent.appendChild(empty);
@@ -50,7 +50,7 @@ export function renderOutline(parent: HTMLElement, entries: OutlineEntry[]): HTM
   }
 
   for (const entry of entries) {
-    const row = activeDocument.createDiv();
+    const row = createDiv();
     row.className = `rp-outline-row h${entry.level}`;
     row.dataset.line = String(entry.line);
     row.textContent = entry.text;

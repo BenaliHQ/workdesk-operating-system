@@ -25,7 +25,7 @@ let activeMenu: ContextMenuHandle | null = null;
 export function showContextMenu(x: number, y: number, items: MenuItem[]): ContextMenuHandle {
   if (activeMenu) activeMenu.close();
 
-  const menu = activeDocument.createDiv();
+  const menu = createDiv();
   menu.className = 'ws-popover workdesk-context-menu';
   menu.setAttribute('role', 'menu');
   menu.style.setProperty('--wd-x', `${x}px`);
@@ -73,35 +73,35 @@ export function showContextMenu(x: number, y: number, items: MenuItem[]): Contex
 
 function renderItem(item: MenuItem, dismiss: () => void): HTMLElement {
   if ('divider' in item) {
-    const d = activeDocument.createDiv();
+    const d = createDiv();
     d.className = 'ws-popover-divider';
     return d;
   }
   if (!('text' in item) && 'label' in item) {
-    const label = activeDocument.createDiv();
+    const label = createDiv();
     label.className = 'ws-popover-label';
     label.textContent = item.label;
     return label;
   }
   const it = item;
-  const row = activeDocument.createEl('button');
+  const row = createEl('button');
   row.type = 'button';
   row.className = 'ws-popover-item';
   row.setAttribute('role', 'menuitem');
   if (it.danger) row.classList.add('danger');
 
-  const glyph = activeDocument.createSpan();
+  const glyph = createSpan();
   glyph.className = 'glyph';
   glyph.setAttribute('aria-hidden', 'true');
   glyph.textContent = it.icon ?? '';
   row.appendChild(glyph);
 
-  const text = activeDocument.createSpan();
+  const text = createSpan();
   text.textContent = it.text;
   row.appendChild(text);
 
   if (it.kbd) {
-    const k = activeDocument.createSpan();
+    const k = createSpan();
     k.className = 'kbd-hint';
     k.textContent = it.kbd;
     row.appendChild(k);

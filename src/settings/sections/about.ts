@@ -7,21 +7,21 @@ export function mountAboutSection(parent: HTMLElement, plugin: WorkdeskOSPlugin)
   parent.dataset.tab = 'about';
   sectionLabel(parent, 'ABOUT');
 
-  const body = activeDocument.createDiv();
+  const body = createDiv();
   body.className = 'about-body';
 
-  const title = activeDocument.createEl('h3');
+  const title = createEl('h3');
   title.textContent = plugin.manifest.name;
   body.appendChild(title);
 
-  const version = activeDocument.createDiv();
+  const version = createDiv();
   version.className = 'desc';
   version.textContent = `Version ${plugin.manifest.version} · MIT`;
   body.appendChild(version);
 
-  const links = activeDocument.createDiv();
+  const links = createDiv();
   links.className = 'about-links';
-  const repo = activeDocument.createEl('a');
+  const repo = createEl('a');
   repo.href = 'https://github.com/BenaliHQ/workdesk-operating-system';
   repo.textContent = 'GitHub';
   repo.target = '_blank';

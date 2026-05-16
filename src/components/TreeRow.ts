@@ -13,7 +13,7 @@ export interface TreeRowOpts {
 
 export function renderTreeRow(opts: TreeRowOpts): HTMLElement {
   const { node } = opts;
-  const row = activeDocument.createDiv();
+  const row = createDiv();
   row.className = 'row';
   row.dataset.depth = String(node.depth);
   if (node.type === 'folder') row.classList.add('is-folder');
@@ -21,29 +21,29 @@ export function renderTreeRow(opts: TreeRowOpts): HTMLElement {
   row.style.setProperty('--depth', String(node.depth));
 
   if (node.type === 'folder') {
-    const chev = activeDocument.createSpan();
+    const chev = createSpan();
     chev.className = 'chevron';
     if (node.expanded) chev.classList.add('open');
     chev.appendChild(wsSvgEl('chevron', 10));
     row.appendChild(chev);
   } else {
-    const spacer = activeDocument.createSpan();
+    const spacer = createSpan();
     spacer.className = 'chevron empty';
     row.appendChild(spacer);
   }
 
-  const glyph = activeDocument.createSpan();
+  const glyph = createSpan();
   glyph.className = 'row-glyph';
   glyph.appendChild(wsSvgEl(node.type === 'folder' ? 'folder' : 'file', 12));
   row.appendChild(glyph);
 
-  const name = activeDocument.createSpan();
+  const name = createSpan();
   name.className = 'name';
   name.textContent = node.name;
   row.appendChild(name);
 
   if (typeof node.count === 'number' || node.count === '—') {
-    const count = activeDocument.createSpan();
+    const count = createSpan();
     count.className = 'count';
     count.textContent = String(node.count);
     row.appendChild(count);
@@ -107,7 +107,7 @@ export function renderTreeRow(opts: TreeRowOpts): HTMLElement {
 }
 
 export function renderTree(nodes: TreeNode[], opts: Omit<TreeRowOpts, 'node'>): HTMLElement {
-  const container = activeDocument.createDiv();
+  const container = createDiv();
   container.className = 'tree';
   container.setAttribute('role', 'tree');
   for (const node of nodes) {

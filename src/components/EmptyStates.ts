@@ -11,24 +11,24 @@ export interface ZoneEmptyOpts {
 }
 
 export function renderZoneEmpty(opts: ZoneEmptyOpts): HTMLElement {
-  const el = activeDocument.createDiv();
+  const el = createDiv();
   el.className = 'zone-empty';
 
-  const bigDot = activeDocument.createDiv();
+  const bigDot = createDiv();
   bigDot.className = 'big-dot';
   bigDot.appendChild(wsSvgEl(opts.icon, 24));
   el.appendChild(bigDot);
 
-  const h2 = activeDocument.createEl('h2');
+  const h2 = createEl('h2');
   h2.textContent = opts.title;
   el.appendChild(h2);
 
-  const p = activeDocument.createEl('p');
+  const p = createEl('p');
   p.textContent = opts.body;
   el.appendChild(p);
 
   if (opts.cta) {
-    const btn = activeDocument.createEl('button');
+    const btn = createEl('button');
     btn.className = 'btn ghost';
     btn.type = 'button';
     btn.textContent = opts.cta.label;
@@ -39,13 +39,13 @@ export function renderZoneEmpty(opts: ZoneEmptyOpts): HTMLElement {
 }
 
 export function renderCaughtUpRow(label = 'All caught up'): HTMLElement {
-  const row = activeDocument.createDiv();
+  const row = createDiv();
   row.className = 'empty-row caught-up';
-  const check = activeDocument.createSpan();
+  const check = createSpan();
   check.className = 'check';
   check.appendChild(wsSvgEl('check', 14));
   row.appendChild(check);
-  const text = activeDocument.createSpan();
+  const text = createSpan();
   text.textContent = label;
   row.appendChild(text);
   return row;

@@ -18,13 +18,13 @@ export function renderBacklinks(parent: HTMLElement, entries: BacklinkEntry[]): 
   parent.classList.add('rp-body');
   parent.dataset.pane = 'backlinks';
 
-  const label = activeDocument.createDiv();
+  const label = createDiv();
   label.className = 'rp-section-label';
   label.textContent = `BACKLINKS · ${entries.length}`;
   parent.appendChild(label);
 
   if (entries.length === 0) {
-    const empty = activeDocument.createDiv();
+    const empty = createDiv();
     empty.className = 'rp-empty';
     empty.textContent = 'No backlinks yet.';
     parent.appendChild(empty);
@@ -32,24 +32,24 @@ export function renderBacklinks(parent: HTMLElement, entries: BacklinkEntry[]): 
   }
 
   for (const entry of entries) {
-    const row = activeDocument.createDiv();
+    const row = createDiv();
     row.className = 'rp-link';
     row.dataset.path = entry.notePath;
 
-    const glyph = activeDocument.createSpan();
+    const glyph = createSpan();
     glyph.className = 'rp-link-glyph';
     glyph.textContent = '↩';
     row.appendChild(glyph);
 
-    const body = activeDocument.createDiv();
+    const body = createDiv();
     body.className = 'rp-link-body';
 
-    const name = activeDocument.createSpan();
+    const name = createSpan();
     name.className = 'rp-link-name';
     name.textContent = entry.noteName;
     body.appendChild(name);
 
-    const ctx = activeDocument.createDiv();
+    const ctx = createDiv();
     ctx.className = 'ctx';
     appendHighlightedMatch(ctx, entry.excerpt, entry.matchText);
     body.appendChild(ctx);
@@ -88,7 +88,7 @@ function appendHighlightedMatch(parent: HTMLElement, excerpt: string, term: stri
   const idx = excerpt.toLowerCase().indexOf(term.toLowerCase());
   if (idx < 0) { parent.appendText(excerpt); return; }
   parent.appendText(excerpt.slice(0, idx));
-  const em = activeDocument.createEl('em');
+  const em = createEl('em');
   em.textContent = excerpt.slice(idx, idx + term.length);
   parent.appendChild(em);
   parent.appendText(excerpt.slice(idx + term.length));

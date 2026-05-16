@@ -45,18 +45,18 @@ export class WorkdeskSettingTab extends PluginSettingTab {
     this.containerEl.replaceChildren();
     this.containerEl.classList.add('settings');
 
-    const nav = activeDocument.createEl('aside');
+    const nav = createEl('aside');
     nav.className = 'settings-nav';
     this.containerEl.appendChild(nav);
 
-    const groupLabel = activeDocument.createDiv();
+    const groupLabel = createDiv();
     groupLabel.className = 'settings-nav-group';
     groupLabel.textContent = 'Workdesk';
     nav.appendChild(groupLabel);
 
     const navButtons = new Map<SettingsTabId, HTMLButtonElement>();
     for (const t of TAB_ORDER) {
-      const item = activeDocument.createEl('button');
+      const item = createEl('button');
       item.type = 'button';
       item.className = 'settings-nav-item';
       item.dataset.tab = t.id;
@@ -67,7 +67,7 @@ export class WorkdeskSettingTab extends PluginSettingTab {
       navButtons.set(t.id, item);
     }
 
-    this.bodyEl = activeDocument.createDiv();
+    this.bodyEl = createDiv();
     this.bodyEl.className = 'settings-body';
     this.containerEl.appendChild(this.bodyEl);
 
@@ -81,7 +81,7 @@ export class WorkdeskSettingTab extends PluginSettingTab {
   renderAllSectionsForTest(): HTMLElement[] {
     const results: HTMLElement[] = [];
     for (const t of TAB_ORDER) {
-      const host = activeDocument.createDiv();
+      const host = createDiv();
       host.className = `settings-section settings-${t.id}`;
       mountSection(t.id, host, this.plugin);
       this.containerEl.appendChild(host);

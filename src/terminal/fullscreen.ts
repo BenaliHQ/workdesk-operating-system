@@ -41,23 +41,23 @@ export function createFullscreenToggle(opts: FullscreenOptions): FullscreenHandl
   const renderRail = (): void => {
     if (!railEl) return;
     railEl.empty();
-    const label = activeDocument.createDiv();
+    const label = createDiv();
     label.className = 'fs-rail-label';
     label.textContent = 'SESSIONS';
     railEl.appendChild(label);
 
     for (const s of opts.sessions()) {
-      const row = activeDocument.createEl('button');
+      const row = createEl('button');
       row.type = 'button';
       row.className = 'fs-session-row';
       row.dataset.session = String(s.id);
       if (s.active) row.classList.add('is-active');
 
-      const dot = activeDocument.createSpan();
+      const dot = createSpan();
       dot.className = 'fs-dot';
       row.appendChild(dot);
 
-      const name = activeDocument.createSpan();
+      const name = createSpan();
       name.className = 'fs-session-name';
       name.textContent = s.name;
       row.appendChild(name);
@@ -66,7 +66,7 @@ export function createFullscreenToggle(opts: FullscreenOptions): FullscreenHandl
       railEl.appendChild(row);
     }
 
-    const newBtn = activeDocument.createEl('button');
+    const newBtn = createEl('button');
     newBtn.type = 'button';
     newBtn.className = 'fs-new-session';
     newBtn.textContent = '+ new session';
@@ -79,7 +79,7 @@ export function createFullscreenToggle(opts: FullscreenOptions): FullscreenHandl
       if (active) return;
       active = true;
       opts.appEl.classList.add('term-fullscreen');
-      railEl = activeDocument.createEl('aside');
+      railEl = createEl('aside');
       railEl.className = 'fs-session-rail';
       opts.appEl.appendChild(railEl);
       renderRail();

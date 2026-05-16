@@ -43,19 +43,19 @@ export async function mountQuickCaptureSection(parent: HTMLElement, plugin: Work
 }
 
 async function mountSecretField(parent: HTMLElement, app: App): Promise<void> {
-  const row = activeDocument.createDiv();
+  const row = createDiv();
   row.className = 'setting';
   row.setAttribute('role', 'group');
 
-  const meta = activeDocument.createDiv();
+  const meta = createDiv();
   meta.className = 'setting-meta';
-  const label = activeDocument.createDiv();
+  const label = createDiv();
   label.className = 'label';
   label.id = 'ws-stt-key-label';
   // eslint-disable-next-line obsidianmd/ui/sentence-case -- STT is an acronym.
   label.textContent = 'STT API key';
   meta.appendChild(label);
-  const desc = activeDocument.createDiv();
+  const desc = createDiv();
   desc.className = 'desc';
   desc.id = 'ws-stt-key-desc';
   desc.textContent = 'Stored in Obsidian’s secret storage; never written to data.json.';
@@ -63,7 +63,7 @@ async function mountSecretField(parent: HTMLElement, app: App): Promise<void> {
   row.setAttribute('aria-labelledby', 'ws-stt-key-label');
   row.appendChild(meta);
 
-  const control = activeDocument.createDiv();
+  const control = createDiv();
   control.className = 'control';
   row.appendChild(control);
 
