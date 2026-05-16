@@ -314,4 +314,19 @@ describe('phase 7 · standard plugin pattern', () => {
     const tooltipBlockRe = /\.tooltip\s*\{[\s\S]*?background:\s*#[0-9a-f]{3,6}[^}]*color:\s*#[0-9a-f]{3,6}/i;
     expect(tooltipBlockRe.test(css)).toBe(true);
   });
+
+  it('bundle restores opacity on Obsidian native modals so Settings is visible', async () => {
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const stylesPath = path.resolve(__dirname, '..', 'styles.css');
+    if (!fs.existsSync(stylesPath)) return;
+    const css = fs.readFileSync(stylesPath, 'utf8');
+    // Our plugin app.css ships `.modal { opacity: 0; transform: translateY(8px) }`
+    // for .scrim-wrapped modals. Obsidian's native modals live in
+    // .modal-container and never get a .scrim ancestor, so without an
+    // override they inherit opacity: 0 and never appear. The override
+    // pins .modal-container .modal back to opacity: 1.
+    const modalOverrideRe = /\.modal-container\s+\.modal\s*\{[\s\S]*?opacity:\s*1[\s\S]*?\}/i;
+    expect(modalOverrideRe.test(css)).toBe(true);
+  });
 });

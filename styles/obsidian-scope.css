@@ -74,3 +74,15 @@ body.focus-on .status-bar:hover { opacity: 1; }
   border-left-color: #2a2a2a;
   border-right-color: #2a2a2a;
 }
+
+/* Obsidian native modal visibility — the scoped app.css ships a `.modal`
+ * rule with `opacity: 0` and `transform: translateY(8px)` intended for
+ * plugin modals wrapped in `.scrim` (the `.scrim.open .modal` rule fades
+ * them in). Obsidian's native modals (Settings, file rename, etc.) live
+ * inside `.modal-container.mod-shown` and never get a `.scrim` ancestor,
+ * so they inherit opacity: 0 and never become visible — clicking the
+ * settings gear looks like "nothing happened". Force them visible. */
+.modal-container .modal {
+  opacity: 1;
+  transform: none;
+}
