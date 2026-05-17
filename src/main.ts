@@ -22,6 +22,7 @@ import { QuickCaptureModal } from './modals/QuickCapture';
 import { WorkdeskSettingTab } from './settings/tab';
 import { createFocusController, type FocusController } from './services/focus';
 import { obsidianCaptureVault } from './services/capture/obsidian-vault';
+import { installStatusObserver } from './services/terminal-status';
 import { installGlobalToast, showToast } from './components/Toast';
 import { wsSvg } from './icons';
 import { scanZones, scanFilesView, nodeFsAdapter } from './services/vault-scan';
@@ -178,6 +179,15 @@ export default class WorkdeskOSPlugin extends Plugin {
     if (this.focus.isOn()) this.refreshFocusIconActive(true);
 
     this.applyAppearance();
+
+    // Sidebar tab activity pulse — per-view MutationObserver on tabBarEl
+    // that re-applies `.has-activity` on tab-strip rebuilds. Fullscreen
+    // overlay tabs already get the same class from vin's vendored
+    // FullscreenManager; no separate wiring needed here.
+    this.app.workspace.onLayoutReady(() => this.installTerminalStatusObservers());
+    this.registerEvent(
+      this.app.workspace.on('layout-change', () => this.installTerminalStatusObservers()),
+    );
 
     this.registerDomEvent(activeDocument, 'keydown', (evt: KeyboardEvent) => {
       if (evt.key !== 'Escape') return;
@@ -363,6 +373,13 @@ export default class WorkdeskOSPlugin extends Plugin {
     await workspace.revealLeaf(leaf);
     const view = leaf.view as TerminalView | undefined;
     if (view?.createSession) view.createSession();
+  }
+
+  private installTerminalStatusObservers(): void {
+    for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKDESK_TERMINAL)) {
+      if (!(leaf.view instanceof TerminalView)) continue;
+      installStatusObserver(leaf.view);
+    }
   }
 
   /** First terminal leaf's view, or null if no terminal has been opened yet. */

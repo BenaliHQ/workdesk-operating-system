@@ -8,6 +8,48 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 _No unreleased changes._
 
+## [1.4.0] — 2026-05-17
+
+Tab activity indicator for the terminal pane. Adopts the binary
+`.has-activity` pulse pattern from upstream `internetvin-terminal` and
+extends it to the sidebar tab strip (upstream only wires it for
+fullscreen tabs).
+
+### Added
+
+- **Terminal: tab activity pulse.** When stdout/stderr arrives at a
+  terminal session that isn't currently focused, the session's tab
+  pulses with the Obsidian accent color (1.2s ease-in-out) and shows a
+  small dot before the label. Focusing the tab clears the pulse —
+  the user has now seen it; the next backgrounded output will re-flag
+  the tab. Works in both the sidebar tab strip and the fullscreen
+  overlay. State is per-session, in-memory only; `WeakSet` storage
+  lets destroyed sessions GC naturally. Implementation: zero vendor
+  modifications — we attach an additive
+  `process.stdout/stderr.on('data', …)` listener (Node EventEmitters
+  allow multiple listeners), so we coexist with upstream's own
+  `setActivityCallback` slot which the vendored `FullscreenManager`
+  owns when fullscreen is open. A `MutationObserver` on each view's
+  `tabBarEl` (childList only — narrow scope, no attribute observation)
+  re-applies the `.has-activity` class whenever upstream's
+  `renderTabs()` rebuilds the tab DOM, and clears it for whichever
+  session has just become active. See `specs/semantic-tab-dots.md`
+  (rev 5) for the full design and the pivot rationale through revs
+  1–4 (which attempted multi-state detection and abandoned it after
+  byte-stream parsing and screen-buffer scanning both proved
+  unreliable against Ink's TUI rendering).
+
+### Changed
+
+- **`styles/obsidian-scope.css`** — adds `wd-tab-pulse` +
+  `wd-tab-dot-pulse` keyframes and a single `.has-activity` rule
+  scoped to both `.vin-terminal-tab` (sidebar) and `.vin-fs-tab`
+  (fullscreen overlay). Pulse uses `var(--text-accent)` plus
+  `rgba(var(--interactive-accent-rgb, 108, 142, 255), …)` so it
+  follows the operator's Obsidian accent color with a sensible blue
+  fallback. Hash bumped in
+  `STATE.json.decisions.obsidian_scope_css_sha256`.
+
 ## [1.3.0] — 2026-05-17
 
 Terminal pane rebuilt on top of the vendored [`workdesk-terminal`](https://github.com/BenaliHQ/workdesk-terminal)

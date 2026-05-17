@@ -15,6 +15,8 @@ export class Plugin {
   registerExtensions(_exts: string[], _viewType: string): void {}
   registerDomEvent(_el: Element | Document | Window, _evt: string, _cb: unknown): void {}
   registerEditorExtension(_ext: unknown): void {}
+  registerEvent(_evtRef: unknown): void {}
+  register(_cb: () => unknown): void {}
   addCommand(c: { id: string; name: string; callback?: () => void; hotkeys?: unknown }): void {
     this.app.commands.commands[c.id] = c;
   }
@@ -74,7 +76,8 @@ export class Workspace {
   _openLinkTextCalls: Array<{ link: string; src: string; newLeaf: boolean }> = [];
   _seededLeavesByType: Record<string, Array<{ view: unknown; setViewState: (s: { type: string }) => Promise<void> }>> = {};
 
-  on(_evt: string, _cb: unknown): void {}
+  on(_evt: string, _cb: unknown): unknown { return { _evt: _evt, _cb: _cb }; }
+  onLayoutReady(cb: () => void): void { cb(); }
 
   _seedLeaf(type: string, viewMock: unknown): void {
     this._seededLeavesByType[type] = this._seededLeavesByType[type] ?? [];
