@@ -6,6 +6,12 @@ styles/app.scoped.generated.css
 .DS_Store
 scripts/logs/
 
+# Track the vendored vin stylesheet — the `styles.css` line above is meant to
+# ignore the bundled output at the repo root, but it also matches this source
+# file. Without this allow-rule a clean checkout would lose the .vin-terminal-*
+# rules and esbuild would silently emit a `/* missing */` placeholder.
+!src/vendor/workdesk-terminal/styles.css
+
 # When the repo is symlinked as a plugin folder into a vault, Obsidian writes
 # the plugin's runtime settings to data.json at the repo root. Operator-private,
 # never committed.

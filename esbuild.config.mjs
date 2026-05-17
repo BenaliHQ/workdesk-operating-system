@@ -37,6 +37,12 @@ execSync('node scripts/scope-app-css.mjs', { stdio: 'inherit', cwd: __dirname })
 const cssOrder = [
   'styles/fonts.css',
   'styles/tokens.css',
+  // Vendored vin terminal stylesheet (see src/vendor/workdesk-terminal/
+  // NOTICE.md). Includes the upstream xterm.js structural rules
+  // (.xterm-viewport / .xterm-screen / .xterm-helper-textarea positioning)
+  // inlined at the top, plus all `.vin-terminal-*` styling. Bundled before
+  // app.scoped.generated.css so any future app.css overrides win on cascade.
+  'src/vendor/workdesk-terminal/styles.css',
   'styles/app.scoped.generated.css',
   'styles/reduced-motion.css',
   'styles/obsidian-scope.css',

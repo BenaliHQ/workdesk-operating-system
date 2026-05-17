@@ -229,30 +229,43 @@ const CLASSIFICATIONS: Record<string, Classification> = {
       return null;
     },
   },
-  'Tab strip': { kind: 'machine', assert: () => (exists('src/terminal/tabs.ts') ? null : 'tabs.ts missing') },
+  // M5 terminal pivot: src/terminal/* was replaced by the vendored vin
+  // plugin at src/vendor/workdesk-terminal/. One file provides tab strip,
+  // status indicators, `[[` autocomplete, drag-drop, and the fullscreen
+  // overlay. The composer + mock statusbar were dropped in the pivot —
+  // users type directly into the active xterm session. See vendor
+  // NOTICE.md for the fork audit.
+  'Tab strip': {
+    kind: 'machine',
+    assert: () => (exists('src/vendor/workdesk-terminal/index.ts') ? null : 'vendored vin index missing'),
+  },
   'Tab status dots': {
     kind: 'machine',
-    assert: () => (exists('src/terminal/status-parser.ts') ? null : 'status-parser missing'),
-  },
-  'Composer at the bottom': {
-    kind: 'machine',
-    assert: () => (exists('src/terminal/composer.ts') ? null : 'composer.ts missing'),
-  },
-  '`Enter` or `⌘+Enter`': {
-    kind: 'machine',
-    assert: () => (exists('src/terminal/keymap.ts') ? null : 'keymap.ts missing'),
+    assert: () => {
+      const css = readFile('src/vendor/workdesk-terminal/styles.css');
+      return css.includes('vin-fs-tab.has-activity') ? null : 'activity-pulse rule missing in vendored styles';
+    },
   },
   '`[[` autocomplete': {
     kind: 'machine',
-    assert: () => (exists('src/terminal/autocomplete.ts') ? null : 'autocomplete missing'),
+    assert: () => {
+      const src = readFile('src/vendor/workdesk-terminal/index.ts');
+      return src.includes('class WikiLinkAutocomplete') ? null : 'WikiLinkAutocomplete missing in vendored index';
+    },
   },
   'Drag-drop file': {
     kind: 'machine',
-    assert: () => (exists('src/terminal/dropzone.ts') ? null : 'dropzone missing'),
+    assert: () => {
+      const src = readFile('src/vendor/workdesk-terminal/index.ts');
+      return src.includes('vin-terminal-dropzone') ? null : 'dropzone class missing in vendored index';
+    },
   },
   'Fullscreen mode': {
     kind: 'machine',
-    assert: () => (exists('src/terminal/fullscreen.ts') ? null : 'fullscreen missing'),
+    assert: () => {
+      const src = readFile('src/vendor/workdesk-terminal/index.ts');
+      return src.includes('class FullscreenManager') ? null : 'FullscreenManager missing in vendored index';
+    },
   },
 
   // ── Phase 5 — Modals ──────────────────────────────────────────────────

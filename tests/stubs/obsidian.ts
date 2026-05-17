@@ -355,6 +355,41 @@ export class Modal {
   onClose(): void {}
 }
 
+export class SuggestModal<T> extends Modal {
+  // Minimal happy-dom stub for vendored vin's OutputCaptureModal. Tests only
+  // import the class so the module loads; they don't open the modal or
+  // exercise suggestion rendering.
+  inputEl: HTMLInputElement = document.createElement('input');
+  resultContainerEl: HTMLElement = document.createElement('div');
+  setPlaceholder(_text: string): void {}
+  emptyStateText = '';
+  getSuggestions(_query: string): T[] | Promise<T[]> { return []; }
+  renderSuggestion(_value: T, _el: HTMLElement): void {}
+  onChooseSuggestion(_value: T, _evt: MouseEvent | KeyboardEvent): void {}
+}
+
+export class Menu {
+  private items: Array<{ title: string; callback: () => void }> = [];
+  addItem(cb: (item: {
+    setTitle: (t: string) => unknown;
+    setIcon: (n: string) => unknown;
+    onClick: (fn: () => void) => unknown;
+  }) => void): this {
+    let title = '';
+    let onClick = (): void => {};
+    cb({
+      setTitle: (t: string) => { title = t; return this; },
+      setIcon: (_n: string) => this,
+      onClick: (fn: () => void) => { onClick = fn; return this; },
+    });
+    this.items.push({ title, callback: onClick });
+    return this;
+  }
+  showAtMouseEvent(_evt: MouseEvent): void {}
+  showAtPosition(_pos: { x: number; y: number }): void {}
+  hide(): void {}
+}
+
 export class SecretComponent {
   containerEl: HTMLElement;
   app: App;

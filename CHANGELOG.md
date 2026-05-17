@@ -8,6 +8,75 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 _No unreleased changes._
 
+## [1.3.0] — 2026-05-17
+
+Terminal pane rebuilt on top of the vendored [`workdesk-terminal`](https://github.com/BenaliHQ/workdesk-terminal)
+plugin (a metadata-only rebrand of [`internetvin/internetvin-terminal`](https://github.com/internetvin/internetvin-terminal)
+by Vin Verma, MIT). The original `src/terminal/*` subsystem and the
+in-pane composer + mock statusbar were retired — see the migration notes
+below.
+
+### Changed
+
+- **Terminal: foundation swap.** Replaced the hand-built `src/terminal/*`
+  subsystem (13 files, ~3500 LOC) with a vendored copy of vin's single-file
+  implementation at `src/vendor/workdesk-terminal/index.ts`. The vendored
+  file is unmodified upstream code except for: (1) `VIEW_TYPE` renamed to
+  `"workdesk-terminal"`, (2) the `TerminalPlugin` shell stripped — our
+  `src/main.ts` owns the `Plugin` lifecycle, (3) `TerminalView`,
+  `ShortcutsModal`, `OutputCaptureModal`, and `PTY_HELPER_PY` exported,
+  (4) `writePtyHelper(vaultBase, manifestDir)` added so our `onload` can
+  materialize the python helper script. Fork audit in
+  `src/vendor/workdesk-terminal/NOTICE.md`.
+- **Terminal: dropped the composer + mock statusbar.** The Cursor-style
+  "Ask Claude — ⌘↵ to send" composer that lived below the xterm canvas,
+  and the mock `opus 4.7 · 0m 0s · $0.00 · ready` statusbar, are gone.
+  Users type directly into the active xterm session. Both surfaces were
+  cramped in a sidebar and confusingly redundant once the PTY was real.
+- **Terminal: real fullscreen.** vin's `FullscreenManager` ships a custom
+  overlay with single / split-h / split-v / 2×2 grid layouts and a left
+  sessions rail. Replaces our M1-M3 `.app.term-fullscreen` toggle that
+  the M4 standard-plugin pattern silently broke.
+- **Terminal: `[[` autocomplete typed into xterm.** vin's
+  `WikiLinkAutocomplete` intercepts the bracket sequence inside the
+  terminal canvas itself and offers vault notes. Our previous autocomplete
+  was wired to the (now-removed) composer paperclip button.
+
+### Added
+
+- `Capture Terminal Output to Note` command (default `Cmd+Shift+S` upstream,
+  unbound here — assign via Settings → Hotkeys). Opens vin's
+  `OutputCaptureModal` so you can save recent xterm output to a vault note.
+- `Add Terminal Bookmark`, `Next Terminal Bookmark`, `Previous Terminal
+  Bookmark`, `Clear Terminal Bookmarks` commands. Right-gutter pips let
+  you scroll back to flagged lines.
+- `Show Terminal Shortcuts` command — opens the help modal listing every
+  binding.
+
+### Removed
+
+- `src/terminal/{autocomplete,composer,dropzone,fullscreen,init,keymap,pty-helper,session,status-parser,statusbar,tabs,theme-bridge}.ts`.
+- `src/views/TerminalView.ts`.
+- The `.term-session-head`, `.workdesk-term-host`, `.workdesk-term-session`,
+  `.term-composer`, `.terminal-statusbar`, `.term-fullscreen-btn`, and
+  related rules in `styles/obsidian-scope.css`. The DOM these styled no
+  longer exists.
+- `tests/phase4a-2.spec.ts`, `tests/phase4b.spec.ts`, `tests/phase6a.spec.ts`
+  (moved to `tests/_archive/*.archived`) — they unit-tested the deleted
+  composer / statusbar / fullscreen toggle / standalone tab strip.
+  `tests/phase4a-1.spec.ts` rewritten to import `PTY_HELPER_PY` from the
+  vendor module; the PTY smoke test still runs.
+
+### Migration notes
+
+- Folder name unchanged: vault installs still resolve under
+  `.obsidian/plugins/workdesk-operating-system/`.
+- Saved settings unchanged: the new view registers under the same
+  `workdesk-terminal` view type, so existing layouts re-attach.
+- The vendored python helper is written to
+  `<vault>/.obsidian/plugins/workdesk-operating-system/pty-helper.py` on
+  every plugin load. Safe to delete; it's regenerated next start.
+
 ## [1.2.0] — 2026-05-16
 
 Bundle release combining the post-M4 review-bot parity cleanup, the plugin

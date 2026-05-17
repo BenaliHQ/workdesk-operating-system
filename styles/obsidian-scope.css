@@ -22,11 +22,138 @@
   background: var(--background-secondary);
 }
 
-/* TerminalView fills its sidebar leaf. */
+/* TerminalView pane — modeled on the workdesk-terminal (vin) plugin:
+ *   .terminal-body
+ *     .term-session-head    — tab strip + fullscreen control
+ *     .workdesk-term-host   — flex grow, holds all .workdesk-term-session
+ *       .workdesk-term-session × N (xterm mounts here, only active is shown)
+ *
+ * No inline composer or mock statusbar — those proved too cramped in a
+ * narrow sidebar and confusingly redundant once the PTY was real. Direct
+ * typing into the xterm canvas is the canonical input path. */
+
+/* Root: own the column flex; app.css's `.terminal-body` legacy padding +
+ * overflow:auto are for the M1-M3 full-surface design and fight the
+ * standard-plugin pattern where this element IS the leaf's .view-content. */
 .workspace-leaf-content[data-type="workdesk-terminal"] .terminal-body {
   height: 100%;
   display: flex;
   flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  background: var(--background-primary);
+}
+
+/* Header strip: clean row with tabs on the left, fullscreen on the right.
+ * app.css gives this a cream background + bottom border meant for the
+ * full-surface design's tab-on-top metaphor (with overlapping bottom
+ * border). In the standard-plugin pattern we want a flat, calm header. */
+.workspace-leaf-content[data-type="workdesk-terminal"] .term-session-head {
+  padding: 8px 12px;
+  background: var(--background-primary);
+  border-bottom: 1px solid var(--background-modifier-border);
+  gap: 8px;
+}
+
+/* Tab strip: horizontal scroll, rounded pill tabs (8px radius), gap 6px. */
+.workspace-leaf-content[data-type="workdesk-terminal"] .term-tabs {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border-bottom: none;
+  gap: 6px;
+}
+
+/* Tab: pill (8px radius), soft border, mono font, idle/active states use
+ * Obsidian's native interactive-accent color for the active tab. */
+.workspace-leaf-content[data-type="workdesk-terminal"] .term-tab {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 450;
+  letter-spacing: 0.01em;
+  color: var(--text-muted);
+  background: transparent;
+  top: 0;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.workspace-leaf-content[data-type="workdesk-terminal"] .term-tab::after {
+  /* Drop the underlapping border-bottom hack from the document-tab style. */
+  display: none;
+}
+.workspace-leaf-content[data-type="workdesk-terminal"] .term-tab:hover {
+  color: var(--text-normal);
+  background: var(--background-secondary);
+}
+.workspace-leaf-content[data-type="workdesk-terminal"] .term-tab.active {
+  color: var(--interactive-accent);
+  border-color: var(--interactive-accent);
+  background: transparent;
+}
+.workspace-leaf-content[data-type="workdesk-terminal"] .term-tab.tt-new {
+  border-style: dashed;
+  padding: 5px 10px;
+  color: var(--text-faint);
+}
+.workspace-leaf-content[data-type="workdesk-terminal"] .term-tab.tt-new:hover {
+  color: var(--text-normal);
+  border-style: solid;
+}
+
+/* Fullscreen (popout) button: square pill matching the tab height. */
+.workspace-leaf-content[data-type="workdesk-terminal"] .term-fullscreen-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: 4px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.workspace-leaf-content[data-type="workdesk-terminal"] .term-fullscreen-btn:hover {
+  color: var(--text-normal);
+  border-color: var(--background-modifier-border-hover, var(--background-modifier-border));
+}
+
+/* Canvas host: flex grow region below the header. `min-height: 0` is the
+ * standard fix for flex children that would otherwise refuse to shrink
+ * below content size; without it the host inherits xterm's intrinsic
+ * height and the FitAddon never gets a real client rect. */
+.workspace-leaf-content[data-type="workdesk-terminal"] .workdesk-term-host {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  background: var(--background-primary);
+}
+
+/* Each TerminalSession absolute-fills the host. Inactive sessions get
+ * inline `display: none` from TerminalView.setActiveSession. The padding
+ * inside the session (not the host) gives xterm breathing room from the
+ * pane edges — measured against vin's 10px 6px 14px 12px. */
+.workspace-leaf-content[data-type="workdesk-terminal"] .workdesk-term-session {
+  position: absolute;
+  inset: 0;
+  padding: 10px 6px 12px 12px;
+}
+.workspace-leaf-content[data-type="workdesk-terminal"] .workdesk-term-session > .xterm {
+  width: 100%;
+  height: 100%;
+}
+
+/* xterm.css hard-codes `.xterm .xterm-viewport { background-color: #000 }`
+ * to dodge a macOS scrollbar opacity quirk. We drive background via xterm's
+ * runtime theme (applied to `.xterm` root by theme-bridge.ts), so let the
+ * theme bleed through instead of pinning black. */
+.workspace-leaf-content[data-type="workdesk-terminal"] .xterm .xterm-viewport {
+  background-color: transparent;
 }
 
 /* Active zone hint on the plugin's ribbon icons. Per-zone CSS variables

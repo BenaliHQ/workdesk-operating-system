@@ -3,34 +3,18 @@ import { spawn } from 'node:child_process';
 import { mkdtempSync, writeFileSync, unlinkSync, rmdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { PTY_HELPER_PY, buildResizeSequence } from '../src/terminal/pty-helper';
-import { getXtermTheme, getAnsiKeys } from '../src/terminal/theme-bridge';
-import { TerminalSession } from '../src/terminal/session';
+import { PTY_HELPER_PY, TerminalView } from '../src/vendor/workdesk-terminal';
 
-describe('phase 4a.1 · vendored contract', () => {
-  it('TerminalSession class import resolves', () => {
-    expect(TerminalSession).toBeDefined();
-    expect(typeof TerminalSession).toBe('function');
-  });
+// M5 — the standalone src/terminal/* subsystem was replaced by the
+// vendored workdesk-terminal (vin) plugin. The PTY smoke test that
+// proves `python3 + helper script + zsh` roundtrips a command is still
+// the highest-value piece of phase 4a.1 coverage, so we keep it here
+// but source PTY_HELPER_PY from the vendor module.
 
-  it('buildResizeSequence emits the OSC R; format used by the helper', () => {
-    expect(buildResizeSequence(80, 24)).toBe('\x1b]R;80;24\x07');
-  });
-});
-
-describe('phase 4a.1 · theme-bridge', () => {
-  it('returns all 16 ANSI keys plus background/foreground/cursor/selection', () => {
-    const theme = getXtermTheme();
-    const ansi = getAnsiKeys();
-    for (const k of ansi) {
-      expect(theme).toHaveProperty(k);
-      expect(typeof theme[k as keyof typeof theme]).toBe('string');
-      expect((theme[k as keyof typeof theme] as string).length).toBeGreaterThan(0);
-    }
-    for (const k of ['background', 'foreground', 'cursor', 'selectionBackground']) {
-      expect(theme).toHaveProperty(k);
-    }
-    expect(ansi.length).toBe(16);
+describe('phase 4a.1 · vendored TerminalView', () => {
+  it('TerminalView class import resolves', () => {
+    expect(TerminalView).toBeDefined();
+    expect(typeof TerminalView).toBe('function');
   });
 });
 
