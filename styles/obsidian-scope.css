@@ -240,3 +240,45 @@ body.focus-on .status-bar:hover { opacity: 1; }
   left: var(--wd-x, 0);
   top: var(--wd-y, 0);
 }
+
+/* Tab activity pulse — modeled on vin's fullscreen `.has-activity` rule
+ * (internetvin-terminal/styles.css:687), but extended to also apply to
+ * the sidebar tab strip. The class is set from
+ * src/services/terminal-status.ts on any stdout chunk that arrives at a
+ * non-focused session, and cleared when the user focuses the tab. */
+
+@keyframes wd-tab-pulse {
+  0%, 100% {
+    border-color: var(--text-accent);
+    background: rgba(var(--interactive-accent-rgb, 108, 142, 255), 0.06);
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    border-color: var(--text-accent);
+    background: rgba(var(--interactive-accent-rgb, 108, 142, 255), 0.14);
+    box-shadow: 0 0 12px 2px rgba(var(--interactive-accent-rgb, 108, 142, 255), 0.2);
+  }
+}
+@keyframes wd-tab-dot-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}
+
+.workspace-leaf-content[data-type="workdesk-terminal"] .vin-terminal-tab.has-activity,
+.vin-fullscreen-overlay .vin-fs-tab.has-activity {
+  color: var(--text-accent);
+  animation: wd-tab-pulse 1.2s ease-in-out infinite;
+}
+.workspace-leaf-content[data-type="workdesk-terminal"] .vin-terminal-tab.has-activity .tab-label::before,
+.vin-fullscreen-overlay .vin-fs-tab.has-activity .vin-fs-tab-label::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-accent);
+  margin-right: 6px;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px 1px rgba(var(--interactive-accent-rgb, 108, 142, 255), 0.5);
+  animation: wd-tab-dot-pulse 1.2s ease-in-out infinite;
+}
