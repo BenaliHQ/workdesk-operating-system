@@ -1,9 +1,9 @@
 # DONE-checklist · machine pass
 
-Generated on 2026-05-16T20:24:44.943Z
+Generated on 2026-05-17T13:58:35.338Z
 
-Total machine items: 36
-Passed: 36
+Total machine items: 34
+Passed: 34
 Failed: 0
 
 ## Phase 0 · Install + load
@@ -34,8 +34,6 @@ Failed: 0
 - ✓ **Right pane defaults to the terminal**
 - ✓ **Tab strip**
 - ✓ **Tab status dots**
-- ✓ **Composer at the bottom**
-- ✓ **`Enter` or `⌘+Enter`**
 - ✓ **`[[` autocomplete**
 - ✓ **Drag-drop file**
 - ✓ **Fullscreen mode**

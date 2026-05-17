@@ -791,3 +791,123 @@
   - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
   - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — ab66fb00d03b…
   - [ok] STATE.phases["7"] is PASS
+## 2026-05-16T21:19:13.061Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [ok] vitest all phases pass (including phase7)
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [FAIL] STATE.decisions.obsidian_scope_css_sha256 present and matches source — obsidian_scope_css_sha256 mismatch: expected ab66fb00d03b… got 039f85715e83…
+  - [ok] STATE.phases["7"] is PASS
+## 2026-05-16T21:19:38.409Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [ok] vitest all phases pass (including phase7)
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — 039f85715e83…
+  - [ok] STATE.phases["7"] is PASS
+## 2026-05-17T12:24:25.782Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [ok] vitest all phases pass (including phase7)
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — d893091b1a1b…
+  - [ok] STATE.phases["7"] is PASS
+## 2026-05-17T12:40:10.779Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [ok] vitest all phases pass (including phase7)
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — fcc1dcb86e4b…
+  - [ok] STATE.phases["7"] is PASS
+## 2026-05-17T12:44:37.596Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [ok] vitest all phases pass (including phase7)
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — fcc1dcb86e4b…
+  - [ok] STATE.phases["7"] is PASS
+## 2026-05-17T13:10:12.790Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [ok] vitest all phases pass (including phase7)
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — fcc1dcb86e4b…
+  - [ok] STATE.phases["7"] is PASS
+## 2026-05-17T13:11:29.201Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [ok] vitest all phases pass (including phase7)
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — fcc1dcb86e4b…
+  - [ok] STATE.phases["7"] is PASS
+## 2026-05-17T13:58:33.382Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [ok] vitest all phases pass (including phase7)
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — fcc1dcb86e4b…
+  - [ok] STATE.phases["7"] is PASS

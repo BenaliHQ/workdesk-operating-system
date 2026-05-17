@@ -10,7 +10,12 @@ import {
 import { DEFAULT_SETTINGS, WorkdeskSettings } from './settings';
 import { ZoneView } from './views/ZoneView';
 import { HtmlView } from './views/HtmlView';
-import { TerminalView } from './views/TerminalView';
+import {
+  OutputCaptureModal,
+  ShortcutsModal,
+  TerminalView,
+  writePtyHelper,
+} from './vendor/workdesk-terminal';
 import { wikilinkAndTagDecorations } from './editor/wikilink-ext';
 import { CommandPalette } from './modals/CommandPalette';
 import { QuickCaptureModal } from './modals/QuickCapture';
@@ -62,7 +67,15 @@ export default class WorkdeskOSPlugin extends Plugin {
     this.registerView(VIEW_TYPE_WORKDESK_ZONE, (leaf) => new ZoneView(leaf, this));
     this.registerView(VIEW_TYPE_WORKDESK_HTML, (leaf) => new HtmlView(leaf, this));
     this.registerExtensions(['html', 'htm'], VIEW_TYPE_WORKDESK_HTML);
-    this.registerView(VIEW_TYPE_WORKDESK_TERMINAL, (leaf) => new TerminalView(leaf, this));
+    // Vendored vin TerminalView (see src/vendor/workdesk-terminal/NOTICE.md).
+    // Writes the PTY helper script next to the plugin folder before any
+    // session can spawn — BRAT ships main.js / styles.css / manifest.json
+    // only, so the python helper has to be materialized at runtime.
+    const vaultAdapter = this.app.vault.adapter;
+    if (vaultAdapter instanceof FileSystemAdapter && this.manifest.dir) {
+      writePtyHelper(vaultAdapter.getBasePath(), this.manifest.dir);
+    }
+    this.registerView(VIEW_TYPE_WORKDESK_TERMINAL, (leaf) => new TerminalView(leaf));
 
     this.registerEditorExtension(wikilinkAndTagDecorations);
 
@@ -84,6 +97,56 @@ export default class WorkdeskOSPlugin extends Plugin {
       id: `${COMMAND_ID_PREFIX}:terminal:new-tab`,
       name: 'New terminal tab',
       callback: () => this.openNewTerminalTab(),
+    });
+
+    // Vendored vin commands — upstream registers these from inside its
+    // stripped `TerminalPlugin.onload`. Re-register them under our command
+    // prefix so the bookmark / capture / shortcuts workflows are reachable
+    // from Obsidian's command palette and rebindable via Settings → Hotkeys.
+    this.addCommand({
+      id: `${COMMAND_ID_PREFIX}:terminal:toggle-fullscreen`,
+      name: 'Toggle fullscreen terminal',
+      callback: () => {
+        const view = this.firstTerminalView();
+        view?.fullscreenManager?.toggle();
+      },
+    });
+    this.addCommand({
+      id: `${COMMAND_ID_PREFIX}:terminal:capture-output`,
+      name: 'Capture terminal output to note',
+      callback: () => {
+        const view = this.firstTerminalView();
+        const session = view?.activeSession;
+        if (!session) return;
+        const text = session.captureOutput();
+        if (!text.trim()) return;
+        new OutputCaptureModal(this.app, text).open();
+      },
+    });
+    this.addCommand({
+      id: `${COMMAND_ID_PREFIX}:terminal:add-bookmark`,
+      name: 'Add terminal bookmark',
+      callback: () => this.firstTerminalView()?.activeSession?.addBookmark(),
+    });
+    this.addCommand({
+      id: `${COMMAND_ID_PREFIX}:terminal:next-bookmark`,
+      name: 'Next terminal bookmark',
+      callback: () => this.firstTerminalView()?.activeSession?.nextBookmark(),
+    });
+    this.addCommand({
+      id: `${COMMAND_ID_PREFIX}:terminal:prev-bookmark`,
+      name: 'Previous terminal bookmark',
+      callback: () => this.firstTerminalView()?.activeSession?.prevBookmark(),
+    });
+    this.addCommand({
+      id: `${COMMAND_ID_PREFIX}:terminal:clear-bookmarks`,
+      name: 'Clear terminal bookmarks',
+      callback: () => this.firstTerminalView()?.activeSession?.clearBookmarks(),
+    });
+    this.addCommand({
+      id: `${COMMAND_ID_PREFIX}:terminal:show-shortcuts`,
+      name: 'Show terminal shortcuts',
+      callback: () => new ShortcutsModal(this.app).open(),
     });
 
     this.addCommand({
@@ -299,7 +362,15 @@ export default class WorkdeskOSPlugin extends Plugin {
     const leaf = leaves[0];
     await workspace.revealLeaf(leaf);
     const view = leaf.view as TerminalView | undefined;
-    if (view?.openNewSession) view.openNewSession();
+    if (view?.createSession) view.createSession();
+  }
+
+  /** First terminal leaf's view, or null if no terminal has been opened yet. */
+  private firstTerminalView(): TerminalView | null {
+    const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKDESK_TERMINAL);
+    if (leaves.length === 0) return null;
+    const view = leaves[0].view;
+    return view instanceof TerminalView ? view : null;
   }
 
   async triageCaptureInbox(): Promise<void> {

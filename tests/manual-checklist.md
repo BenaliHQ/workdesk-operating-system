@@ -8,6 +8,12 @@ Items that need human judgment or multi-day observation. Work through this list 
   - *Verify:* Symlink the build into a vault, enable in Settings → Community Plugins, watch console for errors.
 - [ ] **Theme respects Obsidian** — : switching Obsidian's theme (light ↔ dark) flips WorkDesk's palette instantly. No hard-coded colors.
   - *Verify:* Toggle Obsidian theme (light ↔ dark) and observe WorkDesk tokens flipping. No hard-coded colors should leak.
+## Phase 4 · Terminal
+
+- [ ] **Composer at the bottom** — : rounded shell with `▌` prompt + textarea + reference button + send button. Slate ring on focus. Send button fills slate when there's input.
+  - *Verify:* Not classified — review and confirm manually.
+- [ ] **`Enter` or `⌘+Enter`** — sends. `Shift+Enter` newline. `↑/↓` walks history. `Esc` blurs. Sent message appears in canvas as a new prompt line.
+  - *Verify:* Not classified — review and confirm manually.
 ## Phase 5 · Modals
 
 - [ ] **Onboarding** — (auto on first run): 4 steps with dot pager + Back/Next. Dismiss sets `settings.onboarding.completed = true`. Replayable from command palette.

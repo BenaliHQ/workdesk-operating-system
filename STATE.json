@@ -131,10 +131,14 @@
     "context7_available": false,
     "architecture": "standard-plugin-pattern",
     "architecture_prior": "full-surface-takeover (v1.0.0 — see M4 spec)",
-    "obsidian_scope_css_sha256": "ab66fb00d03b26bf09718ceae0fff8d8c246de5a57788f48f929fca2e205c39a",
+    "obsidian_scope_css_sha256": "fcc1dcb86e4bbedb611ded0f9b97227df5550830851047377cb515f821239745",
     "ribbon_pattern": "addRibbonIcon × 12",
     "workspace_seed_strategy": "on-demand-reveal (no migrateWorkspaceOnce)",
-    "css_scoping_strategy": "build-time-strip-and-scope (scripts/scope-app-css.mjs)"
+    "css_scoping_strategy": "build-time-strip-and-scope (scripts/scope-app-css.mjs)",
+    "terminal_strategy": "vendored vin (BenaliHQ/workdesk-terminal @ 297fea0a) — see src/vendor/workdesk-terminal/NOTICE.md",
+    "vendored_workdesk_terminal_index_sha256": "04fd9db251c5e99a2f4047ae33271cf027b9d574d2afdb2ab1f044f7671c994a",
+    "vendored_workdesk_terminal_styles_sha256": "4d8af4512900100544d10a1809e9fcca62242beeeee32f93cfb10a4c74da8c2a",
+    "vendored_workdesk_terminal_upstream_sha": "297fea0a2194c97426b67a8c9040c73035b8ce65"
   },
   "runtime": {
     "node": "25.6.1",
