@@ -6,6 +6,17 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.6.1] — 2026-05-17
+
+### Added
+
+- **Daily note template path in the settings UI.** Settings → General
+  → "Daily note template path" now exposes `vault.dailyTemplatePath`,
+  which previously was only editable by hand-editing `data.json`. The
+  description lists the supported variables (`{{date}}`, `{{date:FORMAT}}`,
+  `{{time}}`, `{{time:FORMAT}}`, `{{title}}`) so operators don't have to
+  cross-reference the templates section.
+
 ## [1.6.0] — 2026-05-17
 
 ### Added
