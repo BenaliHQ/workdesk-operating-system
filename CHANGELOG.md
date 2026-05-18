@@ -6,6 +6,23 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.6.3] — 2026-05-18
+
+### Fixed
+
+- **Daily template silently failing when the vault file index doesn't
+  see it.** `resolveDailyTemplate()` now falls back to
+  `app.vault.adapter.exists() / .read()` when `getAbstractFileByPath()`
+  returns null. The vault index can be stale when files are created
+  outside Obsidian or during the initial scan race; the adapter reads
+  directly from disk and recovers the template. Behavior is unchanged
+  when the index already sees the file.
+- **Error toast disappearing too fast to read.** Both daily-template
+  error toasts (template-not-found and read-failed) now stay visible
+  for 12 seconds instead of the 4-second default. Operator can read
+  the path being looked up and fix the setting without re-triggering
+  the error.
+
 ## [1.6.2] — 2026-05-17
 
 ### Added

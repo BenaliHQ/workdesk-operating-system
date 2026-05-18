@@ -559,14 +559,43 @@ export default class WorkdeskOSPlugin extends Plugin {
   private async resolveDailyTemplate(now: Date, dateStr: string): Promise<string> {
     const templatePath = this.settings.vault.dailyTemplatePath.trim();
     if (!templatePath) return '';
+
+    let raw: string | null = null;
+
+    // Vault index first — preferred path, respects renames and moves.
     const tpl = this.app.vault.getAbstractFileByPath(templatePath);
-    if (!(tpl instanceof TFile)) return '';
-    let raw: string;
-    try {
-      raw = await this.app.vault.read(tpl);
-    } catch {
-      return '';
+    if (tpl instanceof TFile) {
+      try {
+        raw = await this.app.vault.read(tpl);
+      } catch (err) {
+        showToast(
+          `Could not read daily template "${templatePath}": ${String(err)}`,
+          'error',
+          { duration: 12000 },
+        );
+        return '';
+      }
+    } else {
+      // Index miss — fall back to the adapter which reads directly from
+      // disk. Covers the case where the template file was added or moved
+      // outside Obsidian's awareness (terminal create, plugin file ops,
+      // file watcher race during initial vault scan).
+      try {
+        const exists = await this.app.vault.adapter.exists(templatePath);
+        if (exists) raw = await this.app.vault.adapter.read(templatePath);
+      } catch {
+        // Adapter errors fall through to the "not found" toast below.
+      }
+      if (raw == null) {
+        showToast(
+          `Daily template not found at "${templatePath}". Creating empty note. Check Settings → WorkdeskOS → Daily note template path.`,
+          'error',
+          { duration: 12000 },
+        );
+        return '';
+      }
     }
+
     return applyTemplateVariables(raw, {
       now,
       title: dateStr,
