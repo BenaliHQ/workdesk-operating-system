@@ -6,6 +6,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.5.0] — 2026-05-17
+
 Zone-pane filesystem honesty, Obsidian-native settings, templates engine,
 and a right-click-only creation/deletion model.
 
