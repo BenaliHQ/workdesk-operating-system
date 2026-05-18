@@ -26,7 +26,7 @@ export type IconName =
   | 'search' | 'calendar' | 'focus' | 'mic'
   | 'panelL' | 'panelR' | 'link' | 'outline' | 'collapse'
   | 'plus' | 'sort' | 'more' | 'close' | 'doubleR' | 'doubleL'
-  | 'newNote' | 'help' | 'warn' | 'upload' | 'command' | 'enter' | 'hash'
+  | 'newNote' | 'folderPlus' | 'sliders' | 'help' | 'warn' | 'upload' | 'command' | 'enter' | 'hash'
   | 'trash' | 'copy' | 'expand' | 'contract' | 'send';
 
 /** Status of a terminal tab. Drives the leading dot color + pulse. */

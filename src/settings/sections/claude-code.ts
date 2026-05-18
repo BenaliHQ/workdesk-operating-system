@@ -1,57 +1,70 @@
-// Claude Code sub-tab — binary path, tab status auto-detection, status flags.
+// Claude Code section — binary path, tab status, status flags, skills dir.
 
+import { Setting } from 'obsidian';
 import type WorkdeskOSPlugin from '../../main';
-import { field, toggle, sectionLabel } from '../../components/forms';
 
-export function mountClaudeCodeSection(parent: HTMLElement, plugin: WorkdeskOSPlugin): void {
-  parent.dataset.tab = 'claude-code';
-  sectionLabel(parent, 'CLAUDE CODE');
+export function mountClaudeCodeSection(containerEl: HTMLElement, plugin: WorkdeskOSPlugin): void {
+  new Setting(containerEl)
+    // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Claude Code" is the Anthropic CLI product name.
+    .setName('Claude Code')
+    .setHeading();
 
-  field(parent, {
-    label: 'Binary path',
-    initial: plugin.settings.claude.binaryPath,
-    mono: true,
-    onChange: (v) => {
-      plugin.settings.claude.binaryPath = v;
-      void plugin.saveSettings();
-    },
-  });
+  new Setting(containerEl)
+    .setName('Binary path')
+    .setDesc('Absolute path to the Claude CLI.')
+    .addText((text) => {
+      text
+        .setValue(plugin.settings.claude.binaryPath)
+        .onChange((value) => {
+          plugin.settings.claude.binaryPath = value;
+          void plugin.saveSettings();
+        });
+    });
 
-  toggle(parent, {
-    label: 'Auto-detect tab status',
-    description: 'Parse ● / ⎿ markers from Claude Code output to color the tabs.',
-    initial: plugin.settings.claude.autoDetectTabStatus,
-    onChange: (v) => {
-      plugin.settings.claude.autoDetectTabStatus = v;
-      void plugin.saveSettings();
-    },
-  });
+  new Setting(containerEl)
+    .setName('Auto-detect tab status')
+    // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Claude Code" is a product name.
+    .setDesc('Parse ● / ⎿ markers from Claude Code output to color the tabs.')
+    .addToggle((toggle) => {
+      toggle
+        .setValue(plugin.settings.claude.autoDetectTabStatus)
+        .onChange((value) => {
+          plugin.settings.claude.autoDetectTabStatus = value;
+          void plugin.saveSettings();
+        });
+    });
 
-  toggle(parent, {
-    label: 'Show context %',
-    initial: plugin.settings.claude.showContextPct,
-    onChange: (v) => {
-      plugin.settings.claude.showContextPct = v;
-      void plugin.saveSettings();
-    },
-  });
+  new Setting(containerEl)
+    .setName('Show context percentage')
+    .addToggle((toggle) => {
+      toggle
+        .setValue(plugin.settings.claude.showContextPct)
+        .onChange((value) => {
+          plugin.settings.claude.showContextPct = value;
+          void plugin.saveSettings();
+        });
+    });
 
-  toggle(parent, {
-    label: 'Show cost estimate',
-    initial: plugin.settings.claude.showCostEstimate,
-    onChange: (v) => {
-      plugin.settings.claude.showCostEstimate = v;
-      void plugin.saveSettings();
-    },
-  });
+  new Setting(containerEl)
+    .setName('Show cost estimate')
+    .addToggle((toggle) => {
+      toggle
+        .setValue(plugin.settings.claude.showCostEstimate)
+        .onChange((value) => {
+          plugin.settings.claude.showCostEstimate = value;
+          void plugin.saveSettings();
+        });
+    });
 
-  field(parent, {
-    label: 'Skills directory',
-    initial: plugin.settings.claude.skillsDir,
-    mono: true,
-    onChange: (v) => {
-      plugin.settings.claude.skillsDir = v;
-      void plugin.saveSettings();
-    },
-  });
+  new Setting(containerEl)
+    .setName('Skills directory')
+    .setDesc('Vault-relative path to the skills folder.')
+    .addText((text) => {
+      text
+        .setValue(plugin.settings.claude.skillsDir)
+        .onChange((value) => {
+          plugin.settings.claude.skillsDir = value;
+          void plugin.saveSettings();
+        });
+    });
 }

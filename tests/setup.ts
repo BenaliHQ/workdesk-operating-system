@@ -1,7 +1,12 @@
 // Vitest setup — installs the Obsidian DOM extensions that the plugin
 // relies on at runtime but happy-dom does not ship.
 
-type TagOptsLite = { text?: string; cls?: string } | undefined;
+type TagOptsLite = {
+  text?: string;
+  cls?: string;
+  type?: string;
+  attr?: Record<string, string>;
+} | undefined;
 
 function createElImpl<K extends keyof HTMLElementTagNameMap>(
   this: Document | Element,
@@ -15,6 +20,10 @@ function createElImpl<K extends keyof HTMLElementTagNameMap>(
   const el = ownerDoc.createElement(tag);
   if (opts?.text) el.textContent = opts.text;
   if (opts?.cls) el.className = opts.cls;
+  if (opts?.type) el.setAttribute('type', opts.type);
+  if (opts?.attr) {
+    for (const [k, v] of Object.entries(opts.attr)) el.setAttribute(k, v);
+  }
   if (!isDoc) (this as Element).appendChild(el);
   return el;
 }

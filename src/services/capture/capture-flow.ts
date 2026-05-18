@@ -22,7 +22,10 @@ export type CaptureState =
   | 'success'
   | 'error';
 
-export type CaptureDestination = 'personal/captures' | 'system/inbox' | 'gtd/inbox';
+/** Vault-relative folder where a capture should land. Free-form so callers
+ *  can route to any folder; the Quick capture modal still exposes the three
+ *  chip shortcuts for one-tap switching at capture time. */
+export type CaptureDestination = string;
 
 export interface CaptureFlowDeps {
   provider: SttProvider;

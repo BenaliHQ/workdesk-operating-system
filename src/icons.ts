@@ -54,6 +54,8 @@ export const ICONS: Record<IconName, string> = {
   doubleR:  '<path d="m13 6 6 6-6 6M5 6l6 6-6 6"/>',
   doubleL:  '<path d="m11 6-6 6 6 6M19 6l-6 6 6 6"/>',
   newNote:  '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9"/><path d="M14 3v6h6M12 13v6M9 16h6"/>',
+  folderPlus: '<path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M12 11v6M9 14h6"/>',
+  sliders:  '<path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h12M20 18h0M14 4v4M8 10v4M16 16v4"/>',
   help:     '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 3.5"/><path d="M12 17.5h.01"/>',
   warn:     '<path d="m12 3 10 18H2Z"/><path d="M12 10v4M12 18h.01"/>',
   upload:   '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',

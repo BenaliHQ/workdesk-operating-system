@@ -1,4 +1,6 @@
-// .obj zone-card — 32×32 pastel dot + title + sub + count + shadow + hover-lift.
+// .obj zone-card — minimal row: initial letter + title + count.
+// No preview text. No + buttons. Creation flows through right-click only,
+// surfaced by the host (ZoneView) via the onContextMenu callback.
 
 import { wsSvgEl } from '../icons';
 import type { ZoneObject } from '../types';
@@ -7,6 +9,9 @@ export interface ZoneCardOpts {
   zoneId: string;
   obj: ZoneObject;
   onToggle?: (objId: string) => void;
+  /** Right-click handler. Host opens the create menu (New note / New folder)
+   *  targeting this object's folder. */
+  onContextMenu?: (evt: MouseEvent) => void;
 }
 
 export function renderZoneCard(opts: ZoneCardOpts): HTMLElement {
@@ -21,9 +26,12 @@ export function renderZoneCard(opts: ZoneCardOpts): HTMLElement {
   row.tabIndex = 0;
   row.setAttribute('role', 'button');
 
+  // Initial-letter glyph in place of the icon. First non-whitespace character
+  // of the title, uppercased. Falls back to '·' if the title is empty.
   const dot = createSpan();
-  dot.className = 'obj-dot';
-  dot.appendChild(wsSvgEl(opts.obj.icon, 16));
+  dot.className = 'obj-dot obj-initial';
+  const firstChar = opts.obj.title.trim().charAt(0);
+  dot.textContent = (firstChar || '·').toUpperCase();
   row.appendChild(dot);
 
   const text = createDiv();
@@ -31,11 +39,7 @@ export function renderZoneCard(opts: ZoneCardOpts): HTMLElement {
   const title = createDiv();
   title.className = 'obj-title';
   title.textContent = opts.obj.title;
-  const sub = createDiv();
-  sub.className = 'obj-sub';
-  sub.textContent = opts.obj.sub;
   text.appendChild(title);
-  text.appendChild(sub);
   row.appendChild(text);
 
   const meta = createDiv();
@@ -49,13 +53,14 @@ export function renderZoneCard(opts: ZoneCardOpts): HTMLElement {
   row.appendChild(meta);
 
   row.addEventListener('click', () => {
-    // Mutate the model so a parent re-render reads the new state.
-    // Without this, ZoneView.render() rebuilds the card from obj.expanded
-    // (unchanged) and the visual toggle reverts immediately.
     opts.obj.expanded = !opts.obj.expanded;
     card.classList.toggle('collapsed', !opts.obj.expanded);
     opts.onToggle?.(opts.obj.id);
   });
+
+  if (opts.onContextMenu) {
+    row.addEventListener('contextmenu', (evt) => opts.onContextMenu?.(evt));
+  }
 
   card.appendChild(row);
   return card;

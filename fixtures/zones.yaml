@@ -170,7 +170,7 @@ zones:
   - id: config
     name: config
     sub: WorkDesk plugin and skill configuration
-    icon: gear
+    icon: sliders
     root: config
     objects:
       - id: settings

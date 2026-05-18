@@ -334,6 +334,62 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
 }
 .pane-hero .hero-collapse:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
 
+/* Workdesk zone hero — oversized glyph + zone name + per-zone management
+   label. Replaces the wrap-prone single-line layout from the old design. */
+.workdesk-os-zone-hero {
+  align-items: center;
+  gap: var(--ws-space-4);
+  padding: var(--ws-space-6) var(--ws-space-5) var(--ws-space-4);
+}
+.workdesk-os-zone-hero-icon {
+  flex-shrink: 0;
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  color: var(--text-muted);
+}
+.workdesk-os-zone-hero-meta {
+  min-width: 0;
+  display: flex; flex-direction: column;
+}
+.workdesk-os-zone-hero-meta h1 {
+  font-family: var(--ws-font-display);
+  font-size: var(--ws-fs-24, 22px);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text-normal);
+  margin: 0 0 2px;
+  line-height: 1.15;
+  text-transform: capitalize;
+}
+.workdesk-os-zone-hero-meta .sub {
+  font-size: var(--ws-fs-12);
+  color: var(--text-faint);
+  letter-spacing: 0.01em;
+}
+
+/* Initial-letter chip on object cards — replaces the SVG icon. Pastel
+   surface uses the same --background-secondary so the cards keep their
+   calm tone. */
+.obj-initial {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--ws-font-display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-muted);
+  background: var(--background-secondary);
+}
+
+/* Empty-folder placeholder — shown when an expanded card has zero children. */
+.obj-empty-row {
+  padding: var(--ws-space-2) var(--ws-space-5);
+  font-size: var(--ws-fs-12);
+  color: var(--text-faint);
+  font-style: italic;
+}
+
 .pane-toolbar {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 var(--ws-space-5) var(--ws-space-2);
@@ -1760,139 +1816,19 @@ body.col-resizing * { cursor: col-resize !important; }
 .btn.danger { color: var(--text-error); border-color: var(--background-modifier-border); }
 .btn.danger:hover { background: var(--background-modifier-error); }
 
-/* ── Settings modal ────────────────────────────────────────────────── */
-.settings { width: 940px; max-width: 94vw; height: 620px; max-height: 88vh; flex-direction: row; }
-.settings-nav {
-  width: 220px; flex-shrink: 0;
-  background: var(--background-secondary);
-  border-right: 1px solid var(--ws-border-hair);
-  display: flex; flex-direction: column;
-  padding: var(--ws-space-3) 0;
+/* ── Settings tab ──────────────────────────────────────────────────────
+   The plugin's settings tab uses Obsidian's native PluginSettingTab + Setting
+   API, so spacing, alignment, toggle, dropdown, and text-input styling are
+   inherited from Obsidian's stylesheet. The only plugin-side style is the
+   font-family on the tab root so headings/labels match Workdesk's display
+   face. All selectors are scoped to .workdesk-os-settings so they cannot
+   leak into Obsidian's own settings chrome. */
+.workdesk-os-settings {
+  font-family: var(--ws-font-sans);
 }
-.settings-nav-title {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  padding: var(--ws-space-2) var(--ws-space-4);
-}
-.settings-nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 7px var(--ws-space-4);
-  font-size: 13px;
-  color: var(--text-muted);
-  cursor: pointer;
-  margin: 1px var(--ws-space-2);
-  border-radius: var(--ws-radius-row);
-}
-.settings-nav-item:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
-.settings-nav-item.active { background: var(--background-modifier-active-hover); color: var(--text-normal); font-weight: 500; }
-.settings-nav-item .glyph { display: grid; place-items: center; color: currentColor; }
-
-.settings-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--ws-space-6) var(--ws-space-6) var(--ws-space-6);
-}
-.settings-body h2 {
+.workdesk-os-settings .setting-item-heading .setting-item-name {
   font-family: var(--ws-font-display);
-  font-size: 18px; font-weight: 600;
-  margin: 0 0 4px;
   letter-spacing: -0.01em;
-}
-.settings-body > .lead {
-  font-size: 13px; color: var(--text-muted);
-  margin-bottom: var(--ws-space-5);
-}
-.settings-section { margin-top: var(--ws-space-5); }
-.settings-section-label {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  margin-bottom: var(--ws-space-3);
-}
-.setting {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: var(--ws-space-4);
-  align-items: center;
-  padding: var(--ws-space-3) 0;
-  border-bottom: 1px solid var(--ws-border-hair);
-}
-.setting:last-child { border-bottom: none; }
-.setting .label { font-size: 13.5px; font-weight: 500; }
-.setting .desc { font-size: 12px; color: var(--text-faint); margin-top: 2px; line-height: 1.5; max-width: 480px; }
-.setting .ctrl { display: flex; align-items: center; gap: 8px; }
-
-.toggle {
-  width: 32px; height: 18px;
-  background: var(--background-modifier-border);
-  border-radius: 9px;
-  position: relative;
-  cursor: pointer;
-  transition: background var(--ws-dur-fast);
-}
-.toggle::after {
-  content: '';
-  position: absolute;
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: #fff;
-  top: 2px; left: 2px;
-  transition: left var(--ws-dur-fast) var(--ws-ease-out);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-}
-.toggle.on { background: var(--interactive-accent); }
-.toggle.on::after { left: 16px; }
-
-.field {
-  font-family: var(--ws-font-sans);
-  font-size: 13px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid var(--background-modifier-border);
-  background: var(--background-modifier-form-field);
-  color: var(--text-normal);
-  min-width: 200px;
-}
-.field.mono { font-family: var(--ws-font-mono); font-size: 12.5px; }
-.field:focus { outline: none; border-color: var(--background-modifier-border-focus); }
-.select {
-  font-family: var(--ws-font-sans);
-  font-size: 13px;
-  padding: 6px 28px 6px 10px;
-  border-radius: 6px;
-  border: 1px solid var(--background-modifier-border);
-  background: var(--background-modifier-form-field);
-  color: var(--text-normal);
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a958d' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  background-size: 14px;
-}
-
-/* segmented control */
-.segmented {
-  display: inline-flex;
-  background: var(--background-modifier-hover);
-  border-radius: 7px;
-  padding: 2px;
-  gap: 2px;
-}
-.segmented button {
-  border: none; background: transparent;
-  font-family: var(--ws-font-sans);
-  font-size: 12px;
-  color: var(--text-muted);
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.segmented button.active {
-  background: var(--background-primary);
-  color: var(--text-normal);
-  box-shadow: var(--ws-shadow-card);
 }
 
 /* ── Hotkey chip used in lists ──────────────────────────────────────── */

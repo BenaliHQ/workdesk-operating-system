@@ -1,32 +1,25 @@
-// About sub-tab — plugin metadata + links.
+// About section — plugin metadata and repository link.
 
+import { Setting } from 'obsidian';
 import type WorkdeskOSPlugin from '../../main';
-import { sectionLabel } from '../../components/forms';
 
-export function mountAboutSection(parent: HTMLElement, plugin: WorkdeskOSPlugin): void {
-  parent.dataset.tab = 'about';
-  sectionLabel(parent, 'ABOUT');
+const REPO_URL = 'https://github.com/BenaliHQ/workdesk-operating-system';
 
-  const body = createDiv();
-  body.className = 'about-body';
+export function mountAboutSection(containerEl: HTMLElement, plugin: WorkdeskOSPlugin): void {
+  new Setting(containerEl).setName('About').setHeading();
 
-  const title = createEl('h3');
-  title.textContent = plugin.manifest.name;
-  body.appendChild(title);
+  new Setting(containerEl)
+    .setName(plugin.manifest.name)
+    .setDesc(`Version ${plugin.manifest.version} · MIT`);
 
-  const version = createDiv();
-  version.className = 'desc';
-  version.textContent = `Version ${plugin.manifest.version} · MIT`;
-  body.appendChild(version);
-
-  const links = createDiv();
-  links.className = 'about-links';
-  const repo = createEl('a');
-  repo.href = 'https://github.com/BenaliHQ/workdesk-operating-system';
-  repo.textContent = 'GitHub';
-  repo.target = '_blank';
-  links.appendChild(repo);
-  body.appendChild(links);
-
-  parent.appendChild(body);
+  new Setting(containerEl)
+    .setName('Repository')
+    .setDesc('Source code and issue tracker.')
+    .addButton((button) => {
+      button
+        .setButtonText('Open on GitHub')
+        .onClick(() => {
+          window.open(REPO_URL, '_blank');
+        });
+    });
 }

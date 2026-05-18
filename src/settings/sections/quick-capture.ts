@@ -1,86 +1,75 @@
-// Quick-capture sub-tab — STT provider + key.
+// Quick capture section — STT provider, model, and API key.
 //
-// The STT key field uses Obsidian's SecretComponent (1.11.4+) so the
-// plaintext key never lands in data.json. The current key is fetched via
-// app.secretStorage.getSecret('stt-groq') and saved via setSecret on change.
-// (SecretStorage IDs must be lowercase alphanumeric with dashes — no colons.)
+// The STT key uses Obsidian's SecretComponent (1.11.4+) so the plaintext key
+// never lands in data.json. Reads through `app.secretStorage.getSecret`,
+// writes through `setSecret` on change. The component mounts inside the
+// standard Setting row's controlEl so spacing matches the surrounding rows.
 
-import { SecretComponent, type App } from 'obsidian';
+import { Setting, SecretComponent } from 'obsidian';
 import type WorkdeskOSPlugin from '../../main';
-import { field, select, sectionLabel } from '../../components/forms';
 
 const STT_KEY_NAME = 'stt-groq';
 
-export async function mountQuickCaptureSection(parent: HTMLElement, plugin: WorkdeskOSPlugin): Promise<void> {
-  parent.dataset.tab = 'quick-capture';
-  sectionLabel(parent, 'QUICK CAPTURE');
+export async function mountQuickCaptureSection(containerEl: HTMLElement, plugin: WorkdeskOSPlugin): Promise<void> {
+  new Setting(containerEl).setName('Quick capture').setHeading();
 
-  select(parent, {
-    label: 'STT provider',
-    initial: plugin.settings.capture.provider,
-    choices: [
-      { value: 'groq', label: 'Groq' },
-      { value: 'openai', label: 'OpenAI' },
-      { value: 'deepgram', label: 'Deepgram' },
-    ],
-    onChange: (v) => {
-      plugin.settings.capture.provider = v as WorkdeskOSPlugin['settings']['capture']['provider'];
-      void plugin.saveSettings();
-    },
-  });
-
-  field(parent, {
-    label: 'STT model',
-    initial: plugin.settings.capture.model,
-    mono: true,
-    onChange: (v) => {
-      plugin.settings.capture.model = v;
-      void plugin.saveSettings();
-    },
-  });
-
-  await mountSecretField(parent, plugin.app);
-}
-
-async function mountSecretField(parent: HTMLElement, app: App): Promise<void> {
-  const row = createDiv();
-  row.className = 'setting';
-  row.setAttribute('role', 'group');
-
-  const meta = createDiv();
-  meta.className = 'setting-meta';
-  const label = createDiv();
-  label.className = 'label';
-  label.id = 'ws-stt-key-label';
-  // eslint-disable-next-line obsidianmd/ui/sentence-case -- STT is an acronym.
-  label.textContent = 'STT API key';
-  meta.appendChild(label);
-  const desc = createDiv();
-  desc.className = 'desc';
-  desc.id = 'ws-stt-key-desc';
-  desc.textContent = 'Stored in Obsidian’s secret storage; never written to data.json.';
-  meta.appendChild(desc);
-  row.setAttribute('aria-labelledby', 'ws-stt-key-label');
-  row.appendChild(meta);
-
-  const control = createDiv();
-  control.className = 'control';
-  row.appendChild(control);
-
-  const secret = new SecretComponent(app, control);
-  const stored = app.secretStorage.getSecret(STT_KEY_NAME);
-  secret.setValue(stored ?? '');
-  secret.onChange((v) => {
-    app.secretStorage.setSecret(STT_KEY_NAME, v);
-  });
-
-  const inputEl = control.querySelector('input');
-  if (inputEl) {
+  new Setting(containerEl)
     // eslint-disable-next-line obsidianmd/ui/sentence-case -- STT is an acronym.
-    inputEl.setAttribute('aria-label', 'STT API key');
-    inputEl.setAttribute('aria-labelledby', 'ws-stt-key-label');
-    inputEl.setAttribute('aria-describedby', 'ws-stt-key-desc');
-  }
+    .setName('STT provider')
+    .setDesc('Speech-to-text service used for voice captures.')
+    .addDropdown((dropdown) => {
+      dropdown
+        .addOption('groq', 'Groq')
+        .addOption('openai', 'OpenAI')
+        .addOption('deepgram', 'Deepgram')
+        .setValue(plugin.settings.capture.provider)
+        .onChange((value) => {
+          plugin.settings.capture.provider = value as WorkdeskOSPlugin['settings']['capture']['provider'];
+          void plugin.saveSettings();
+        });
+    });
 
-  parent.appendChild(row);
+  new Setting(containerEl)
+    // eslint-disable-next-line obsidianmd/ui/sentence-case -- STT is an acronym.
+    .setName('STT model')
+    .addText((text) => {
+      text
+        .setValue(plugin.settings.capture.model)
+        .onChange((value) => {
+          plugin.settings.capture.model = value;
+          void plugin.saveSettings();
+        });
+    });
+
+  new Setting(containerEl)
+    .setName('Default destination')
+    .setDesc('Vault-relative folder where new captures land by default. The modal’s chips still let you switch at capture time.')
+    .addText((text) => {
+      text
+        // eslint-disable-next-line obsidianmd/ui/sentence-case -- folder path, not prose.
+        .setPlaceholder('gtd/inbox')
+        .setValue(plugin.settings.capture.defaultDest)
+        .onChange((value) => {
+          plugin.settings.capture.defaultDest = value.trim();
+          void plugin.saveSettings();
+        });
+    });
+
+  new Setting(containerEl)
+    // eslint-disable-next-line obsidianmd/ui/sentence-case -- STT is an acronym.
+    .setName('STT API key')
+    .setDesc('Stored in Obsidian’s secret storage; never written to data.json.')
+    .then((setting) => {
+      const secret = new SecretComponent(plugin.app, setting.controlEl);
+      const stored = plugin.app.secretStorage.getSecret(STT_KEY_NAME);
+      secret.setValue(stored ?? '');
+      secret.onChange((value) => {
+        plugin.app.secretStorage.setSecret(STT_KEY_NAME, value);
+      });
+      const input = setting.controlEl.querySelector('input');
+      if (input) {
+        // eslint-disable-next-line obsidianmd/ui/sentence-case -- STT is an acronym.
+        input.setAttribute('aria-label', 'STT API key');
+      }
+    });
 }

@@ -79,33 +79,54 @@ describe('phase 5a · command palette keyboard footer', () => {
   });
 });
 
-describe('phase 5a · settings tab — 7 sub-tabs', () => {
-  it('renders all seven nav buttons with the expected labels', () => {
+describe('phase 5a · settings tab — single-column Setting API layout', () => {
+  it('renders every section heading in display order', () => {
     const app = new App();
     const plugin = makePlugin();
     const tab = new WorkdeskSettingTab(app, plugin);
     tab.display();
-    const labels = Array.from(tab.containerEl.querySelectorAll('.settings-nav-item')).map((b) => (b as HTMLElement).textContent);
-    expect(labels).toEqual(['General', 'Zones', 'Terminal', 'Quick capture', 'Claude Code', 'Appearance', 'About']);
+    const headings = Array.from(
+      tab.containerEl.querySelectorAll('.setting-item-heading .setting-item-name'),
+    ).map((el) => (el as HTMLElement).textContent);
+    expect(headings).toEqual([
+      'General',
+      'Zones',
+      'Terminal',
+      'Quick capture',
+      'Claude Code',
+      'Templates',
+      'Appearance',
+      'About',
+    ]);
   });
 
-  it('renderAllSectionsForTest mounts every section body', () => {
+  it('scopes its container with the .workdesk-os-settings class', () => {
     const app = new App();
     const plugin = makePlugin();
     const tab = new WorkdeskSettingTab(app, plugin);
-    const hosts = tab.renderAllSectionsForTest();
-    const ids = hosts.map((h) => (h.firstElementChild as HTMLElement | null)?.dataset.tab);
-    // Each section sets dataset.tab on its parent (the host), not the first child.
-    const tabIds = hosts.map((h) => h.dataset.tab ?? h.children[0]?.getAttribute('data-tab'));
-    const expected = ['general', 'zones', 'terminal', 'quick-capture', 'claude-code', 'appearance', 'about'];
-    // Some sections write data-tab on the parent host directly via mountX(host, plugin)
-    // which sets parent.dataset.tab. Verify at least the section-label per section.
-    expect(ids.length).toBe(7);
-    expect(tabIds.length).toBe(7);
-    for (const e of expected) {
-      const match = hosts.some((h) => h.dataset.tab === e);
-      expect(match).toBe(true);
-    }
+    tab.display();
+    expect(tab.containerEl.classList.contains('workdesk-os-settings')).toBe(true);
+  });
+
+  it('does not render a custom side nav inside the settings pane', () => {
+    const app = new App();
+    const plugin = makePlugin();
+    const tab = new WorkdeskSettingTab(app, plugin);
+    tab.display();
+    // Obsidian provides the sidebar nav. A plugin must not inject its own
+    // alongside `containerEl` — that's what produced the dual-nav rendering bug.
+    expect(tab.containerEl.querySelector('.settings-nav')).toBeNull();
+    expect(tab.containerEl.querySelector('.settings-nav-item')).toBeNull();
+  });
+
+  it('mounts every settings row through Obsidian Setting items', () => {
+    const app = new App();
+    const plugin = makePlugin();
+    const tab = new WorkdeskSettingTab(app, plugin);
+    tab.display();
+    const settingRows = tab.containerEl.querySelectorAll('.setting-item');
+    // 8 headings + at least 22 control rows across the sections.
+    expect(settingRows.length).toBeGreaterThanOrEqual(8 + 22);
   });
 });
 

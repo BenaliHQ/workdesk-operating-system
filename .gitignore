@@ -17,6 +17,11 @@ scripts/logs/
 # never committed.
 data.json
 
+# Generated at runtime by writePtyHelper() — the PTY helper script is
+# materialized next to the plugin folder when the repo is symlinked as a
+# plugin into a vault. Not a tracked source artifact.
+pty-helper.py
+
 # Per-developer AI-assist tooling (Claude Code skills, slash commands). The
 # obsidian-plugin skill is documented in
 # `~/Workdesk-OS/intel/research/obsidian-plugin-development.md` §9 — contributors

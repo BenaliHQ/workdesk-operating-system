@@ -5,7 +5,12 @@
 
 export class Plugin {
   app: App = new App();
-  manifest = { id: 'workdesk-operating-system', dir: '.obsidian/plugins/workdesk-operating-system' } as { id: string; dir: string };
+  manifest = {
+    id: 'workdesk-operating-system',
+    name: 'Workdesk Operating System',
+    version: '0.0.0-test',
+    dir: '.obsidian/plugins/workdesk-operating-system',
+  } as { id: string; name: string; version: string; dir: string };
   private _data: unknown = null;
   _ribbonCalls: Array<{ icon: string; title: string }> = [];
   _ribbonElements: HTMLElement[] = [];
@@ -38,6 +43,12 @@ export class App {
   workspace = new Workspace();
   vault = new Vault();
   commands = { commands: {} as Record<string, unknown>, executeCommandById: (_id: string) => true };
+  fileManager = {
+    _trashCalls: [] as Array<{ path: string }>,
+    async trashFile(file: { path?: string }): Promise<void> {
+      this._trashCalls.push({ path: file.path ?? '' });
+    },
+  };
   secretStorage = {
     _store: new Map<string, string>(),
     _getCalls: [] as string[],
@@ -77,6 +88,7 @@ export class Workspace {
   _seededLeavesByType: Record<string, Array<{ view: unknown; setViewState: (s: { type: string }) => Promise<void> }>> = {};
 
   on(_evt: string, _cb: unknown): unknown { return { _evt: _evt, _cb: _cb }; }
+  trigger(_name: string, ..._args: unknown[]): void { /* no-op in tests */ }
   onLayoutReady(cb: () => void): void { cb(); }
 
   _seedLeaf(type: string, viewMock: unknown): void {
@@ -142,6 +154,7 @@ export class Workspace {
 export class WorkspaceLeaf {
   view: View | null = null;
   async setViewState(_s: { type: string; active?: boolean }): Promise<void> {}
+  async openFile(_file: TFile): Promise<void> {}
 }
 
 export class View {
@@ -201,7 +214,20 @@ export class Vault {
   getMarkdownFiles(): TFile[] { return []; }
   getFiles(): TFile[] { return []; }
   getRoot(): TFolder { return new TFolder(); }
-  on(_evt: string, _cb: unknown): void {}
+
+  // Vault event API — tests register handlers via `on()` and fire them via
+  // `trigger()`. Real Obsidian dispatches these on every vault filesystem
+  // change; the stub lets us simulate that synchronously in unit tests.
+  private _handlers: Map<string, Array<(...args: unknown[]) => void>> = new Map();
+  on(evt: string, cb: (...args: unknown[]) => void): { evt: string; cb: typeof cb } {
+    const arr = this._handlers.get(evt) ?? [];
+    arr.push(cb);
+    this._handlers.set(evt, arr);
+    return { evt, cb };
+  }
+  trigger(evt: string, ...args: unknown[]): void {
+    for (const cb of this._handlers.get(evt) ?? []) cb(...args);
+  }
 }
 
 export class Notice { constructor(_msg: string, _ms?: number) {} }
@@ -270,62 +296,138 @@ export async function requestUrl(p: RequestUrlParam): Promise<RequestUrlResponse
 
 export class Setting {
   containerEl: HTMLElement;
+  settingEl: HTMLElement;
+  infoEl: HTMLElement;
+  nameEl: HTMLElement;
+  descEl: HTMLElement;
+  controlEl: HTMLElement;
   constructor(containerEl: HTMLElement) {
     this.containerEl = containerEl;
+    this.settingEl = document.createElement('div');
+    this.settingEl.className = 'setting-item';
+    this.infoEl = document.createElement('div');
+    this.infoEl.className = 'setting-item-info';
+    this.nameEl = document.createElement('div');
+    this.nameEl.className = 'setting-item-name';
+    this.descEl = document.createElement('div');
+    this.descEl.className = 'setting-item-description';
+    this.controlEl = document.createElement('div');
+    this.controlEl.className = 'setting-item-control';
+    this.infoEl.appendChild(this.nameEl);
+    this.infoEl.appendChild(this.descEl);
+    this.settingEl.appendChild(this.infoEl);
+    this.settingEl.appendChild(this.controlEl);
+    containerEl.appendChild(this.settingEl);
   }
-  setName(n: string): this {
-    const el = document.createElement('div');
-    el.className = 'setting-item-name';
-    el.textContent = n;
-    this.containerEl.appendChild(el);
+  setName(n: string | DocumentFragment): this {
+    if (typeof n === 'string') this.nameEl.textContent = n;
+    else { this.nameEl.replaceChildren(); this.nameEl.appendChild(n); }
     return this;
   }
-  setDesc(d: string): this {
-    const el = document.createElement('div');
-    el.className = 'setting-item-description';
-    el.textContent = d;
-    this.containerEl.appendChild(el);
+  setDesc(d: string | DocumentFragment): this {
+    if (typeof d === 'string') this.descEl.textContent = d;
+    else { this.descEl.replaceChildren(); this.descEl.appendChild(d); }
     return this;
   }
-  addText(cb: (t: { setValue: (v: string) => unknown; onChange: (fn: (v: string) => void) => unknown }) => unknown): this {
+  setHeading(): this {
+    this.settingEl.classList.add('setting-item-heading');
+    return this;
+  }
+  then(cb: (setting: this) => unknown): this {
+    cb(this);
+    return this;
+  }
+  private applyAriaLabel(el: HTMLElement): void {
+    const label = this.nameEl.textContent?.trim();
+    if (label) el.setAttribute('aria-label', label);
+  }
+  addText(cb: (t: TextComponentStub) => unknown): this {
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'setting-text';
-    this.containerEl.appendChild(input);
-    cb({
-      setValue: (v) => { input.value = v; return input; },
-      onChange: (fn) => { input.addEventListener('input', () => fn(input.value)); return input; },
-    });
+    this.applyAriaLabel(input);
+    this.controlEl.appendChild(input);
+    const component: TextComponentStub = {
+      inputEl: input,
+      setValue(v) { input.value = v; return this; },
+      setPlaceholder(p) { input.placeholder = p; return this; },
+      onChange(fn) { input.addEventListener('input', () => fn(input.value)); return this; },
+    };
+    cb(component);
     return this;
   }
-  addToggle(cb: (t: { setValue: (v: boolean) => unknown; onChange: (fn: (v: boolean) => void) => unknown }) => unknown): this {
+  addToggle(cb: (t: ToggleComponentStub) => unknown): this {
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.className = 'setting-toggle';
-    this.containerEl.appendChild(input);
-    cb({
-      setValue: (v) => { input.checked = v; return input; },
-      onChange: (fn) => { input.addEventListener('change', () => fn(input.checked)); return input; },
-    });
+    this.applyAriaLabel(input);
+    this.controlEl.appendChild(input);
+    const component: ToggleComponentStub = {
+      toggleEl: input,
+      setValue(v) { input.checked = v; return this; },
+      onChange(fn) { input.addEventListener('change', () => fn(input.checked)); return this; },
+    };
+    cb(component);
     return this;
   }
-  addDropdown(cb: (t: { addOption: (v: string, n: string) => unknown; setValue: (v: string) => unknown; onChange: (fn: (v: string) => void) => unknown }) => unknown): this {
+  addDropdown(cb: (t: DropdownComponentStub) => unknown): this {
     const select = document.createElement('select');
     select.className = 'setting-select';
-    this.containerEl.appendChild(select);
-    cb({
-      addOption: (v, n) => {
+    this.applyAriaLabel(select);
+    this.controlEl.appendChild(select);
+    const component: DropdownComponentStub = {
+      selectEl: select,
+      addOption(v, n) {
         const opt = document.createElement('option');
         opt.value = v;
         opt.textContent = n;
         select.appendChild(opt);
-        return select;
+        return this;
       },
-      setValue: (v) => { select.value = v; return select; },
-      onChange: (fn) => { select.addEventListener('change', () => fn(select.value)); return select; },
-    });
+      setValue(v) { select.value = v; return this; },
+      onChange(fn) { select.addEventListener('change', () => fn(select.value)); return this; },
+    };
+    cb(component);
     return this;
   }
+  addButton(cb: (b: ButtonComponentStub) => unknown): this {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'setting-button';
+    this.controlEl.appendChild(btn);
+    const component: ButtonComponentStub = {
+      buttonEl: btn,
+      setButtonText(t) { btn.textContent = t; return this; },
+      setCta() { btn.classList.add('mod-cta'); return this; },
+      onClick(fn) { btn.addEventListener('click', fn); return this; },
+    };
+    cb(component);
+    return this;
+  }
+}
+
+interface TextComponentStub {
+  inputEl: HTMLInputElement;
+  setValue(v: string): this;
+  setPlaceholder(p: string): this;
+  onChange(fn: (v: string) => void): this;
+}
+interface ToggleComponentStub {
+  toggleEl: HTMLInputElement;
+  setValue(v: boolean): this;
+  onChange(fn: (v: boolean) => void): this;
+}
+interface DropdownComponentStub {
+  selectEl: HTMLSelectElement;
+  addOption(value: string, name: string): this;
+  setValue(v: string): this;
+  onChange(fn: (v: string) => void): this;
+}
+interface ButtonComponentStub {
+  buttonEl: HTMLButtonElement;
+  setButtonText(t: string): this;
+  setCta(): this;
+  onClick(fn: () => void): this;
 }
 export class PluginSettingTab {
   app: App; plugin: unknown;
@@ -372,25 +474,29 @@ export class SuggestModal<T> extends Modal {
 }
 
 export class Menu {
-  private items: Array<{ title: string; callback: () => void }> = [];
-  addItem(cb: (item: {
-    setTitle: (t: string) => unknown;
-    setIcon: (n: string) => unknown;
-    onClick: (fn: () => void) => unknown;
-  }) => void): this {
+  /** Public for tests so they can assert which items were added. */
+  items: Array<{ title: string; callback: () => void }> = [];
+  addItem(cb: (item: MenuItemStub) => void): this {
     let title = '';
-    let onClick = (): void => {};
-    cb({
-      setTitle: (t: string) => { title = t; return this; },
-      setIcon: (_n: string) => this,
-      onClick: (fn: () => void) => { onClick = fn; return this; },
-    });
-    this.items.push({ title, callback: onClick });
+    let onClickFn = (): void => {};
+    const item: MenuItemStub = {
+      setTitle(t: string) { title = t; return this; },
+      setIcon(_n: string) { return this; },
+      onClick(fn: () => void) { onClickFn = fn; return this; },
+    };
+    cb(item);
+    this.items.push({ title, callback: () => onClickFn() });
     return this;
   }
   showAtMouseEvent(_evt: MouseEvent): void {}
   showAtPosition(_pos: { x: number; y: number }): void {}
   hide(): void {}
+}
+
+interface MenuItemStub {
+  setTitle(t: string): MenuItemStub;
+  setIcon(n: string): MenuItemStub;
+  onClick(fn: () => void): MenuItemStub;
 }
 
 export class SecretComponent {
