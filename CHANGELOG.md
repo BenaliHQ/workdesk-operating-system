@@ -6,6 +6,23 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.6.0] — 2026-05-17
+
+### Added
+
+- **Daily note filename format setting.** New
+  `vault.dailyFilenameFormat` setting (Settings → General → Daily note
+  filename format). Moment-style tokens `YYYY MM DD HH mm ss`
+  substitute; anything else passes through literally. Default
+  `YYYY-MM-DD` reproduces v1.5.x behavior. Supports patterns like
+  `YYYY.MM.DD Daily Note` for vaults that use dotted dates with a
+  human-readable suffix. `openDaily()` reads the setting and routes
+  the resulting filename through the shared template-format helper.
+  Template `{{title}}` continues to receive the canonical
+  `YYYY-MM-DD` date string regardless of the filename pattern, so
+  templates stay portable across vaults with different filename
+  conventions.
+
 ## [1.5.1] — 2026-05-17
 
 ### Fixed

@@ -13,6 +13,14 @@ describe('templates · formatDate', () => {
   it('passes unrecognized tokens through literally', () => {
     expect(formatDate(NOW, 'YYYY-WW')).toBe('2026-WW');
   });
+
+  it('renders the canonical daily-filename formats used by operator vaults', () => {
+    // YYYY-MM-DD — default in WorkdeskSettings.vault.dailyFilenameFormat.
+    expect(formatDate(NOW, 'YYYY-MM-DD')).toBe('2026-05-17');
+    // YYYY.MM.DD Daily Note — canary-vault convention; the spaces and the
+    // literal "Daily Note" must pass through unchanged.
+    expect(formatDate(NOW, 'YYYY.MM.DD Daily Note')).toBe('2026.05.17 Daily Note');
+  });
 });
 
 describe('templates · applyTemplateVariables', () => {

@@ -20,7 +20,7 @@ import { wikilinkAndTagDecorations } from './editor/wikilink-ext';
 import { CommandPalette } from './modals/CommandPalette';
 import { InsertTemplateModal } from './modals/InsertTemplate';
 import { QuickCaptureModal } from './modals/QuickCapture';
-import { applyTemplateVariables } from './services/templates';
+import { applyTemplateVariables, formatDate } from './services/templates';
 import { WorkdeskSettingTab } from './settings/tab';
 import { createFocusController, type FocusController } from './services/focus';
 import { obsidianCaptureVault } from './services/capture/obsidian-vault';
@@ -516,12 +516,15 @@ export default class WorkdeskOSPlugin extends Plugin {
 
   private async openDaily(): Promise<void> {
     const d = new Date();
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    const dateStr = `${yyyy}-${mm}-${dd}`;
+    const filenameFormat = this.settings.vault.dailyFilenameFormat?.trim() || 'YYYY-MM-DD';
+    const filenameStem = formatDate(d, filenameFormat);
+    // `dateStr` is the canonical YYYY-MM-DD date passed into the template
+    // engine as {{title}}; keep it independent of the filename format so
+    // template substitutions stay stable when the operator changes the
+    // filename pattern.
+    const dateStr = formatDate(d, 'YYYY-MM-DD');
     const folder = this.settings.vault.dailyNoteFolder.replace(/^\/+|\/+$/g, '');
-    const path = folder ? `${folder}/${dateStr}.md` : `${dateStr}.md`;
+    const path = folder ? `${folder}/${filenameStem}.md` : `${filenameStem}.md`;
 
     const existing = this.app.vault.getAbstractFileByPath(path);
     if (existing instanceof TFile) {

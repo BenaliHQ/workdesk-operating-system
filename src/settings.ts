@@ -27,6 +27,11 @@ export interface WorkdeskSettings {
     dailyTemplatePath: string;
     /** Vault-relative folder where daily notes live. */
     dailyNoteFolder: string;
+    /** Moment-style format string for the daily-note filename stem (no
+     *  extension). Tokens YYYY MM DD HH mm ss substitute; anything else
+     *  passes through literally. Default `YYYY-MM-DD` reproduces v1.5.x
+     *  behavior. */
+    dailyFilenameFormat: string;
   };
   zones: {
     showFilesView: boolean;
@@ -111,6 +116,7 @@ export const DEFAULT_SETTINGS: WorkdeskSettings = {
     autoOpenDaily: true,
     dailyTemplatePath: 'config/templates/daily.md',
     dailyNoteFolder: 'personal/daily',
+    dailyFilenameFormat: 'YYYY-MM-DD',
   },
   zones: {
     showFilesView: true,

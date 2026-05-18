@@ -32,7 +32,7 @@ export function mountGeneralSection(containerEl: HTMLElement, plugin: WorkdeskOS
 
   new Setting(containerEl)
     .setName('Daily note folder')
-    .setDesc('Vault-relative folder where daily notes live. Today’s note is opened as <folder>/YYYY-MM-DD.md.')
+    .setDesc('Vault-relative folder where daily notes live.')
     .addText((text) => {
       text
         // eslint-disable-next-line obsidianmd/ui/sentence-case -- folder path, not prose.
@@ -40,6 +40,20 @@ export function mountGeneralSection(containerEl: HTMLElement, plugin: WorkdeskOS
         .setValue(plugin.settings.vault.dailyNoteFolder)
         .onChange((value) => {
           plugin.settings.vault.dailyNoteFolder = value.trim();
+          void plugin.saveSettings();
+        });
+    });
+
+  new Setting(containerEl)
+    .setName('Daily note filename format')
+    .setDesc('Moment-style tokens: YYYY MM DD HH mm ss. Anything else passes through literally (e.g. "YYYY.MM.DD Daily Note").')
+    .addText((text) => {
+      text
+        // eslint-disable-next-line obsidianmd/ui/sentence-case -- format string, not prose.
+        .setPlaceholder('YYYY-MM-DD')
+        .setValue(plugin.settings.vault.dailyFilenameFormat)
+        .onChange((value) => {
+          plugin.settings.vault.dailyFilenameFormat = value.trim() || 'YYYY-MM-DD';
           void plugin.saveSettings();
         });
     });
