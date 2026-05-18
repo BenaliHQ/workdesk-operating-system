@@ -11,6 +11,14 @@ import * as fsNs from 'node:fs';
 import { parseYaml } from 'obsidian';
 import type { Zone, ZoneId, ZoneObject, TreeNode, IconName } from '../types';
 
+// Fixture YAML is inlined into main.js at build time via esbuild's text
+// loader (see esbuild.config.mjs `loader: { '.yaml': 'text' }`). The
+// runtime always has access to these strings, even when BRAT installs
+// only the flat release assets (main.js / styles.css / manifest.json /
+// versions.json) and the plugin folder has no fixtures/ subdirectory.
+import defaultZonesYaml from '../../fixtures/zones.yaml';
+import defaultObjectIconsYaml from '../../fixtures/object-icons.yaml';
+
 // ───────── Adapter shapes ─────────
 
 export interface FsAdapter {
@@ -41,20 +49,36 @@ export interface ZoneManifest {
 
 // ───────── YAML loading + fallback ─────────
 
-export function loadZoneManifest(fs: FsAdapter, primaryPath: string, fallbackPath: string): ZoneManifest {
-  const path = fs.exists(primaryPath) ? primaryPath : fallbackPath;
-  if (!fs.exists(path)) throw new Error(`zone manifest not found at ${primaryPath} or ${fallbackPath}`);
-  const parsed = parseYaml(fs.read(path)) as ZoneManifest;
-  if (!parsed?.zones?.length) throw new Error(`zone manifest at ${path} produced no zones`);
+export function loadZoneManifest(
+  fs: FsAdapter,
+  primaryPath: string,
+  fallbackPath: string,
+  inlineFallback?: string,
+): ZoneManifest {
+  let yaml: string | undefined;
+  if (fs.exists(primaryPath)) yaml = fs.read(primaryPath);
+  else if (fs.exists(fallbackPath)) yaml = fs.read(fallbackPath);
+  else if (inlineFallback) yaml = inlineFallback;
+  if (!yaml) throw new Error(`zone manifest not found at ${primaryPath} or ${fallbackPath} (no inlined fallback)`);
+  const parsed = parseYaml(yaml) as ZoneManifest;
+  if (!parsed?.zones?.length) throw new Error('zone manifest produced no zones');
   return parsed;
 }
 
-export function loadIconManifest(fs: FsAdapter, paths: string[]): Record<string, IconName> {
+export function loadIconManifest(
+  fs: FsAdapter,
+  paths: string[],
+  inlineFallback?: string,
+): Record<string, IconName> {
   for (const p of paths) {
     if (fs.exists(p)) {
       const parsed = parseYaml(fs.read(p)) as { icons?: Record<string, IconName> };
       return parsed?.icons ?? {};
     }
+  }
+  if (inlineFallback) {
+    const parsed = parseYaml(inlineFallback) as { icons?: Record<string, IconName> };
+    return parsed?.icons ?? {};
   }
   return {};
 }
@@ -136,11 +160,16 @@ export function scanZones(fs: FsAdapter, opts: ScanOptions): Record<Exclude<Zone
     fs,
     `${opts.vaultRoot}/${opts.manifestPath ?? 'config/zones.yaml'}`,
     `${opts.pluginRoot}/fixtures/zones.yaml`,
+    defaultZonesYaml,
   );
-  const iconOverrides = loadIconManifest(fs, [
-    `${opts.vaultRoot}/${opts.iconPath ?? 'config/object-icons.yaml'}`,
-    `${opts.pluginRoot}/fixtures/object-icons.yaml`,
-  ]);
+  const iconOverrides = loadIconManifest(
+    fs,
+    [
+      `${opts.vaultRoot}/${opts.iconPath ?? 'config/object-icons.yaml'}`,
+      `${opts.pluginRoot}/fixtures/object-icons.yaml`,
+    ],
+    defaultObjectIconsYaml,
+  );
 
   // Filesystem-first model: for every zone, walk its actual root folder on
   // disk and emit a zone object for each direct child (folder or markdown/

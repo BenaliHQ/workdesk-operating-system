@@ -166,3 +166,4 @@ declare global {
     stubBodyFor(name: string): string;
   }
 }
+

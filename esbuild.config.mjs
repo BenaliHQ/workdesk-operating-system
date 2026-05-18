@@ -64,6 +64,7 @@ await esbuild.build({
   format: 'cjs',
   platform: 'browser',
   target: 'ES2022',
+  loader: { '.yaml': 'text' },
   external: [
     'obsidian',
     'electron',

@@ -6,6 +6,20 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.5.1] — 2026-05-17
+
+### Fixed
+
+- **Zone panes empty on BRAT installs.** The scanner needed
+  `fixtures/zones.yaml` + `fixtures/object-icons.yaml` from the plugin
+  folder, but BRAT only installs the flat release assets (no
+  subdirectories). Result: any non-symlinked install loaded with empty
+  zones across the board. Fixed by inlining both fixture YAML files
+  into `main.js` at build time via esbuild's text loader (~6.4KB).
+  Vault overrides at `<vault>/config/zones.yaml` still win when
+  present; the inlined fallback only kicks in when neither the vault
+  override nor a plugin-folder copy exists.
+
 ## [1.5.0] — 2026-05-17
 
 Zone-pane filesystem honesty, Obsidian-native settings, templates engine,
