@@ -63,7 +63,6 @@ export function mountGeneralSection(containerEl: HTMLElement, plugin: WorkdeskOS
     .setDesc('Vault-relative path to the template file applied to new daily notes. Variables: {{date}}, {{date:FORMAT}}, {{time}}, {{time:FORMAT}}, {{title}}. Leave blank to create empty daily notes.')
     .addText((text) => {
       text
-        // eslint-disable-next-line obsidianmd/ui/sentence-case -- file path, not prose.
         .setPlaceholder('config/templates/daily.md')
         .setValue(plugin.settings.vault.dailyTemplatePath)
         .onChange((value) => {

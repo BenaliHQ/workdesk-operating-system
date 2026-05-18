@@ -33,16 +33,16 @@ export class RenameItemModal extends Modal {
 
     contentEl.createEl('h3', { text: opts.heading });
 
-    const isFile = opts.target instanceof TFile;
-    const currentName = isFile ? (opts.target as TFile).basename : opts.target.name;
-    const extension = isFile ? `.${(opts.target as TFile).extension}` : '';
+    const target = opts.target;
+    const currentName = target instanceof TFile ? target.basename : target.name;
+    const extension = target instanceof TFile ? `.${target.extension}` : '';
 
     this.input = contentEl.createEl('input', { type: 'text' });
     this.input.value = currentName;
     this.input.spellcheck = false;
 
     // Pre-select the stem so the operator can just start typing to replace.
-    setTimeout(() => {
+    activeWindow.setTimeout(() => {
       this.input.focus();
       this.input.setSelectionRange(0, currentName.length);
     }, 0);
