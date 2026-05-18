@@ -107,6 +107,28 @@ export interface ScanOptions {
   manifestPath?: string;    // <vault>/config/zones.yaml
   iconPath?: string;        // <vault>/config/object-icons.yaml
   pluginRoot: string;       // plugin folder (contains fixtures/)
+  /** Optional per-zone root folder overrides. When provided, any object whose
+   *  manifest folder/file path starts with `<zoneId>/` (or equals `<zoneId>`)
+   *  is rewritten to start with the override. Lets the operator move whole
+   *  zones (e.g. atlas → archive/atlas) without editing zones.yaml. */
+  zoneFolders?: Partial<Record<Exclude<ZoneId, 'files'>, string>>;
+}
+
+/** Rewrites a manifest path so its `<zoneId>` prefix is replaced with the
+ *  operator-configured root. Returns the original path when no override
+ *  applies, when the override is empty, or when the path doesn't start with
+ *  the zone id. */
+function applyZoneFolderOverride(
+  path: string,
+  zoneId: Exclude<ZoneId, 'files'>,
+  zoneFolders?: Partial<Record<Exclude<ZoneId, 'files'>, string>>,
+): string {
+  if (!path) return path;
+  const override = zoneFolders?.[zoneId]?.trim().replace(/\/+$/, '');
+  if (!override || override === zoneId) return path;
+  if (path === zoneId) return override;
+  if (path.startsWith(`${zoneId}/`)) return `${override}${path.slice(zoneId.length)}`;
+  return path;
 }
 
 export function scanZones(fs: FsAdapter, opts: ScanOptions): Record<Exclude<ZoneId, 'files'>, Zone> {
@@ -120,37 +142,83 @@ export function scanZones(fs: FsAdapter, opts: ScanOptions): Record<Exclude<Zone
     `${opts.pluginRoot}/fixtures/object-icons.yaml`,
   ]);
 
+  // Filesystem-first model: for every zone, walk its actual root folder on
+  // disk and emit a zone object for each direct child (folder or markdown/
+  // json file). The manifest is treated as an OVERLAY — it lets the
+  // operator override title/sub/icon/empty for specific entries that match
+  // by path, but it never invents folders that aren't there. This avoids
+  // the old failure mode where the scanner reported manifest-defined
+  // objects (e.g. `config/templates`) even when the folder didn't exist,
+  // and inversely hid real folders (e.g. `config/objects`) that the
+  // manifest didn't enumerate.
+
   const out: Partial<Record<Exclude<ZoneId, 'files'>, Zone>> = {};
   for (const z of manifest.zones) {
     if (z.id === 'files') continue;
-    const objects: ZoneObject[] = [];
+    const zoneId = z.id;
+    const zoneRoot = applyZoneFolderOverride(zoneId, zoneId, opts.zoneFolders);
+    const fullZoneRoot = `${opts.vaultRoot}/${zoneRoot}`;
+
+    // Build a lookup keyed by remapped vault-relative path so the overlay
+    // matches whatever path the operator's zone-folder remap resolves to.
+    type ManifestObj = (typeof z.objects)[number];
+    const overlay = new Map<string, ManifestObj>();
     for (const obj of z.objects) {
-      const target = obj.folder ?? obj.file ?? '';
-      const fullPath = target ? `${opts.vaultRoot}/${target}` : '';
-      const isFile = !!obj.file || target.endsWith('.md') || target.endsWith('.json');
-      let count: number | '—' = 0;
-      let children: TreeNode[] | undefined;
-      if (!target) {
-        count = 0;
-      } else if (isFile) {
-        count = '—';
-      } else if (fs.exists(fullPath)) {
-        count = countDescendants(fs, fullPath);
-        children = walkTree(fs, fullPath);
-      }
-      objects.push({
-        id: obj.id,
-        folder: obj.folder,
-        title: obj.title,
-        sub: obj.sub,
-        count,
-        icon: iconOverrides[obj.id] ?? obj.icon,
-        expanded: obj.expanded ?? false,
-        empty: count === 0 && obj.empty ? 'caught-up' : undefined,
-        children,
-      });
+      const raw = obj.folder ?? obj.file ?? '';
+      const remapped = applyZoneFolderOverride(raw, zoneId, opts.zoneFolders);
+      if (remapped) overlay.set(remapped, obj);
     }
-    out[z.id] = { name: z.name, sub: z.sub, icon: z.icon, objects };
+
+    const objects: ZoneObject[] = [];
+    if (fs.exists(fullZoneRoot)) {
+      const entries = fs.list(fullZoneRoot).filter((e) => !e.name.startsWith('.'));
+      entries.sort((a, b) => {
+        if (a.isDir !== b.isDir) return a.isDir ? -1 : 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      for (const entry of entries) {
+        const relPath = `${zoneRoot}/${entry.name}`;
+        const fullPath = `${opts.vaultRoot}/${relPath}`;
+        const m = overlay.get(relPath);
+
+        if (entry.isDir) {
+          const count = countDescendants(fs, fullPath);
+          const children = walkTree(fs, fullPath);
+          const id = m?.id ?? entry.name;
+          objects.push({
+            id,
+            folder: relPath,
+            title: m?.title ?? entry.name,
+            sub: m?.sub ?? '',
+            count,
+            icon: iconOverrides[id] ?? m?.icon ?? 'folder',
+            // Always start collapsed — the manifest's `expanded: true` is
+            // ignored so the operator has to opt in to seeing children.
+            expanded: false,
+            empty: count === 0 && m?.empty ? 'caught-up' : undefined,
+            children,
+          });
+        } else if (entry.name.endsWith('.md') || entry.name.endsWith('.json')) {
+          const id = m?.id ?? entry.name;
+          // For file-cards, `folder` carries the file's vault-relative path
+          // (semantic stretch — the field name is folder-biased — but it lets
+          // the host resolve the underlying TFile via getAbstractFileByPath
+          // for right-click → native file menu without adding a new field.
+          // `count: '—'` remains the discriminator that this is a file).
+          objects.push({
+            id,
+            folder: relPath,
+            title: m?.title ?? entry.name,
+            sub: m?.sub ?? '',
+            count: '—',
+            icon: iconOverrides[id] ?? m?.icon ?? 'file',
+            expanded: false,
+          });
+        }
+      }
+    }
+    out[zoneId] = { name: z.name, sub: z.sub, icon: z.icon, objects };
   }
   return out as Record<Exclude<ZoneId, 'files'>, Zone>;
 }

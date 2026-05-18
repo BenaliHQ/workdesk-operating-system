@@ -8,11 +8,25 @@
 // through `app.secretStorage.get('stt:groq')`. The data.json never sees
 // plaintext keys.
 
+/** Zone folder map. Each zone's root folder path is operator-configurable;
+ *  defaults to the zone id. The scanner applies these as prefix overrides
+ *  when resolving zone objects from `config/zones.yaml`. */
+export type ZoneFolderMap = {
+  atlas: string;
+  gtd: string;
+  intel: string;
+  personal: string;
+  system: string;
+  config: string;
+};
+
 export interface WorkdeskSettings {
   vault: {
     path: string;
     autoOpenDaily: boolean;
     dailyTemplatePath: string;
+    /** Vault-relative folder where daily notes live. */
+    dailyNoteFolder: string;
   };
   zones: {
     showFilesView: boolean;
@@ -21,12 +35,17 @@ export interface WorkdeskSettings {
     showFileCounts: boolean;
     manifestPath: string;
     iconManifestPath: string;
+    /** Per-zone root folder overrides. Defaults to the zone id. */
+    folders: ZoneFolderMap;
   };
   capture: {
     provider: 'groq' | 'openai' | 'deepgram';
     model: string;
     streamPartials: boolean;
-    defaultDest: 'personal/captures' | 'system/inbox' | 'gtd/inbox';
+    /** Vault-relative folder where quick captures land by default. Free-form
+     *  string so operators can route to any folder; the modal's chips remain
+     *  as one-tap shortcuts at capture time. */
+    defaultDest: string;
     filenamePattern: string;
     autoLogToSystem: boolean;
     inputDevice?: string;
@@ -75,6 +94,15 @@ export interface WorkdeskSettings {
     /** When true, hides ribbon icons not contributed by Workdesk Operating System via a body class hook. */
     hideNonWorkdeskRibbonIcons: boolean;
   };
+  templates: {
+    /** Vault-relative folder containing markdown templates. The Insert
+     *  template command lists every `.md` under this folder, recursively. */
+    folder: string;
+    /** Default format for {{date}} substitutions. Moment-style tokens. */
+    dateFormat: string;
+    /** Default format for {{time}} substitutions. Moment-style tokens. */
+    timeFormat: string;
+  };
 }
 
 export const DEFAULT_SETTINGS: WorkdeskSettings = {
@@ -82,6 +110,7 @@ export const DEFAULT_SETTINGS: WorkdeskSettings = {
     path: '~/Workdesk-OS',
     autoOpenDaily: true,
     dailyTemplatePath: 'config/templates/daily.md',
+    dailyNoteFolder: 'personal/daily',
   },
   zones: {
     showFilesView: true,
@@ -90,12 +119,20 @@ export const DEFAULT_SETTINGS: WorkdeskSettings = {
     showFileCounts: true,
     manifestPath: 'config/zones.yaml',
     iconManifestPath: 'config/object-icons.yaml',
+    folders: {
+      atlas: 'atlas',
+      gtd: 'gtd',
+      intel: 'intel',
+      personal: 'personal',
+      system: 'system',
+      config: 'config',
+    },
   },
   capture: {
     provider: 'groq',
     model: 'whisper-large-v3',
     streamPartials: true,
-    defaultDest: 'personal/captures',
+    defaultDest: 'gtd/inbox',
     filenamePattern: '{{timestamp}}-{{slug}}',
     autoLogToSystem: true,
   },
@@ -143,6 +180,11 @@ export const DEFAULT_SETTINGS: WorkdeskSettings = {
     // want a tight ribbon. The Appearance settings sub-tab lets them flip back
     // if they prefer the native icons visible.
     hideNonWorkdeskRibbonIcons: true,
+  },
+  templates: {
+    folder: 'config/templates',
+    dateFormat: 'YYYY-MM-DD',
+    timeFormat: 'HH:mm',
   },
 };
 

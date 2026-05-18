@@ -6,7 +6,82 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-_No unreleased changes._
+Zone-pane filesystem honesty, Obsidian-native settings, templates engine,
+and a right-click-only creation/deletion model.
+
+### Added
+
+- **Templates: insert-template command + shared variable engine.** New
+  `workdesk:templates:insert` editor command opens a SuggestModal over
+  every `.md` under the configured templates folder. Variables
+  `{{date}}`, `{{date:FORMAT}}`, `{{time}}`, `{{time:FORMAT}}`, `{{title}}`
+  substituted at the cursor. Format tokens: `YYYY MM DD HH mm ss`.
+  Settings → Templates section with folder + date/time format fields.
+- **Daily note: authoritative path.** `openDaily()` no longer defers to
+  Daily Notes core or Periodic Notes. Resolves
+  `<vault.dailyNoteFolder>/YYYY-MM-DD.md`, creates the folder if missing,
+  applies the shared template engine to `vault.dailyTemplatePath`, then
+  opens the new note.
+- **Per-zone folder settings.** `settings.zones.folders` lets the
+  operator remap any zone's root folder (e.g. `atlas → archive/atlas`).
+  Scanner applies the remap when resolving zone objects; settings UI
+  debounces a live re-scan when the field changes.
+- **Live zone refresh on vault events.**
+  `vault.on('create'|'delete'|'rename')` triggers a 250ms-debounced
+  re-scan that pushes refreshed zones into every open `ZoneView`. New
+  folders or notes created from anywhere (Obsidian's file explorer,
+  terminal, another plugin) appear in the zone pane without a manual
+  reload.
+- **Filesystem-first zone scanner.** The zone pane now walks the actual
+  filesystem under each zone's root and emits a card for every direct
+  child (folder or `.md`/`.json` file). The manifest is treated as an
+  overlay — it can rename / re-icon a matching entry but no longer
+  invents folders that don't exist, nor hides folders that do.
+- **Right-click context menu on zone hero, cards, and tree rows.**
+  Folder cards prepend `New note in <X>` + `New folder in <X>` items;
+  every menu layers Obsidian's native file-menu contributions
+  (Bookmarks, Copy path, Reveal, plugin extensions) in the middle; every
+  menu ends with an explicit Delete that calls
+  `app.fileManager.trashFile(target)`.
+- **Auto-numbered instant create.** `plugin.createNewNoteIn(parent)` and
+  `plugin.createNewFolderIn(parent)` create `Untitled.md` / `Untitled`
+  with collision numbering (`Untitled 1`, `Untitled 2`, …). Notes open
+  in the workspace; folders surface via the live-refresh listener.
+- **First-letter initial chips on zone cards.** Replaces the SVG icon
+  with the uppercased first character of the title.
+- **Per-zone management label in hero.** Atlas → Object Management,
+  GTD → Action Management (with all-caps title), Intel → Signal
+  Management, Personal → Practice Management, System → Source
+  Management, Config → Set-up Management, Files → File Management.
+- **`sliders` glyph for the Config zone ribbon + hero.** Distinct from
+  the plugin-settings `gear` icon.
+- **"This folder is empty" placeholder.** Expanding a zero-count folder
+  card shows a faint italic placeholder row.
+
+### Changed
+
+- **Settings tab rewritten to native `PluginSettingTab` + `Setting`
+  rows.** Eight sections in one scrollable column, divided by
+  `Setting.setHeading()`. The prior custom side-nav + body-pane layout
+  (which hijacked Obsidian's modal sizing via unscoped `.settings`
+  selectors) is gone. All settings rows now inherit Obsidian's spacing,
+  focus rings, and theme styling.
+- **`capture.defaultDest` loosened to free-form string** (was a typed
+  union of three paths). Default flipped `personal/captures` →
+  `gtd/inbox`.
+- **Zone objects start collapsed by default.** The scanner ignores the
+  manifest's `expanded: true` field — every card opens collapsed.
+
+### Removed
+
+- **All `+ note` / `+ folder` buttons on the zone hero and per-card.**
+  Creation flows through right-click only.
+- **`src/components/forms.ts`** — 200 lines of reinvented form widgets;
+  Obsidian's `Setting` API covers all the cases.
+- **Custom `NewZoneItem` modal** — replaced by direct
+  `createNewNoteIn` / `createNewFolderIn` invoked from context menus.
+- **Daily Notes / Periodic Notes deferral in `openDaily()`.** WorkdeskOS
+  owns the daily-note flow end-to-end.
 
 ## [1.4.0] — 2026-05-17
 

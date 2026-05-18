@@ -1,4 +1,4 @@
-import { Plugin, addIcon } from 'obsidian';
+import { Plugin, TFile, addIcon } from 'obsidian';
 import { FileSystemAdapter } from 'obsidian';
 import {
   COMMAND_ID_PREFIX,
@@ -18,7 +18,9 @@ import {
 } from './vendor/workdesk-terminal';
 import { wikilinkAndTagDecorations } from './editor/wikilink-ext';
 import { CommandPalette } from './modals/CommandPalette';
+import { InsertTemplateModal } from './modals/InsertTemplate';
 import { QuickCaptureModal } from './modals/QuickCapture';
+import { applyTemplateVariables } from './services/templates';
 import { WorkdeskSettingTab } from './settings/tab';
 import { createFocusController, type FocusController } from './services/focus';
 import { obsidianCaptureVault } from './services/capture/obsidian-vault';
@@ -36,7 +38,7 @@ const RIBBON_ICON_MAP: Array<{ name: string; glyph: IconName }> = [
   { name: 'workdesk-intel', glyph: 'signal' },
   { name: 'workdesk-personal', glyph: 'person' },
   { name: 'workdesk-system', glyph: 'layers' },
-  { name: 'workdesk-config', glyph: 'gear' },
+  { name: 'workdesk-config', glyph: 'sliders' },
   { name: 'workdesk-files', glyph: 'files' },
   { name: 'workdesk-today', glyph: 'calendar' },
   { name: 'workdesk-terminal', glyph: 'code' },
@@ -86,6 +88,21 @@ export default class WorkdeskOSPlugin extends Plugin {
       id: `${COMMAND_ID_PREFIX}:open-palette`,
       name: 'Open palette',
       callback: () => new CommandPalette(this.app).open(),
+    });
+
+    this.addCommand({
+      id: `${COMMAND_ID_PREFIX}:templates:insert`,
+      name: 'Insert template',
+      editorCallback: (editor, view) => {
+        const title = view.file?.basename ?? '';
+        new InsertTemplateModal(this.app, {
+          editor,
+          title,
+          folder: this.settings.templates.folder,
+          dateFormat: this.settings.templates.dateFormat,
+          timeFormat: this.settings.templates.timeFormat,
+        }).open();
+      },
     });
 
     this.addCommand({
@@ -180,6 +197,16 @@ export default class WorkdeskOSPlugin extends Plugin {
 
     this.applyAppearance();
 
+    // Live zone refresh — vault filesystem changes (file/folder create,
+    // delete, rename) trigger a debounced re-scan + re-render of every
+    // open ZoneView. Without this, the operator creates a folder via
+    // Obsidian's file explorer and the zone pane shows stale state until
+    // a manual reload. Debounce coalesces bulk ops (e.g. moving 50 files
+    // into a folder) into a single refresh.
+    this.registerEvent(this.app.vault.on('create', () => this.scheduleZoneRefresh()));
+    this.registerEvent(this.app.vault.on('delete', () => this.scheduleZoneRefresh()));
+    this.registerEvent(this.app.vault.on('rename', () => this.scheduleZoneRefresh()));
+
     // Sidebar tab activity pulse — per-view MutationObserver on tabBarEl
     // that re-applies `.has-activity` on tab-strip rebuilds. Fullscreen
     // overlay tabs already get the same class from vin's vendored
@@ -214,6 +241,92 @@ export default class WorkdeskOSPlugin extends Plugin {
     }
   }
 
+  /** Re-scans the vault with the current settings (zone folders, manifest path,
+   *  icon manifest path) and pushes the refreshed zones into every open
+   *  ZoneView. Called by settings-tab onChange handlers so folder remaps
+   *  take effect without a plugin reload — and by the vault create/delete/
+   *  rename listeners so the zone pane stays in sync with the filesystem. */
+  async refreshZones(): Promise<void> {
+    await this.loadZones();
+    const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKDESK_ZONE);
+    for (const leaf of leaves) {
+      const view = leaf.view as ZoneView | undefined;
+      if (!view) continue;
+      view.setZones(this.zones);
+      view.setActiveZone(this.activeZone);
+    }
+  }
+
+  private zoneRefreshTimer: number | null = null;
+
+  /** Coalesces a burst of vault filesystem events into a single refresh
+   *  on the trailing edge. 250ms is short enough to feel instant after a
+   *  single mkdir, long enough to fold bulk moves into one re-scan. */
+  scheduleZoneRefresh(): void {
+    if (this.zoneRefreshTimer !== null) activeWindow.clearTimeout(this.zoneRefreshTimer);
+    this.zoneRefreshTimer = activeWindow.setTimeout(() => {
+      this.zoneRefreshTimer = null;
+      void this.refreshZones();
+    }, 250);
+  }
+
+  /** Creates a new untitled markdown file inside `parent` (vault-relative)
+   *  and opens it in the workspace. Mirrors Obsidian's File Explorer
+   *  "new note" affordance: instant create with `Untitled`, `Untitled 1`,
+   *  `Untitled 2`, ... naming, then the operator renames via Obsidian's
+   *  built-in rename (F2 / right-click → rename / title bar). */
+  async createNewNoteIn(parent: string): Promise<string | null> {
+    const folder = parent.replace(/^\/+|\/+$/g, '');
+    if (folder && !this.app.vault.getAbstractFileByPath(folder)) {
+      try { await this.app.vault.createFolder(folder); } catch { /* concurrent create */ }
+    }
+    const name = this.findAvailableName(folder, 'Untitled', '.md');
+    const path = folder ? `${folder}/${name}` : name;
+    try {
+      const file = await this.app.vault.create(path, '');
+      if (file instanceof TFile) {
+        await this.app.workspace.openLinkText(file.path, '', false);
+      }
+      return path;
+    } catch (err) {
+      showToast(`Could not create note at ${path}: ${String(err)}`, 'error');
+      return null;
+    }
+  }
+
+  /** Creates a new untitled folder inside `parent` (vault-relative).
+   *  Same auto-numbered naming as createNewNoteIn. */
+  async createNewFolderIn(parent: string): Promise<string | null> {
+    const folder = parent.replace(/^\/+|\/+$/g, '');
+    if (folder && !this.app.vault.getAbstractFileByPath(folder)) {
+      try { await this.app.vault.createFolder(folder); } catch { /* concurrent create */ }
+    }
+    const name = this.findAvailableName(folder, 'Untitled', '');
+    const path = folder ? `${folder}/${name}` : name;
+    try {
+      await this.app.vault.createFolder(path);
+      return path;
+    } catch (err) {
+      showToast(`Could not create folder at ${path}: ${String(err)}`, 'error');
+      return null;
+    }
+  }
+
+  /** Returns the first available `<base><n><ext>` under `parent`. Used by
+   *  createNewNoteIn / createNewFolderIn to mirror Obsidian's collision-
+   *  numbering convention (Untitled, Untitled 1, Untitled 2, ...). */
+  private findAvailableName(parent: string, base: string, ext: string): string {
+    for (let i = 0; i < 1000; i += 1) {
+      const suffix = i === 0 ? '' : ` ${String(i)}`;
+      const candidate = `${base}${suffix}${ext}`;
+      const fullPath = parent ? `${parent}/${candidate}` : candidate;
+      if (!this.app.vault.getAbstractFileByPath(fullPath)) return candidate;
+    }
+    // Pathological fallback — 1000 untitled items in a single folder is
+    // operator error, not a bug; degrade to a timestamped name.
+    return `${base} ${String(Date.now())}${ext}`;
+  }
+
   private async loadZones(): Promise<void> {
     try {
       const vaultRoot = this.getVaultRoot();
@@ -224,6 +337,7 @@ export default class WorkdeskOSPlugin extends Plugin {
         manifestPath: this.settings.zones.manifestPath,
         iconPath: this.settings.zones.iconManifestPath,
         pluginRoot,
+        zoneFolders: this.settings.zones.folders,
       }) as unknown as Record<string, Zone>;
     } catch (err) {
       console.warn(`[${PLUGIN_ID}] zone scan failed; continuing with empty state`, err);
@@ -401,25 +515,55 @@ export default class WorkdeskOSPlugin extends Plugin {
   }
 
   private async openDaily(): Promise<void> {
-    const commands = (this.app as unknown as {
-      commands?: { executeCommandById(id: string): boolean };
-    }).commands;
-    if (commands?.executeCommandById('daily-notes:goto-today')) return;
-    if (commands?.executeCommandById('periodic-notes:open-daily-note')) return;
     const d = new Date();
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
-    const path = `personal/daily/${yyyy}-${mm}-${dd}.md`;
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+    const folder = this.settings.vault.dailyNoteFolder.replace(/^\/+|\/+$/g, '');
+    const path = folder ? `${folder}/${dateStr}.md` : `${dateStr}.md`;
+
     const existing = this.app.vault.getAbstractFileByPath(path);
-    if (existing) {
+    if (existing instanceof TFile) {
       await this.app.workspace.openLinkText(path, '', false);
       return;
     }
-    showToast(
-      `No daily note at ${path} and no Periodic Notes plugin installed. Create it manually or install Periodic Notes.`,
-      'info',
-    );
+
+    if (folder && !this.app.vault.getAbstractFileByPath(folder)) {
+      try {
+        await this.app.vault.createFolder(folder);
+      } catch {
+        // Folder may already exist; ignore.
+      }
+    }
+
+    const content = await this.resolveDailyTemplate(d, dateStr);
+    try {
+      await this.app.vault.create(path, content);
+    } catch (err) {
+      showToast(`Could not create daily note at ${path}: ${String(err)}`, 'error');
+      return;
+    }
+    await this.app.workspace.openLinkText(path, '', false);
+  }
+
+  private async resolveDailyTemplate(now: Date, dateStr: string): Promise<string> {
+    const templatePath = this.settings.vault.dailyTemplatePath.trim();
+    if (!templatePath) return '';
+    const tpl = this.app.vault.getAbstractFileByPath(templatePath);
+    if (!(tpl instanceof TFile)) return '';
+    let raw: string;
+    try {
+      raw = await this.app.vault.read(tpl);
+    } catch {
+      return '';
+    }
+    return applyTemplateVariables(raw, {
+      now,
+      title: dateStr,
+      dateFormat: this.settings.templates.dateFormat,
+      timeFormat: this.settings.templates.timeFormat,
+    });
   }
 
   private openWorkdeskSettings(): void {

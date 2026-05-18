@@ -1,25 +1,25 @@
-// Appearance sub-tab — visual scaffolding controls.
-//
-// Currently a single toggle: hide non-WorkDesk ribbon icons. The toggle
-// flips `settings.appearance.hideNonWorkdeskRibbonIcons` and re-applies
-// the body class via plugin.applyAppearance() on change.
+// Appearance section — visual scaffolding controls.
 
+import { Setting } from 'obsidian';
 import type WorkdeskOSPlugin from '../../main';
-import { toggle, sectionLabel } from '../../components/forms';
 
-export function mountAppearanceSection(parent: HTMLElement, plugin: WorkdeskOSPlugin): void {
-  parent.dataset.tab = 'appearance';
-  sectionLabel(parent, 'APPEARANCE');
+export function mountAppearanceSection(containerEl: HTMLElement, plugin: WorkdeskOSPlugin): void {
+  new Setting(containerEl).setName('Appearance').setHeading();
 
-  toggle(parent, {
-    label: 'Hide non-WorkDesk ribbon icons (opt-in)',
-    description:
-      'Hides every ribbon icon that is not contributed by Workdesk Operating System. Use when you want a tighter ribbon focused on WorkDesk surfaces. Other plugins and Obsidian itself continue to function normally.',
-    initial: plugin.settings.appearance.hideNonWorkdeskRibbonIcons,
-    onChange: (v) => {
-      plugin.settings.appearance.hideNonWorkdeskRibbonIcons = v;
-      void plugin.saveSettings();
-      plugin.applyAppearance();
-    },
-  });
+  new Setting(containerEl)
+    // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Workdesk" is the product name.
+    .setName('Hide non-Workdesk ribbon icons')
+    .setDesc(
+      // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Workdesk Operating System" is the product name.
+      'Hides every ribbon icon not contributed by Workdesk Operating System. Use when you want a tighter ribbon focused on Workdesk surfaces; other plugins continue to function normally.',
+    )
+    .addToggle((toggle) => {
+      toggle
+        .setValue(plugin.settings.appearance.hideNonWorkdeskRibbonIcons)
+        .onChange((value) => {
+          plugin.settings.appearance.hideNonWorkdeskRibbonIcons = value;
+          void plugin.saveSettings();
+          plugin.applyAppearance();
+        });
+    });
 }

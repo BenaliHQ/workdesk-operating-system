@@ -1,57 +1,62 @@
-// Terminal sub-tab — shell, font, cursor, wrap, scrollback.
+// Terminal section — shell, font, cursor, wrap.
 
+import { Setting } from 'obsidian';
 import type WorkdeskOSPlugin from '../../main';
-import { field, toggle, select, sectionLabel } from '../../components/forms';
 
-export function mountTerminalSection(parent: HTMLElement, plugin: WorkdeskOSPlugin): void {
-  parent.dataset.tab = 'terminal';
-  sectionLabel(parent, 'TERMINAL');
+export function mountTerminalSection(containerEl: HTMLElement, plugin: WorkdeskOSPlugin): void {
+  new Setting(containerEl).setName('Terminal').setHeading();
 
-  field(parent, {
-    label: 'Shell command',
-    initial: plugin.settings.terminal.shell,
-    mono: true,
-    onChange: (v) => {
-      plugin.settings.terminal.shell = v;
-      void plugin.saveSettings();
-    },
-  });
+  new Setting(containerEl)
+    .setName('Shell command')
+    .setDesc('Command used to spawn the terminal session.')
+    .addText((text) => {
+      text
+        .setValue(plugin.settings.terminal.shell)
+        .onChange((value) => {
+          plugin.settings.terminal.shell = value;
+          void plugin.saveSettings();
+        });
+    });
 
-  select(parent, {
-    label: 'Font',
-    initial: plugin.settings.terminal.font,
-    choices: [
-      { value: 'Geist Mono', label: 'Geist Mono' },
-      { value: 'JetBrains Mono', label: 'JetBrains Mono' },
-      { value: 'IBM Plex Mono', label: 'IBM Plex Mono' },
-      { value: 'SF Mono', label: 'SF Mono' },
-    ],
-    onChange: (v) => {
-      plugin.settings.terminal.font = v as WorkdeskOSPlugin['settings']['terminal']['font'];
-      void plugin.saveSettings();
-    },
-  });
+  new Setting(containerEl)
+    .setName('Font')
+    .addDropdown((dropdown) => {
+      dropdown
+        /* eslint-disable obsidianmd/ui/sentence-case -- font product names. */
+        .addOption('Geist Mono', 'Geist Mono')
+        .addOption('JetBrains Mono', 'JetBrains Mono')
+        .addOption('IBM Plex Mono', 'IBM Plex Mono')
+        .addOption('SF Mono', 'SF Mono')
+        /* eslint-enable obsidianmd/ui/sentence-case */
+        .setValue(plugin.settings.terminal.font)
+        .onChange((value) => {
+          plugin.settings.terminal.font = value as WorkdeskOSPlugin['settings']['terminal']['font'];
+          void plugin.saveSettings();
+        });
+    });
 
-  select(parent, {
-    label: 'Cursor',
-    initial: plugin.settings.terminal.cursorStyle,
-    choices: [
-      { value: 'block', label: 'Block' },
-      { value: 'bar', label: 'Bar' },
-      { value: 'underline', label: 'Underline' },
-    ],
-    onChange: (v) => {
-      plugin.settings.terminal.cursorStyle = v as WorkdeskOSPlugin['settings']['terminal']['cursorStyle'];
-      void plugin.saveSettings();
-    },
-  });
+  new Setting(containerEl)
+    .setName('Cursor')
+    .addDropdown((dropdown) => {
+      dropdown
+        .addOption('block', 'Block')
+        .addOption('bar', 'Bar')
+        .addOption('underline', 'Underline')
+        .setValue(plugin.settings.terminal.cursorStyle)
+        .onChange((value) => {
+          plugin.settings.terminal.cursorStyle = value as WorkdeskOSPlugin['settings']['terminal']['cursorStyle'];
+          void plugin.saveSettings();
+        });
+    });
 
-  toggle(parent, {
-    label: 'Wrap lines',
-    initial: plugin.settings.terminal.wrap,
-    onChange: (v) => {
-      plugin.settings.terminal.wrap = v;
-      void plugin.saveSettings();
-    },
-  });
+  new Setting(containerEl)
+    .setName('Wrap lines')
+    .addToggle((toggle) => {
+      toggle
+        .setValue(plugin.settings.terminal.wrap)
+        .onChange((value) => {
+          plugin.settings.terminal.wrap = value;
+          void plugin.saveSettings();
+        });
+    });
 }

@@ -1,44 +1,61 @@
-// General sub-tab — vault, auto-open daily, theme, motion.
+// General section — vault, auto-open daily, reduce motion.
 
+import { Setting } from 'obsidian';
 import type WorkdeskOSPlugin from '../../main';
-import { field, toggle, segmented, sectionLabel } from '../../components/forms';
 
-export function mountGeneralSection(parent: HTMLElement, plugin: WorkdeskOSPlugin): void {
-  parent.dataset.tab = 'general';
-  sectionLabel(parent, 'GENERAL');
+export function mountGeneralSection(containerEl: HTMLElement, plugin: WorkdeskOSPlugin): void {
+  new Setting(containerEl).setName('General').setHeading();
 
-  field(parent, {
-    label: 'Vault path',
-    description: 'Defaults to the current Obsidian vault.',
-    initial: plugin.settings.vault.path,
-    onChange: (v) => {
-      plugin.settings.vault.path = v;
-      void plugin.saveSettings();
-    },
-  });
+  new Setting(containerEl)
+    .setName('Vault path')
+    .setDesc('Defaults to the current Obsidian vault.')
+    .addText((text) => {
+      text
+        .setValue(plugin.settings.vault.path)
+        .onChange((value) => {
+          plugin.settings.vault.path = value;
+          void plugin.saveSettings();
+        });
+    });
 
-  toggle(parent, {
-    label: 'Auto-open daily note',
-    description: 'Opens today’s daily note on session start.',
-    initial: plugin.settings.vault.autoOpenDaily,
-    onChange: (v) => {
-      plugin.settings.vault.autoOpenDaily = v;
-      void plugin.saveSettings();
-    },
-  });
+  new Setting(containerEl)
+    .setName('Auto-open daily note')
+    .setDesc('Opens today’s daily note on session start.')
+    .addToggle((toggle) => {
+      toggle
+        .setValue(plugin.settings.vault.autoOpenDaily)
+        .onChange((value) => {
+          plugin.settings.vault.autoOpenDaily = value;
+          void plugin.saveSettings();
+        });
+    });
 
-  segmented(parent, {
-    label: 'Reduce motion',
-    description: 'Honor the system preference or force on/off.',
-    initial: plugin.settings.theme.reduceMotion,
-    choices: [
-      { value: 'auto', label: 'Auto' },
-      { value: 'on', label: 'On' },
-      { value: 'off', label: 'Off' },
-    ],
-    onChange: (v) => {
-      plugin.settings.theme.reduceMotion = v as 'auto' | 'on' | 'off';
-      void plugin.saveSettings();
-    },
-  });
+  new Setting(containerEl)
+    .setName('Daily note folder')
+    .setDesc('Vault-relative folder where daily notes live. Today’s note is opened as <folder>/YYYY-MM-DD.md.')
+    .addText((text) => {
+      text
+        // eslint-disable-next-line obsidianmd/ui/sentence-case -- folder path, not prose.
+        .setPlaceholder('personal/daily')
+        .setValue(plugin.settings.vault.dailyNoteFolder)
+        .onChange((value) => {
+          plugin.settings.vault.dailyNoteFolder = value.trim();
+          void plugin.saveSettings();
+        });
+    });
+
+  new Setting(containerEl)
+    .setName('Reduce motion')
+    .setDesc('Honor the system preference or force on/off.')
+    .addDropdown((dropdown) => {
+      dropdown
+        .addOption('auto', 'Auto')
+        .addOption('on', 'On')
+        .addOption('off', 'Off')
+        .setValue(plugin.settings.theme.reduceMotion)
+        .onChange((value) => {
+          plugin.settings.theme.reduceMotion = value as 'auto' | 'on' | 'off';
+          void plugin.saveSettings();
+        });
+    });
 }

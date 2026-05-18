@@ -8,6 +8,10 @@ export interface TreeRowOpts {
   node: TreeNode;
   onActivate?: (node: TreeNode, path: string) => void;
   onContextAction?: (action: string, node: TreeNode, path: string) => void;
+  /** When set, overrides the legacy in-house context menu. Lets the host
+   *  trigger Obsidian's native file-menu (delete, rename, reveal, plugin
+   *  extensions) instead of our hardcoded one. */
+  onContextMenu?: (evt: MouseEvent, node: TreeNode, path: string) => void;
   pathPrefix: string;
 }
 
@@ -82,6 +86,10 @@ export function renderTreeRow(opts: TreeRowOpts): HTMLElement {
   row.addEventListener('contextmenu', (evt) => {
     evt.preventDefault();
     const path = opts.pathPrefix ? `${opts.pathPrefix}/${node.name}` : node.name;
+    if (opts.onContextMenu) {
+      opts.onContextMenu(evt, node, path);
+      return;
+    }
     const fire = (action: string) => () => opts.onContextAction?.(action, node, path);
     const items =
       node.type === 'folder'
