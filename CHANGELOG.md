@@ -6,6 +6,18 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.6.2] — 2026-05-17
+
+### Added
+
+- **Rename prompt on create.** Right-click → New note or New folder
+  now opens a small rename modal immediately after the file/folder is
+  created, with the default name pre-selected. Mirrors Obsidian's File
+  Explorer "create → inline rename" UX. Enter commits the rename via
+  `app.fileManager.renameFile()`; Escape (or the Cancel button)
+  leaves the default name in place. Names that would collide with an
+  existing file/folder are flagged inline rather than silently failing.
+
 ## [1.6.1] — 2026-05-17
 
 ### Added

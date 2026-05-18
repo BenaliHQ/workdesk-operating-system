@@ -2045,3 +2045,18 @@ svg { display: block; }
    and keep modals visible. We rely on the iframe's own clip + bg. */
 body.embedded { overflow: hidden; }
 body.embedded ::-webkit-scrollbar { width: 0; height: 0; }
+
+/* Rename modal — opens immediately after create flows. */
+.workdesk-os-rename-modal h3 { margin-top: 0; }
+.workdesk-os-rename-modal input[type="text"] {
+  width: 100%;
+  margin-bottom: 12px;
+}
+.workdesk-os-rename-modal input.workdesk-os-rename-error {
+  border-color: var(--text-error, #e06c75);
+}
+.workdesk-os-rename-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

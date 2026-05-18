@@ -1,4 +1,4 @@
-import { Plugin, TFile, addIcon } from 'obsidian';
+import { Plugin, TFile, TFolder, addIcon } from 'obsidian';
 import { FileSystemAdapter } from 'obsidian';
 import {
   COMMAND_ID_PREFIX,
@@ -20,6 +20,7 @@ import { wikilinkAndTagDecorations } from './editor/wikilink-ext';
 import { CommandPalette } from './modals/CommandPalette';
 import { InsertTemplateModal } from './modals/InsertTemplate';
 import { QuickCaptureModal } from './modals/QuickCapture';
+import { RenameItemModal } from './modals/RenameItem';
 import { applyTemplateVariables, formatDate } from './services/templates';
 import { WorkdeskSettingTab } from './settings/tab';
 import { createFocusController, type FocusController } from './services/focus';
@@ -286,6 +287,7 @@ export default class WorkdeskOSPlugin extends Plugin {
       const file = await this.app.vault.create(path, '');
       if (file instanceof TFile) {
         await this.app.workspace.openLinkText(file.path, '', false);
+        new RenameItemModal(this.app, { target: file, heading: 'Rename note' }).open();
       }
       return path;
     } catch (err) {
@@ -305,6 +307,10 @@ export default class WorkdeskOSPlugin extends Plugin {
     const path = folder ? `${folder}/${name}` : name;
     try {
       await this.app.vault.createFolder(path);
+      const created = this.app.vault.getAbstractFileByPath(path);
+      if (created instanceof TFolder) {
+        new RenameItemModal(this.app, { target: created, heading: 'Rename folder' }).open();
+      }
       return path;
     } catch (err) {
       showToast(`Could not create folder at ${path}: ${String(err)}`, 'error');
