@@ -49,11 +49,10 @@ export function mountGeneralSection(containerEl: HTMLElement, plugin: WorkdeskOS
     .setDesc('Moment-style tokens: YYYY MM DD HH mm ss. Anything else passes through literally (e.g. "YYYY.MM.DD Daily Note").')
     .addText((text) => {
       text
-        // eslint-disable-next-line obsidianmd/ui/sentence-case -- format string, not prose.
-        .setPlaceholder('YYYY-MM-DD')
+        .setPlaceholder('YYYY.MM.DD [Daily Note]')
         .setValue(plugin.settings.vault.dailyFilenameFormat)
         .onChange((value) => {
-          plugin.settings.vault.dailyFilenameFormat = value.trim() || 'YYYY-MM-DD';
+          plugin.settings.vault.dailyFilenameFormat = value.trim() || 'YYYY.MM.DD [Daily Note]';
           void plugin.saveSettings();
         });
     });
@@ -63,7 +62,7 @@ export function mountGeneralSection(containerEl: HTMLElement, plugin: WorkdeskOS
     .setDesc('Vault-relative path to the template file applied to new daily notes. Variables: {{date}}, {{date:FORMAT}}, {{time}}, {{time:FORMAT}}, {{title}}. Leave blank to create empty daily notes.')
     .addText((text) => {
       text
-        .setPlaceholder('config/templates/daily.md')
+        .setPlaceholder('config/templates/daily-note.md')
         .setValue(plugin.settings.vault.dailyTemplatePath)
         .onChange((value) => {
           plugin.settings.vault.dailyTemplatePath = value.trim();

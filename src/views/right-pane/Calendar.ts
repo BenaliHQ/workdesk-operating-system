@@ -138,24 +138,37 @@ function sameDay(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
-export async function loadRecentDailyNotes(app: App, limit = 5): Promise<Array<{ name: string; relative: string; path: string }>> {
+export async function loadRecentDailyNotes(
+  app: App,
+  folder: string,
+  limit = 5,
+): Promise<Array<{ name: string; relative: string; path: string }>> {
   const out: Array<{ name: string; relative: string; path: string }> = [];
+  const normFolder = folder.replace(/^\/+|\/+$/g, '');
+  const prefix = normFolder ? `${normFolder}/` : '';
   const files = app.vault.getMarkdownFiles();
   const daily = files
-    .filter((f) => /personal\/daily\/\d{4}-\d{2}-\d{2}\.md$/.test(f.path))
-    .sort((a, b) => b.path.localeCompare(a.path))
+    .filter((f) => f.path.startsWith(prefix) && !f.path.slice(prefix.length).includes('/'))
+    .map((f) => ({ file: f, when: extractDate(f.basename) ?? f.stat.mtime }))
+    .sort((a, b) => b.when - a.when)
     .slice(0, limit);
-  for (const f of daily) {
-    out.push({ name: f.basename, relative: relativeAge(f.basename), path: f.path });
+  for (const { file, when } of daily) {
+    out.push({ name: file.basename, relative: relativeAge(when), path: file.path });
   }
   return out;
 }
 
-function relativeAge(basename: string): string {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(basename);
-  if (!m || !m[1] || !m[2] || !m[3]) return basename;
-  const date = new Date(`${m[1]}-${m[2]}-${m[3]}T00:00:00`);
-  const days = Math.round((Date.now() - date.getTime()) / 86_400_000);
+function extractDate(basename: string): number | null {
+  // Permissive: matches YYYY-MM-DD, YYYY.MM.DD, YYYY_MM_DD, YYYY/MM/DD anywhere in basename.
+  const m = /(\d{4})[-._/](\d{2})[-._/](\d{2})/.exec(basename);
+  if (!m || !m[1] || !m[2] || !m[3]) return null;
+  const d = new Date(`${m[1]}-${m[2]}-${m[3]}T00:00:00`);
+  const ms = d.getTime();
+  return Number.isNaN(ms) ? null : ms;
+}
+
+function relativeAge(when: number): string {
+  const days = Math.round((Date.now() - when) / 86_400_000);
   if (days === 0) return 'today';
   if (days === 1) return 'yesterday';
   if (days < 7) return `${days}d ago`;

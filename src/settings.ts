@@ -114,9 +114,9 @@ export const DEFAULT_SETTINGS: WorkdeskSettings = {
   vault: {
     path: '~/Workdesk-OS',
     autoOpenDaily: true,
-    dailyTemplatePath: 'config/templates/daily.md',
+    dailyTemplatePath: 'config/templates/daily-note.md',
     dailyNoteFolder: 'personal/daily',
-    dailyFilenameFormat: 'YYYY-MM-DD',
+    dailyFilenameFormat: 'YYYY.MM.DD [Daily Note]',
   },
   zones: {
     showFilesView: true,

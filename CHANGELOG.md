@@ -6,6 +6,24 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.6.4] — 2026-05-19
+
+### Fixed
+
+- **Daily-note defaults aligned with WorkDesk OS vault layout.** Fresh
+  installs now default to `dailyTemplatePath: config/templates/daily-note.md`
+  (was `daily.md`) and `dailyFilenameFormat: YYYY.MM.DD [Daily Note]` (was
+  `YYYY-MM-DD`), matching the canonical template shipped by the WorkDesk OS
+  skills repo. Existing installs are unaffected; only defaults change.
+- **Recent daily notes list now honors the configured folder and
+  filename format.** `loadRecentDailyNotes()` previously hard-coded
+  `personal/daily/YYYY-MM-DD.md`, leaving the Calendar's "Recent daily
+  notes" section empty for any operator using a different filename
+  pattern. It now takes the folder from settings, accepts any filename
+  format that contains a `YYYY?MM?DD` segment (`-`, `.`, `_`, or `/`
+  separators), and falls back to file mtime when no date can be
+  extracted from the basename.
+
 ## [1.6.3] — 2026-05-18
 
 ### Fixed
