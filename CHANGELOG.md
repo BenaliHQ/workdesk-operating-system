@@ -6,6 +6,14 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Update button in Settings → About.** The About section now shows
+  the installed version (as before) plus a "Check for updates" button
+  that runs the same self-update flow as the command-palette command.
+  Button disables itself while the check is in flight so a double-click
+  can't fire two parallel downloads.
+
 ## [1.6.6] — 2026-05-20
 
 ### Added
