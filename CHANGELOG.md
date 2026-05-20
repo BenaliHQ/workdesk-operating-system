@@ -6,6 +6,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.6.6] — 2026-05-20
+
 ### Added
 
 - **In-plugin self-update command.** New command `Workdesk: Check for
