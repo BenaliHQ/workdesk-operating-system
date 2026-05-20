@@ -6,6 +6,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.6.7] — 2026-05-20
+
 ### Added
 
 - **Update button in Settings → About.** The About section now shows
