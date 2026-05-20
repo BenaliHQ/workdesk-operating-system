@@ -6,6 +6,18 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.6.5] — 2026-05-20
+
+### Fixed
+
+- **Zone card count showed recursive descendants instead of immediate
+  children.** The Projects card (and every other zone card) summed every
+  file under the folder, displaying e.g. "220" when only 6 subfolders sat
+  directly under it. The card now answers "what's directly in this zone
+  object?" — files + folders one level deep. Nested folder rows in the
+  expanded tree continue to show their recursive subtree counts, so the
+  "how big is this subfolder" signal isn't lost.
+
 ## [1.6.4] — 2026-05-19
 
 ### Fixed

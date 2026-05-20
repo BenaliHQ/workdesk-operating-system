@@ -41,7 +41,8 @@ describe('phase 2 · scanner', () => {
     expect(atlas).toBeDefined();
     const projects = atlas.objects.find((o) => o.id === 'projects');
     const people = atlas.objects.find((o) => o.id === 'people');
-    expect(projects?.count).toBeGreaterThanOrEqual(2); // _brief.md + _status.md
+    // Card count is immediate children only (the example-project subfolder).
+    expect(projects?.count).toBe(1);
     expect(people?.count).toBe(1); // jane-doe.md
     expect(projects?.children?.length ?? 0).toBeGreaterThan(0);
   });

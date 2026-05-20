@@ -124,6 +124,16 @@ export function countDescendants(fs: FsAdapter, folder: string): number {
   return n;
 }
 
+export function countImmediate(fs: FsAdapter, folder: string): number {
+  if (!fs.exists(folder)) return 0;
+  let n = 0;
+  for (const entry of fs.list(folder)) {
+    if (entry.name.startsWith('.')) continue;
+    n++;
+  }
+  return n;
+}
+
 // ───────── Scanner ─────────
 
 export interface ScanOptions {
@@ -212,7 +222,11 @@ export function scanZones(fs: FsAdapter, opts: ScanOptions): Record<Exclude<Zone
         const m = overlay.get(relPath);
 
         if (entry.isDir) {
-          const count = countDescendants(fs, fullPath);
+          // Card-level count is immediate children (files + folders) only.
+          // Nested folder rows in the tree below still show recursive counts
+          // via walkTree → countDescendants; the card answers "what's directly
+          // in this zone object?" without summing the entire subtree.
+          const count = countImmediate(fs, fullPath);
           const children = walkTree(fs, fullPath);
           const id = m?.id ?? entry.name;
           objects.push({
