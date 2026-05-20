@@ -6,6 +6,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.6.8] — 2026-05-20
+
 ### Added
 
 - **Resume note written to `gtd/inbox/` before plugin updates.** Reloading
