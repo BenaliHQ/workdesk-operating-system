@@ -6,6 +6,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.6.10] — 2026-05-20
+
 ### Added
 
 - **Codex CLI sessions included in the resume note.** Alongside Claude
