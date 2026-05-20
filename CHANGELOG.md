@@ -6,6 +6,17 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **Resume note now shows session titles, not just UUIDs.** Each Claude
+  Code session writes an `aiTitle` field (a short AI-generated summary
+  like "Count people in vault") into its `.jsonl` file after a few
+  turns. The session-discovery pass now extracts that title along with
+  the cwd, so the inbox resume note reads like a real list of work
+  instead of a wall of UUIDs. Falls back to the first user message when
+  no `aiTitle` is present yet (very short sessions). Header read window
+  bumped to 256KB so the scan reaches `aiTitle` in typical sessions.
+
 ## [1.6.8] — 2026-05-20
 
 ### Added

@@ -16,7 +16,8 @@ import { join } from 'node:path';
 const CLAUDE_PROJECTS_DIR = join(homedir(), '.claude', 'projects');
 const MAX_SESSIONS = 8;
 const RECENT_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h
-const HEADER_READ_BYTES = 8192;
+const HEADER_READ_BYTES = 256 * 1024; // 256KB — enough to reach `aiTitle` in typical sessions
+const LABEL_MAX_LEN = 80;
 
 export interface ClaudeSession {
   /** Absolute working directory where the session was active. */
@@ -25,30 +26,79 @@ export interface ClaudeSession {
   sessionId: string;
   /** Epoch ms of the session file's last modification. */
   lastModified: number;
+  /** Human-readable label: `aiTitle` if present, else first user message,
+   *  else null. Truncated to LABEL_MAX_LEN. */
+  label: string | null;
 }
 
-function readCwdFromSessionFile(filePath: string): string | null {
+interface SessionMetadata {
+  cwd: string | null;
+  label: string | null;
+}
+
+function extractTextFromMessage(message: unknown): string | null {
+  if (!message || typeof message !== 'object') return null;
+  const m = message as { content?: unknown };
+  if (typeof m.content === 'string') return m.content;
+  if (Array.isArray(m.content)) {
+    for (const c of m.content) {
+      if (c && typeof c === 'object') {
+        const block = c as { type?: unknown; text?: unknown };
+        if (block.type === 'text' && typeof block.text === 'string') return block.text;
+      }
+    }
+  }
+  return null;
+}
+
+function cleanLabel(raw: string): string {
+  // Strip code-block markers, collapse whitespace, truncate.
+  const flat = raw.replace(/\s+/g, ' ').trim();
+  if (flat.length <= LABEL_MAX_LEN) return flat;
+  return flat.slice(0, LABEL_MAX_LEN - 1).trimEnd() + '…';
+}
+
+function readSessionMetadata(filePath: string): SessionMetadata {
   let fd: number;
   try {
     fd = openSync(filePath, 'r');
   } catch {
-    return null;
+    return { cwd: null, label: null };
   }
   try {
     const buf = Buffer.alloc(HEADER_READ_BYTES);
     const n = readSync(fd, buf, 0, buf.length, 0);
     const text = buf.subarray(0, n).toString('utf8');
+
+    let cwd: string | null = null;
+    let aiTitle: string | null = null;
+    let firstUserText: string | null = null;
+
     for (const line of text.split('\n')) {
       if (!line.trim()) continue;
+      let obj: Record<string, unknown>;
       try {
-        const obj = JSON.parse(line) as { cwd?: unknown };
-        if (typeof obj.cwd === 'string' && obj.cwd) return obj.cwd;
+        obj = JSON.parse(line) as Record<string, unknown>;
       } catch {
-        // Incomplete trailing line — fine, the file is append-only and we
-        // only need the first parseable line that carries cwd.
+        // Incomplete trailing line — append-only file; just stop reading
+        // partial JSON and use what we already have.
+        continue;
       }
+
+      if (!cwd && typeof obj.cwd === 'string' && obj.cwd) cwd = obj.cwd;
+      if (!aiTitle && typeof obj.aiTitle === 'string' && obj.aiTitle) aiTitle = obj.aiTitle;
+      if (!firstUserText && obj.type === 'user') {
+        const t = extractTextFromMessage(obj.message);
+        if (t) firstUserText = t;
+      }
+
+      // aiTitle is the best label and lands after a few turns; once we have
+      // it plus cwd, stop scanning.
+      if (cwd && aiTitle) break;
     }
-    return null;
+
+    const label = aiTitle ?? firstUserText;
+    return { cwd, label: label ? cleanLabel(label) : null };
   } finally {
     try {
       closeSync(fd);
@@ -114,9 +164,9 @@ export function findRecentClaudeSessions(): ClaudeSession[] {
 
   const out: ClaudeSession[] = [];
   for (const c of top) {
-    const cwd = readCwdFromSessionFile(c.path);
+    const { cwd, label } = readSessionMetadata(c.path);
     if (!cwd) continue;
-    out.push({ cwd, sessionId: c.sessionId, lastModified: c.mtime });
+    out.push({ cwd, sessionId: c.sessionId, lastModified: c.mtime, label });
   }
   return out;
 }
@@ -168,7 +218,12 @@ export function formatResumeNote(
     const s = sessions[i];
     if (!s) continue;
     const when = relativeTime(s.lastModified);
-    lines.push(`## Session ${i + 1} — \`${s.cwd}\` (${when})`);
+    const heading = s.label
+      ? `## ${i + 1}. ${s.label} (${when})`
+      : `## Session ${i + 1} — \`${s.cwd}\` (${when})`;
+    lines.push(heading);
+    lines.push('');
+    if (s.label) lines.push(`\`${s.cwd}\``);
     lines.push('');
     lines.push('```bash');
     lines.push(`cd "${s.cwd}" && claude --resume ${s.sessionId}`);
