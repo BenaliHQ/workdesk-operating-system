@@ -11,6 +11,10 @@
 import { requestUrl, type Plugin } from 'obsidian';
 import { showToast } from '../components/Toast';
 import { UpdateReadyModal } from '../modals/UpdateReady';
+import { findRecentClaudeSessions, formatResumeNote } from './claude-sessions';
+import { VIEW_TYPE_WORKDESK_TERMINAL } from '../constants';
+
+const INBOX_DIR = 'gtd/inbox';
 
 const REPO = 'BenaliHQ/workdesk-operating-system';
 const RELEASES_URL = `https://api.github.com/repos/${REPO}/releases/latest`;
@@ -144,12 +148,38 @@ export async function checkAndUpdate(plugin: Plugin): Promise<void> {
     return;
   }
 
-  // 7. Files are on disk — Obsidian still has the old code in memory until
+  // 7. Capture state that the reload will kill: open terminal panes +
+  //    recent Claude Code sessions. If any sessions exist, write a resume
+  //    note to gtd/inbox/ so the operator can paste the commands into
+  //    fresh terminals after reload.
+  const terminalCount = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_WORKDESK_TERMINAL).length;
+  const sessions = findRecentClaudeSessions();
+  let resumeNotePath: string | null = null;
+  if (sessions.length > 0) {
+    const { filename, content } = formatResumeNote(sessions, currentVersion, latestVersion);
+    const adapter = plugin.app.vault.adapter;
+    try {
+      if (!(await adapter.exists(INBOX_DIR))) {
+        await adapter.mkdir(INBOX_DIR);
+      }
+      const candidate = `${INBOX_DIR}/${filename}`;
+      await adapter.write(candidate, content);
+      resumeNotePath = candidate;
+    } catch (err) {
+      console.warn('[workdesk-operating-system] could not write resume note', err);
+      // Non-fatal — surface the modal anyway, just without the link.
+    }
+  }
+
+  // 8. Files are on disk — Obsidian still has the old code in memory until
   //    the renderer reloads. Prompt operator.
   showToast(`Installed v${latestVersion}.`, 'success', { id: TOAST_ID, duration: 4000 });
   new UpdateReadyModal(plugin.app, {
     fromVersion: currentVersion,
     toVersion: latestVersion,
     releaseUrl: release.html_url,
+    terminalCount,
+    sessionCount: sessions.length,
+    resumeNotePath,
   }).open();
 }

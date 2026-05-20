@@ -6,6 +6,18 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Resume note written to `gtd/inbox/` before plugin updates.** Reloading
+  the plugin kills any terminal panes inside the Workdesk surface, which
+  takes Claude Code conversations down with them. Before the reload
+  prompt, the updater now scans `~/.claude/projects/*/<id>.jsonl` for
+  recent sessions (24h window, top 8 by mtime), reads each session's
+  `cwd` from the file header, and writes a markdown note with
+  paste-ready `cd <cwd> && claude --resume <id>` commands. The reload
+  modal shows a "X terminal panes will close" warning, a session count,
+  and an "Open resume note" link that jumps straight to the new file.
+
 ## [1.6.7] — 2026-05-20
 
 ### Added

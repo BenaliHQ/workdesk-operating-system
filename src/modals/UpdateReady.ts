@@ -2,12 +2,18 @@
 // to disk. Obsidian still has the old code in memory; this modal exists
 // to make the reload step a one-click action.
 
-import { type App, Modal } from 'obsidian';
+import { type App, Modal, TFile } from 'obsidian';
 
 export interface UpdateReadyOptions {
   fromVersion: string;
   toVersion: string;
   releaseUrl: string;
+  /** Number of open terminal panes that the reload will close. */
+  terminalCount: number;
+  /** Number of recent Claude Code sessions discovered on disk. */
+  sessionCount: number;
+  /** Vault-relative path to the resume note in gtd/inbox/, or null if none was written. */
+  resumeNotePath: string | null;
 }
 
 export class UpdateReadyModal extends Modal {
@@ -29,6 +35,28 @@ export class UpdateReadyModal extends Modal {
     body.createEl('strong', { text: `v${opts.toVersion}` });
     body.createSpan({ text: ` (was v${opts.fromVersion}). Reload Obsidian to apply.` });
 
+    // Warning + resume-note link if the reload will disrupt terminal work.
+    if (opts.terminalCount > 0 || opts.sessionCount > 0) {
+      const warn = contentEl.createEl('p', { cls: 'workdesk-os-update-warn' });
+      const parts: string[] = [];
+      if (opts.terminalCount > 0) {
+        parts.push(`${opts.terminalCount} terminal pane${opts.terminalCount === 1 ? '' : 's'} will close on reload.`);
+      }
+      if (opts.sessionCount > 0 && opts.resumeNotePath) {
+        parts.push(`Saved ${opts.sessionCount} recent Claude Code session${opts.sessionCount === 1 ? '' : 's'} as paste-ready resume commands.`);
+      }
+      warn.setText(parts.join(' '));
+
+      if (opts.resumeNotePath) {
+        const linkRow = contentEl.createEl('p');
+        const link = linkRow.createEl('a', { text: 'Open resume note', href: '#' });
+        link.addEventListener('click', (event) => {
+          event.preventDefault();
+          this.openResumeNote();
+        });
+      }
+    }
+
     const notes = contentEl.createEl('a', { text: 'View release notes', href: opts.releaseUrl });
     notes.setAttr('target', '_blank');
     notes.setAttr('rel', 'noopener');
@@ -48,6 +76,15 @@ export class UpdateReadyModal extends Modal {
         activeWindow.location.reload();
       }
     });
+  }
+
+  private openResumeNote(): void {
+    const path = this.opts.resumeNotePath;
+    if (!path) return;
+    const file = this.app.vault.getAbstractFileByPath(path);
+    if (file instanceof TFile) {
+      void this.app.workspace.openLinkText(path, '', false);
+    }
   }
 
   onClose(): void {
