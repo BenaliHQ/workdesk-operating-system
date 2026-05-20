@@ -6,6 +6,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.6.9] — 2026-05-20
+
 ### Changed
 
 - **Resume note now shows session titles, not just UUIDs.** Each Claude
