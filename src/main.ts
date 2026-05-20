@@ -22,6 +22,7 @@ import { InsertTemplateModal } from './modals/InsertTemplate';
 import { QuickCaptureModal } from './modals/QuickCapture';
 import { RenameItemModal } from './modals/RenameItem';
 import { applyTemplateVariables, formatDate } from './services/templates';
+import { checkAndUpdate } from './services/updater';
 import { WorkdeskSettingTab } from './settings/tab';
 import { createFocusController, type FocusController } from './services/focus';
 import { obsidianCaptureVault } from './services/capture/obsidian-vault';
@@ -184,6 +185,12 @@ export default class WorkdeskOSPlugin extends Plugin {
       id: `${COMMAND_ID_PREFIX}:focus:toggle`,
       name: 'Toggle focus mode',
       callback: () => this.toggleFocus(),
+    });
+
+    this.addCommand({
+      id: `${COMMAND_ID_PREFIX}:update`,
+      name: 'Check for plugin updates',
+      callback: () => { void checkAndUpdate(this); },
     });
 
     this.registerRibbonIcons();

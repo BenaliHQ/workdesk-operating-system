@@ -6,6 +6,18 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **In-plugin self-update command.** New command `Workdesk: Check for
+  plugin updates` (palette: <kbd>Cmd</kbd> + <kbd>P</kbd>) fetches the
+  latest GitHub Release, compares against the installed version, downloads
+  `main.js` + `manifest.json` + `styles.css` directly into the plugin
+  folder, and opens a reload prompt. Self-contained — does not depend on
+  BRAT. Uses Obsidian's `requestUrl` (Electron main-process fetch) so
+  GitHub asset redirects resolve correctly. Verifies the downloaded
+  manifest version matches the release tag before overwriting, so a
+  half-built release can't corrupt the install.
+
 ## [1.6.5] — 2026-05-20
 
 ### Fixed
