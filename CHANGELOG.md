@@ -6,6 +6,24 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Codex CLI sessions included in the resume note.** Alongside Claude
+  Code sessions, the updater now reads `~/.codex/session_index.jsonl`
+  and writes `codex resume <id>` commands for any Codex sessions
+  touched in the last 24 hours. Codex's session index already carries
+  `thread_name` labels, so no per-file scan is needed and the resume
+  UUID is portable (no `cd` prefix required). Note now renders two
+  sections — "Claude Code" and "Codex CLI" — with empty sections
+  omitted when nothing recent was found for an agent.
+
+### Changed
+
+- **Resume note filename: `<ts>-ai-resume.md`** (was `<ts>-claude-resume.md`)
+  to reflect the broader scope.
+- `src/services/claude-sessions.ts` renamed to `ai-sessions.ts`; exports
+  `findRecentAiSessions()` (returns combined Claude + Codex list).
+
 ## [1.6.9] — 2026-05-20
 
 ### Changed
