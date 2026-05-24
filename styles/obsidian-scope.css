@@ -191,35 +191,6 @@ body.focus-on .status-bar:hover { opacity: 1; }
   color: var(--text-normal);
 }
 
-/* Tooltip contrast — tokens.css redefines --background-secondary-alt /
- * --background-modifier-message / --text-on-accent at :root, which is what
- * Obsidian's native tooltip pulls from. That landed our tooltip on cream
- * with white text (unreadable). Explicit override here pins a high-contrast
- * dark-on-light tooltip regardless of token drift. */
-.tooltip {
-  background: #2a2a2a;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-.tooltip .tooltip-arrow {
-  border-top-color: #2a2a2a;
-  border-bottom-color: #2a2a2a;
-  border-left-color: #2a2a2a;
-  border-right-color: #2a2a2a;
-}
-
-/* Obsidian native modal visibility — the scoped app.css ships a `.modal`
- * rule with `opacity: 0` and `transform: translateY(8px)` intended for
- * plugin modals wrapped in `.scrim` (the `.scrim.open .modal` rule fades
- * them in). Obsidian's native modals (Settings, file rename, etc.) live
- * inside `.modal-container.mod-shown` and never get a `.scrim` ancestor,
- * so they inherit opacity: 0 and never become visible — clicking the
- * settings gear looks like "nothing happened". Force them visible. */
-.modal-container .modal {
-  opacity: 1;
-  transform: none;
-}
-
 /* HtmlView iframe — sized to fit pane via class rather than inline styles. */
 .workdesk-html-view .wd-html-iframe {
   width: 100%;

@@ -6,6 +6,56 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Real italic face for DM Sans.** `dm-sans-italic.woff2` is now copied
+  alongside the upright weights so `font-style: italic` resolves to a
+  proper italic instead of a browser-synthesized skew. Single italic
+  woff2 covers all weights via the variable font's `wght` axis.
+
+### Changed
+
+- **Container-scoped tokens (strategy C).** Obsidian-native CSS variable
+  reassignments (`--background-primary`, `--text-normal`, etc.) moved out
+  of `:root` into a scoped block under
+  `body.workdesk-os-active :is(<plugin containers>)`. Native Obsidian
+  chrome (tooltips, the settings dialog, other plugins' modals) now
+  keeps Obsidian's own values; only surfaces WorkDesk renders into get
+  reassigned. The body class is applied on plugin load and removed on
+  unload, and propagates to popout windows via the `window-open` event.
+- **Plugin modal fade-in scoped to `.scrim .modal`** so it stops affecting
+  Obsidian's native modals (which live in `.modal-container` without a
+  `.scrim` ancestor). The hardcoded `.modal-container .modal { opacity: 1 }`
+  workaround in `obsidian-scope.css` is no longer needed and has been
+  removed.
+- **Warm-tinted surfaces and shadows.** Pure-white surface tokens
+  (`#ffffff` × 3) and pure-gray shadow stacks (`rgba(20,20,20,…)` × 4)
+  swapped for OKLCH values that share the warm-amber hue of the rest of
+  the palette. Cards and modals now read as part of the same room
+  instead of harsh-white islands.
+- **Toast severity signaled by leading chip + full border**, not the
+  3px colored left-stripe (Impeccable anti-pattern). Same component
+  markup; `.glyph` is restyled into a 28px tinted chip via CSS only.
+  Dismiss button bumped to 28×28 with `:focus-visible` ring.
+- **Native Obsidian callouts restyled.** Targets `.callout[data-callout]`
+  in MarkdownView so callouts in user notes (note / warning / success /
+  info / error / question / example synonyms grouped) get a full
+  color-mixed border + tinted bg + leading 28px icon chip. The
+  design-handoff-only `.editor-body .callout` block is gone.
+- **Entity titles use operator's actual casing.** Removed
+  `text-transform: capitalize` from five sites so `byrd-building`,
+  `BenaliHQ`, `qbo-cli`, `WorkDesk OS` render with their intended
+  casing instead of being CSS-normalized.
+- **Empty-state and placeholder rows no longer use synthetic italic.**
+  Color, weight, and letter-spacing carry the differentiation; six
+  `font-style: italic` sites where no italic face existed have been
+  retired. The remaining `.editor-body em` rule uses the new real italic
+  face.
+- **Hardcoded `.tooltip` contrast override removed.** Native tooltips
+  inherit Obsidian's own values now that container scoping is in place.
+- **Build order: `copy-fonts` before `esbuild`** so the inline-fonts
+  step finds every woff2 on the first pass of a fresh checkout.
+
 ## [1.6.10] — 2026-05-20
 
 ### Added

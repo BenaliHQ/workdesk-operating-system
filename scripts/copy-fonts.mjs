@@ -13,21 +13,24 @@ fs.mkdirSync(fontsDir, { recursive: true });
 // We want a fixed weight per .woff2 file. @fontsource-variable ships one
 // per axis-range; we copy the "latin" full-range file and rename per
 // weight slot. The browser still resolves correct weight from the
-// font-weight axis inside the variable file.
+// font-weight axis inside the variable file. Italic slots pick the
+// "latin-wght-italic" file so font-style: italic resolves to a real
+// italic instead of a browser-synthesized skew.
 const slots = [
-  { family: '@fontsource-variable/dm-sans', weight: 400, out: 'dm-sans-400.woff2' },
-  { family: '@fontsource-variable/dm-sans', weight: 500, out: 'dm-sans-500.woff2' },
-  { family: '@fontsource-variable/dm-sans', weight: 600, out: 'dm-sans-600.woff2' },
-  { family: '@fontsource-variable/manrope', weight: 500, out: 'manrope-500.woff2' },
-  { family: '@fontsource-variable/manrope', weight: 600, out: 'manrope-600.woff2' },
-  { family: '@fontsource-variable/manrope', weight: 700, out: 'manrope-700.woff2' },
-  { family: '@fontsource-variable/geist-mono', weight: 400, out: 'geist-mono-400.woff2' },
-  { family: '@fontsource-variable/geist-mono', weight: 500, out: 'geist-mono-500.woff2' },
+  { family: '@fontsource-variable/dm-sans', weight: 400, style: 'normal', out: 'dm-sans-400.woff2' },
+  { family: '@fontsource-variable/dm-sans', weight: 500, style: 'normal', out: 'dm-sans-500.woff2' },
+  { family: '@fontsource-variable/dm-sans', weight: 600, style: 'normal', out: 'dm-sans-600.woff2' },
+  { family: '@fontsource-variable/dm-sans', weight: 400, style: 'italic', out: 'dm-sans-italic.woff2' },
+  { family: '@fontsource-variable/manrope', weight: 500, style: 'normal', out: 'manrope-500.woff2' },
+  { family: '@fontsource-variable/manrope', weight: 600, style: 'normal', out: 'manrope-600.woff2' },
+  { family: '@fontsource-variable/manrope', weight: 700, style: 'normal', out: 'manrope-700.woff2' },
+  { family: '@fontsource-variable/geist-mono', weight: 400, style: 'normal', out: 'geist-mono-400.woff2' },
+  { family: '@fontsource-variable/geist-mono', weight: 500, style: 'normal', out: 'geist-mono-500.woff2' },
 ];
 
 const shas = {};
 
-function pickWoff2(familyDir) {
+function pickWoff2(familyDir, style) {
   const filesRoot = path.join(familyDir, 'files');
   if (!fs.existsSync(filesRoot)) throw new Error(`files/ missing under ${familyDir}`);
   const candidates = fs
@@ -36,13 +39,17 @@ function pickWoff2(familyDir) {
     .map((f) => path.join(filesRoot, f))
     .sort();
   if (candidates.length === 0) throw new Error(`no .woff2 in ${filesRoot}`);
-  // Prefer "latin-wght-normal" (the variable-axis full-range file).
-  const variableAxis = candidates.find((p) => p.includes('latin-wght-normal'));
-  return variableAxis ?? candidates[0];
+  // Variable-axis full-range file for the requested style.
+  const tag = style === 'italic' ? 'latin-wght-italic' : 'latin-wght-normal';
+  const variableAxis = candidates.find((p) => p.includes(tag));
+  if (!variableAxis) {
+    throw new Error(`no ${tag} variant in ${filesRoot} — italic axis required`);
+  }
+  return variableAxis;
 }
 
 for (const slot of slots) {
-  const src = pickWoff2(path.join(root, 'node_modules', ...slot.family.split('/')));
+  const src = pickWoff2(path.join(root, 'node_modules', ...slot.family.split('/')), slot.style);
   const dst = path.join(fontsDir, slot.out);
   fs.copyFileSync(src, dst);
   const sha = crypto.createHash('sha256').update(fs.readFileSync(dst)).digest('hex');

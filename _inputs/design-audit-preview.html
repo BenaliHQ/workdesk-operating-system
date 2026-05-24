@@ -1,0 +1,872 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WorkDesk OS — Design audit preview</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* ─── Fonts (from plugin) ─────────────────────────────────────────────── */
+@font-face { font-family: 'DM Sans';   font-weight: 400; font-display: swap; src: url('../fonts/dm-sans-400.woff2') format('woff2'); }
+@font-face { font-family: 'DM Sans';   font-weight: 500; font-display: swap; src: url('../fonts/dm-sans-500.woff2') format('woff2'); }
+@font-face { font-family: 'DM Sans';   font-weight: 600; font-display: swap; src: url('../fonts/dm-sans-600.woff2') format('woff2'); }
+@font-face { font-family: 'Manrope';   font-weight: 500; font-display: swap; src: url('../fonts/manrope-500.woff2') format('woff2'); }
+@font-face { font-family: 'Manrope';   font-weight: 600; font-display: swap; src: url('../fonts/manrope-600.woff2') format('woff2'); }
+@font-face { font-family: 'Manrope';   font-weight: 700; font-display: swap; src: url('../fonts/manrope-700.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono'; font-weight: 400; font-display: swap; src: url('../fonts/geist-mono-400.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono'; font-weight: 500; font-display: swap; src: url('../fonts/geist-mono-500.woff2') format('woff2'); }
+
+/* ─── Tokens — proposed warm-amber tints already applied here ─────────── */
+:root {
+  --bg-app:     oklch(98% 0.007 75);    /* warm cream — frame */
+  --bg-surface: oklch(99.6% 0.004 75);  /* warm white — cards */
+  --bg-soft:    oklch(97.5% 0.008 75);
+  --bg-hover:   oklch(95.5% 0.011 70);
+  --bg-active:  oklch(93.5% 0.013 65);
+  --hair:       oklch(94% 0.010 70);
+  --border:     oklch(90% 0.012 70);
+  --text:       oklch(22% 0.015 70);     /* warm near-black */
+  --muted:      oklch(48% 0.012 70);
+  --faint:      oklch(64% 0.010 70);
+  --accent:     oklch(48% 0.045 245);    /* slate */
+  --success:    oklch(50% 0.075 145);
+  --warn:       oklch(58% 0.095 75);
+  --error:      oklch(50% 0.085 22);
+  --info:       oklch(55% 0.055 235);
+
+  --shadow-card:    0 1px 0 oklch(20% 0.020 65 / 0.020), 0 1px 3px oklch(20% 0.020 65 / 0.045);
+  --shadow-modal:   0 1px 0 oklch(20% 0.020 65 / 0.04),  0 12px 36px oklch(20% 0.020 65 / 0.14);
+
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+
+  --radius-row: 6px; --radius-card: 10px; --radius-modal: 14px;
+
+  --font-sans:    "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Manrope", "DM Sans", system-ui, sans-serif;
+  --font-mono:    "Geist Mono", ui-monospace, "SF Mono", "Menlo", monospace;
+
+  --ws-zone-atlas-bg: #e7eef6;     --ws-zone-atlas-fg: #4a6a8a;
+  --ws-zone-gtd-bg:   #e6efe6;     --ws-zone-gtd-fg:   #4f7a52;
+  --ws-zone-intel-bg: #f5ecdc;     --ws-zone-intel-fg: #8a6a2e;
+  --ws-zone-personal-bg: #f4e6e8;  --ws-zone-personal-fg: #8a4a55;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: var(--font-sans);
+  font-size: 14px; line-height: 1.55;
+  color: var(--text); background: var(--bg-app);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Document chrome ─────────────────────────────────────────────────── */
+.doc {
+  max-width: 1080px; margin: 0 auto;
+  padding: var(--space-8) var(--space-6) var(--space-8);
+}
+.doc-head { margin-bottom: var(--space-7); }
+.doc-eyebrow {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: var(--space-2);
+}
+.doc-head h1 {
+  font-family: var(--font-display);
+  font-size: 32px; font-weight: 600;
+  letter-spacing: -0.02em; line-height: 1.1;
+  margin: 0 0 var(--space-3);
+}
+.doc-head p { color: var(--muted); font-size: 15px; line-height: 1.55; margin: 0; max-width: 64ch; }
+
+.toc {
+  display: grid; gap: 1px;
+  background: var(--hair); border: 1px solid var(--hair);
+  border-radius: var(--radius-card); overflow: hidden;
+  margin: var(--space-6) 0 var(--space-7);
+}
+.toc a {
+  display: grid; grid-template-columns: 28px 1fr auto;
+  gap: var(--space-3); align-items: center;
+  background: var(--bg-surface); padding: var(--space-3) var(--space-4);
+  color: var(--text); text-decoration: none;
+  font-size: 14px;
+  transition: background 120ms ease;
+}
+.toc a:hover { background: var(--bg-hover); }
+.toc a .num {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--faint); font-weight: 500;
+}
+.toc a .sev {
+  font-family: var(--font-mono); font-size: 10.5px;
+  color: var(--muted); letter-spacing: 0.05em;
+}
+
+/* ─── Section card ────────────────────────────────────────────────────── */
+.finding {
+  background: var(--bg-surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-modal);
+  padding: var(--space-6) var(--space-6) var(--space-5);
+  margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-card);
+}
+.finding header { margin-bottom: var(--space-5); }
+.finding .tag-row {
+  display: flex; gap: var(--space-2); align-items: center;
+  margin-bottom: var(--space-3);
+}
+.tag {
+  display: inline-flex; align-items: center;
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 999px;
+  border: 1px solid var(--border); color: var(--muted);
+}
+.tag.p1 { color: oklch(35% 0.090 22); border-color: oklch(80% 0.060 22); background: oklch(96% 0.025 22); }
+.tag.p2 { color: oklch(40% 0.070 75); border-color: oklch(82% 0.055 75); background: oklch(96% 0.025 75); }
+.finding h2 {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 600;
+  letter-spacing: -0.015em; line-height: 1.2;
+  margin: 0 0 var(--space-2);
+}
+.finding .problem {
+  font-size: 14.5px; color: var(--muted);
+  line-height: 1.55; margin: 0;
+  max-width: 68ch;
+}
+.finding .problem code {
+  font-family: var(--font-mono); font-size: 12.5px;
+  background: var(--bg-hover); border: 1px solid var(--hair);
+  padding: 1px 5px; border-radius: 4px;
+  color: var(--text);
+}
+
+/* ─── Before / after panels ───────────────────────────────────────────── */
+.ba {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+.ba > section {
+  background: var(--bg-soft);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-card);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  position: relative;
+}
+.ba .label {
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: var(--space-3);
+  display: flex; align-items: center; gap: 6px;
+}
+.ba .label::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+}
+.ba .before .label::before { background: oklch(60% 0.080 22); }
+.ba .after  .label::before { background: oklch(55% 0.080 145); }
+
+.note {
+  margin-top: var(--space-4);
+  font-size: 13px; color: var(--muted); line-height: 1.55;
+  border-top: 1px solid var(--hair);
+  padding-top: var(--space-3);
+}
+.note strong { color: var(--text); font-weight: 600; }
+
+.code-block {
+  font-family: var(--font-mono);
+  font-size: 12px; line-height: 1.6;
+  background: oklch(17% 0.014 65);
+  color: oklch(92% 0.020 75);
+  border-radius: var(--radius-card);
+  padding: var(--space-3) var(--space-4);
+  overflow-x: auto;
+  margin-top: var(--space-3);
+}
+.code-block .added { color: oklch(78% 0.130 145); }
+.code-block .removed { color: oklch(72% 0.120 22); text-decoration: line-through; opacity: 0.7; }
+.code-block .comment { color: oklch(60% 0.025 75); font-style: normal; }
+.code-block .key { color: oklch(78% 0.070 245); }
+
+/* ═══════ FINDING 1: Toasts + callouts (current vs proposed) ═══════════ */
+
+/* BEFORE — current Toast component */
+.demo-toast--before {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-modal);
+  font-size: 13px;
+  max-width: 360px;
+}
+.demo-toast--before.success { border-left: 3px solid var(--success); }
+.demo-toast--before.error   { border-left: 3px solid var(--error); }
+.demo-toast--before.info    { border-left: 3px solid var(--accent); }
+.demo-toast--before .glyph { width: 18px; height: 18px; display: grid; place-items: center; flex-shrink: 0; }
+.demo-toast--before.success .glyph { color: var(--success); }
+.demo-toast--before.error   .glyph { color: var(--error); }
+.demo-toast--before.info    .glyph { color: var(--accent); }
+.demo-toast--before .body { flex: 1; line-height: 1.45; }
+.demo-toast--before .body strong { display: block; font-weight: 600; font-size: 13px; }
+.demo-toast--before .body .sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+/* AFTER — proposed: full tinted border + leading glyph chip + tinted bg */
+.demo-toast {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-modal);
+  font-size: 13px;
+  max-width: 360px;
+}
+.demo-toast .chip {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+.demo-toast.success {
+  background: color-mix(in oklch, var(--ws-zone-gtd-bg) 50%, var(--bg-surface));
+  border-color: color-mix(in oklch, var(--success) 28%, var(--border));
+}
+.demo-toast.success .chip { background: var(--ws-zone-gtd-bg); color: var(--ws-zone-gtd-fg); }
+.demo-toast.error {
+  background: color-mix(in oklch, var(--ws-zone-personal-bg) 50%, var(--bg-surface));
+  border-color: color-mix(in oklch, var(--error) 28%, var(--border));
+}
+.demo-toast.error .chip { background: var(--ws-zone-personal-bg); color: var(--ws-zone-personal-fg); }
+.demo-toast.info {
+  background: color-mix(in oklch, var(--ws-zone-atlas-bg) 50%, var(--bg-surface));
+  border-color: color-mix(in oklch, var(--info) 28%, var(--border));
+}
+.demo-toast.info .chip { background: var(--ws-zone-atlas-bg); color: var(--ws-zone-atlas-fg); }
+.demo-toast .body { flex: 1; line-height: 1.45; }
+.demo-toast .body strong { display: block; font-weight: 600; font-size: 13px; }
+.demo-toast .body .sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+/* BEFORE — current callout */
+.callout--before {
+  border-radius: 8px;
+  padding: var(--space-3) var(--space-4);
+  margin: 0;
+  border-left: 3px solid;
+  font-size: 14px;
+}
+.callout--before.note    { border-color: var(--ws-zone-atlas-fg);    background: var(--ws-zone-atlas-bg); }
+.callout--before.warning { border-color: var(--ws-zone-intel-fg);    background: var(--ws-zone-intel-bg); }
+.callout--before .callout-title {
+  font-weight: 600; font-size: 12px;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 6px;
+}
+.callout--before.note    .callout-title { color: var(--ws-zone-atlas-fg); }
+.callout--before.warning .callout-title { color: var(--ws-zone-intel-fg); }
+.callout--before p { margin: 0; }
+
+/* AFTER — proposed callout: leading glyph chip in tinted bg, full subtle border */
+.callout {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 14px;
+  border-radius: var(--radius-card);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid;
+  font-size: 14px;
+}
+.callout .chip {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  flex-shrink: 0; margin-top: 1px;
+  font-weight: 600;
+}
+.callout.note    {
+  background: color-mix(in oklch, var(--ws-zone-atlas-bg) 60%, var(--bg-surface));
+  border-color: color-mix(in oklch, var(--ws-zone-atlas-fg) 35%, var(--border));
+}
+.callout.note    .chip { background: var(--ws-zone-atlas-bg); color: var(--ws-zone-atlas-fg); }
+.callout.warning {
+  background: color-mix(in oklch, var(--ws-zone-intel-bg) 60%, var(--bg-surface));
+  border-color: color-mix(in oklch, var(--ws-zone-intel-fg) 35%, var(--border));
+}
+.callout.warning .chip { background: var(--ws-zone-intel-bg); color: var(--ws-zone-intel-fg); }
+.callout .callout-title {
+  font-weight: 600; font-size: 13px;
+  letter-spacing: -0.005em;
+  margin-bottom: 2px;
+  color: var(--text);
+}
+.callout.note    .callout-title { color: var(--ws-zone-atlas-fg); }
+.callout.warning .callout-title { color: var(--ws-zone-intel-fg); }
+.callout p { margin: 0; color: var(--muted); line-height: 1.55; }
+
+/* Demo stacks */
+.toast-stack { display: flex; flex-direction: column; gap: 10px; }
+.callout-stack { display: flex; flex-direction: column; gap: 10px; }
+
+/* ═══════ FINDING 2: Scoped token overrides ═══════════════════════════ */
+
+.arch {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.7;
+  background: var(--bg-soft);
+  padding: var(--space-4);
+  border-radius: var(--radius-row);
+  border: 1px solid var(--hair);
+  white-space: pre;
+  color: var(--text);
+  overflow-x: auto;
+}
+
+/* Simulated tooltip — current (broken under :root override) */
+.tooltip-demo--before {
+  position: relative; display: inline-block;
+  padding: 14px 18px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13.5px; color: var(--text);
+}
+.tooltip-demo--before::after {
+  content: 'Open settings'; position: absolute;
+  bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  /* This is what Obsidian's native tooltip looks like when :root tokens
+     are clobbered: background pulled from --background-secondary-alt
+     (now cream) + color pulled from --text-on-accent (now white).
+     Result: white text on cream = unreadable. */
+  background: oklch(96% 0.010 70);
+  color: oklch(99% 0.005 70);
+  padding: 5px 10px; border-radius: 4px;
+  font-size: 11.5px; font-family: var(--font-sans);
+  white-space: nowrap; pointer-events: none;
+  border: 1px solid oklch(92% 0.012 70);
+}
+.tooltip-demo {
+  position: relative; display: inline-block;
+  padding: 14px 18px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13.5px; color: var(--text);
+}
+.tooltip-demo::after {
+  content: 'Open settings'; position: absolute;
+  bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: oklch(20% 0.012 70);
+  color: oklch(98% 0.005 70);
+  padding: 5px 10px; border-radius: 4px;
+  font-size: 11.5px; font-family: var(--font-sans);
+  white-space: nowrap; pointer-events: none;
+}
+
+/* ═══════ FINDING 3: text-transform + italic ══════════════════════════ */
+
+.entity-row {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--hair);
+}
+.entity-row:last-child { border-bottom: none; }
+.entity-row .initial {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--bg-soft);
+  color: var(--muted);
+  display: grid; place-items: center;
+  font-family: var(--font-display);
+  font-size: 13px; font-weight: 600;
+}
+.entity-row .title {
+  font-size: 14px; font-weight: 500;
+  color: var(--text); line-height: 1.25;
+}
+.entity-row .title.capitalized { text-transform: capitalize; } /* BEFORE behavior */
+.entity-row .sub {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--faint);
+}
+
+/* Empty-state row demo */
+.empty-row--before {
+  padding: 10px var(--space-3);
+  color: var(--faint);
+  font-size: 13px;
+  font-style: italic; /* synthesized — ugly */
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-row);
+  background: var(--bg-soft);
+}
+.empty-row {
+  padding: 10px var(--space-3);
+  color: var(--faint);
+  font-size: 13px;
+  letter-spacing: 0.005em;
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-row);
+  background: var(--bg-soft);
+}
+.empty-row.success { color: oklch(45% 0.075 145); font-weight: 500; }
+
+/* Inline em demo */
+.prose {
+  font-size: 14.5px; line-height: 1.65; color: var(--text);
+  max-width: 56ch;
+}
+.prose em.synth { font-style: italic; }
+.prose em.proposed {
+  font-style: normal;
+  color: var(--text);
+  border-bottom: 1px dotted color-mix(in oklch, var(--accent) 60%, transparent);
+  padding-bottom: 1px;
+}
+
+/* ═══════ FINDING 4: Warm-tinted surfaces ═════════════════════════════ */
+
+.surface-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+.surface-swatch {
+  border-radius: var(--radius-card);
+  height: 140px;
+  position: relative;
+  border: 1px solid var(--hair);
+  overflow: hidden;
+}
+.surface-swatch.flat-white { background: #ffffff; }
+.surface-swatch.warm-white { background: oklch(99.6% 0.004 75); }
+.surface-swatch .corner-card {
+  position: absolute;
+  bottom: 12px; left: 12px;
+  background: inherit;
+  padding: 10px 14px;
+  border-radius: 8px;
+  box-shadow: 0 1px 0 rgba(20,20,20,0.02), 0 1px 3px rgba(20,20,20,0.04);
+  font-size: 12px;
+  color: var(--text);
+}
+.surface-swatch.warm-white .corner-card { box-shadow: var(--shadow-card); }
+.surface-swatch .label-overlay {
+  position: absolute; top: 10px; right: 12px;
+  font-family: var(--font-mono); font-size: 10.5px;
+  color: var(--faint); letter-spacing: 0.04em;
+}
+
+/* Shadow demo */
+.shadow-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+.shadow-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-card);
+  padding: var(--space-4) var(--space-4) var(--space-4);
+  font-size: 13px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.shadow-card .swatch-label {
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--faint);
+}
+.shadow-card.gray { box-shadow: 0 1px 0 rgba(20,20,20,0.04), 0 12px 36px rgba(20,20,20,0.16); }
+.shadow-card.warm { box-shadow: 0 1px 0 oklch(20% 0.020 65 / 0.04), 0 12px 36px oklch(20% 0.020 65 / 0.14); }
+
+/* Color swatches */
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.swatch {
+  border-radius: var(--radius-row);
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border: 1px solid var(--hair);
+  font-family: var(--font-mono); font-size: 10.5px;
+  line-height: 1.5;
+}
+.swatch .chip-color {
+  width: 100%; height: 32px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  border: 1px solid oklch(90% 0.010 70 / 0.4);
+}
+.swatch .name { color: var(--text); font-weight: 500; }
+.swatch .val { color: var(--faint); }
+
+/* Smaller helpers */
+.demo-row { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <div class="doc-head">
+    <div class="doc-eyebrow">Design audit · workdesk-operating-system v1.6.10 → Unreleased</div>
+    <h1>Four changes, before and after</h1>
+    <p>This is the visual proposal for the four priority items from the audit. Each finding shows the current behavior on the left, the proposed behavior on the right, and a short note on what specifically changes in the code.</p>
+    <div style="margin-top: var(--space-4); padding: var(--space-3) var(--space-4); background: color-mix(in oklch, var(--ws-zone-gtd-bg) 55%, var(--bg-surface)); border: 1px solid color-mix(in oklch, var(--success) 30%, var(--border)); border-radius: var(--radius-card); font-size: 13.5px; color: var(--text); line-height: 1.55;">
+      <strong style="font-weight: 600;">All four shipped.</strong>
+      Findings 1a, 1b, 2, 3, 4 implemented on the Unreleased branch. Tests 132/132 pass, ESLint + typecheck clean, build clean from fresh checkout. `_inputs/design-handoff/` mirrors updated and `STATE.decisions.{tokens,app,obsidian_scope}_css_sha256` re-pinned. Reload the plugin and use the smoke-test checklist in `_inputs/design-audit-smoke-test.md` to eyeball each surface.
+    </div>
+  </div>
+
+  <nav class="toc" aria-label="Findings">
+    <a href="#f1"><span class="num">01</span><span>Side-stripe purge on toasts and callouts</span><span class="sev">P1</span></a>
+    <a href="#f2"><span class="num">02</span><span>Scope token overrides under a body class</span><span class="sev">P1</span></a>
+    <a href="#f3"><span class="num">03</span><span>Stop auto-capitalizing titles; replace synthetic italic</span><span class="sev">P1 / P2</span></a>
+    <a href="#f4"><span class="num">04</span><span>Tint pure white and shadows toward warm amber</span><span class="sev">P1</span></a>
+  </nav>
+
+  <!-- ═══════════════════════════ FINDING 1 ═══════════════════════════ -->
+  <section class="finding" id="f1">
+    <header>
+      <div class="tag-row"><span class="tag p1">P1 · Anti-pattern ban</span><span class="tag">Toast · Callout</span></div>
+      <h2>Side-stripe purge on toasts and callouts</h2>
+      <p class="problem">Toasts (<code>app.css:1900-1907</code>) and editor callouts (<code>app.css:734-755</code>) signal severity with a 3px colored left border. This is Impeccable's #1 absolute ban — it's the single tell most fluent reviewers spot first. The replacement keeps the same semantic clarity using a leading glyph chip in the role color plus a full subtle tinted border. Same information, no AI-slop stripe.</p>
+    </header>
+
+    <div class="ba">
+      <section class="before">
+        <div class="label">Before — current production</div>
+        <div class="toast-stack">
+          <div class="demo-toast--before success">
+            <div class="glyph">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="body"><strong>Note created</strong><span class="sub">atlas/people/martin-holland.md</span></div>
+          </div>
+          <div class="demo-toast--before error">
+            <div class="glyph">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+            <div class="body"><strong>Terminal disconnected</strong><span class="sub">Click reconnect or restart Obsidian</span></div>
+          </div>
+          <div class="demo-toast--before info">
+            <div class="glyph">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </div>
+            <div class="body"><strong>Update available</strong><span class="sub">v1.6.11 ready to install</span></div>
+          </div>
+        </div>
+      </section>
+      <section class="after">
+        <div class="label">After — proposed</div>
+        <div class="toast-stack">
+          <div class="demo-toast success">
+            <div class="chip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="body"><strong>Note created</strong><span class="sub">atlas/people/martin-holland.md</span></div>
+          </div>
+          <div class="demo-toast error">
+            <div class="chip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+            <div class="body"><strong>Terminal disconnected</strong><span class="sub">Click reconnect or restart Obsidian</span></div>
+          </div>
+          <div class="demo-toast info">
+            <div class="chip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </div>
+            <div class="body"><strong>Update available</strong><span class="sub">v1.6.11 ready to install</span></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="ba">
+      <section class="before">
+        <div class="label">Before — callouts in note body</div>
+        <div class="callout-stack">
+          <div class="callout--before note">
+            <div class="callout-title">Note</div>
+            <p>The operator maintains multiple vaults. The primary personal vault is khalils-vault. The operating vault is whatever Claude Code was launched from.</p>
+          </div>
+          <div class="callout--before warning">
+            <div class="callout-title">Warning</div>
+            <p>Pure-white surface tokens will be replaced. Any plugin overriding the same tokens at <code>:root</code> level will conflict.</p>
+          </div>
+        </div>
+      </section>
+      <section class="after">
+        <div class="label">After — proposed</div>
+        <div class="callout-stack">
+          <div class="callout note">
+            <div class="chip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </div>
+            <div>
+              <div class="callout-title">Note</div>
+              <p>The operator maintains multiple vaults. The primary personal vault is khalils-vault. The operating vault is whatever Claude Code was launched from.</p>
+            </div>
+          </div>
+          <div class="callout warning">
+            <div class="chip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div>
+              <div class="callout-title">Warning</div>
+              <p>Pure-white surface tokens will be replaced. Any plugin overriding the same tokens at <code>:root</code> level will conflict.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="note">
+      <strong>What changes in code:</strong> remove every <code>border-left: 3px solid &lt;color&gt;</code> from <code>.toast.*</code> and <code>.editor-body .callout.*</code>. Replace with: (a) full-border token using <code>color-mix(in oklch, &lt;role&gt; 28-35%, var(--border))</code>, (b) tinted background using <code>color-mix(in oklch, &lt;zone-bg&gt; 50-60%, var(--bg-surface))</code>, (c) leading 28px glyph chip in the role's bg/fg pair. Touches <code>styles/app.css</code> only — no TS changes; existing <code>Toast.ts</code> and Markdown renderer already inject <code>.glyph</code>, just rename to <code>.chip</code> in CSS and adjust sizing.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ FINDING 2 ═══════════════════════════ -->
+  <section class="finding" id="f2">
+    <header>
+      <div class="tag-row"><span class="tag p1">P1 · Architecture</span><span class="tag">tokens.css · obsidian-scope.css</span></div>
+      <h2>Scope token overrides under a body class</h2>
+      <p class="problem"><code>styles/tokens.css:79</code> redefines Obsidian's core CSS variables at <code>:root</code> — globally. Every Obsidian native chrome surface (tooltips, settings dialogs, the file rename modal, other plugins' modals) then reads WorkDesk values. The tooltip already broke and has a hardcoded patch at <code>obsidian-scope.css:199-209</code>; the next Obsidian update will break a different surface the same way. The fix is structural: apply WorkDesk tokens only where the plugin renders.</p>
+    </header>
+
+    <div class="ba">
+      <section class="before">
+        <div class="label">Before — :root override → native tooltip breaks</div>
+        <div style="padding: var(--space-6) var(--space-5) 70px; text-align: center;">
+          <div class="tooltip-demo--before">Hover area — tooltip above is what Obsidian renders when our tokens override <code style="font-family:var(--font-mono);font-size:11.5px;background:var(--bg-hover);padding:1px 5px;border-radius:3px;">--background-secondary-alt</code> and <code style="font-family:var(--font-mono);font-size:11.5px;background:var(--bg-hover);padding:1px 5px;border-radius:3px;">--text-on-accent</code></div>
+        </div>
+      </section>
+      <section class="after">
+        <div class="label">After — scoped tokens → native chrome untouched</div>
+        <div style="padding: var(--space-6) var(--space-5) 70px; text-align: center;">
+          <div class="tooltip-demo">Hover area — Obsidian's native tooltip uses its own values, dark-on-light contrast intact, no patch needed</div>
+        </div>
+      </section>
+    </div>
+
+    <div class="note">
+      <strong>What changes in code:</strong> three structural edits.
+      <ol style="margin: 8px 0 0; padding-left: 20px; line-height: 1.6;">
+        <li>In <code>styles/tokens.css</code>: change <code>:root, .theme-light { ... }</code> → <code>body.workdesk-os-active.theme-light, body.workdesk-os-active:not(.theme-dark) { ... }</code>. Same for <code>.theme-dark</code> → <code>body.workdesk-os-active.theme-dark</code>. Only the <code>--ws-*</code> source tokens stay at <code>:root</code>.</li>
+        <li>In <code>src/main.ts</code>: <code>document.body.classList.add('workdesk-os-active')</code> on plugin load, remove on unload. Also re-apply the class to every popout window via <code>this.app.workspace.on('window-open', ...)</code> so popouts get the design too.</li>
+        <li>In <code>styles/obsidian-scope.css</code>: delete the tooltip patch (<code>:199-209</code>) and the <code>.modal-container .modal</code> visibility hack (<code>:218-221</code>). Both become unnecessary once the global override is gone.</li>
+      </ol>
+    </div>
+
+    <div class="code-block"><span class="comment">/* tokens.css — diff */</span>
+<span class="removed">:root, .theme-light {</span>
+<span class="added">body.workdesk-os-active,</span>
+<span class="added">body.workdesk-os-active.theme-light {</span>
+  <span class="key">--background-primary</span>:        <span class="comment">/* warm-tinted, see finding 4 */</span>;
+  <span class="key">--text-normal</span>:               <span class="comment">/* … */</span>;
+  <span class="comment">/* … all Obsidian-native token reassignments … */</span>
+}
+
+<span class="removed">.theme-dark {</span>
+<span class="added">body.workdesk-os-active.theme-dark {</span>
+  <span class="comment">/* dark theme overrides … */</span>
+}
+
+<span class="comment">/* main.ts */</span>
+async onload() {
+  <span class="comment">/* … existing setup … */</span>
+  <span class="added">document.body.classList.add('workdesk-os-active');</span>
+  <span class="added">this.registerEvent(this.app.workspace.on('window-open', (win) =&gt; {</span>
+<span class="added">    win.doc.body.classList.add('workdesk-os-active');</span>
+<span class="added">  }));</span>
+}
+
+onunload() {
+  <span class="added">document.body.classList.remove('workdesk-os-active');</span>
+}</div>
+  </section>
+
+  <!-- ═══════════════════════════ FINDING 3 ═══════════════════════════ -->
+  <section class="finding" id="f3">
+    <header>
+      <div class="tag-row"><span class="tag p1">P1 · Typography</span><span class="tag">P2 · Typography</span></div>
+      <h2>Stop auto-capitalizing titles, replace synthetic italic</h2>
+      <p class="problem"><strong>Capitalize</strong>: five sites (<code>app.css:319, 362, 452, 511, .pane-hero h1</code>) auto-capitalize titles. This mangles operator entity names — <code>byrd-building</code>, <code>BenaliHQ</code>, <code>qbo-cli</code>, <code>WorkDesk OS</code> — which carry real casing. Title casing is a writing decision, not a CSS decision.<br><br><strong>Italic</strong>: six sites set <code>font-style: italic</code> against DM Sans and Manrope, neither of which has an italic woff2 in <code>fonts/</code>. Browsers synthesize the italic by skewing the upright. Particularly ugly on Manrope at display sizes.</p>
+    </header>
+
+    <div class="ba">
+      <section class="before">
+        <div class="label">Before — capitalize on entity titles</div>
+        <div style="background: var(--bg-surface); border: 1px solid var(--hair); border-radius: var(--radius-card); padding: var(--space-2) var(--space-3);">
+          <div class="entity-row">
+            <div class="initial">B</div>
+            <div><div class="title capitalized">byrd-building</div><div class="sub">2 days ago</div></div>
+            <div class="sub">·</div>
+          </div>
+          <div class="entity-row">
+            <div class="initial">B</div>
+            <div><div class="title capitalized">BenaliHQ</div><div class="sub">org</div></div>
+            <div class="sub">·</div>
+          </div>
+          <div class="entity-row">
+            <div class="initial">Q</div>
+            <div><div class="title capitalized">qbo-cli</div><div class="sub">repo</div></div>
+            <div class="sub">·</div>
+          </div>
+          <div class="entity-row">
+            <div class="initial">W</div>
+            <div><div class="title capitalized">WorkDesk OS</div><div class="sub">infrastructure</div></div>
+            <div class="sub">·</div>
+          </div>
+        </div>
+      </section>
+      <section class="after">
+        <div class="label">After — operator's actual casing preserved</div>
+        <div style="background: var(--bg-surface); border: 1px solid var(--hair); border-radius: var(--radius-card); padding: var(--space-2) var(--space-3);">
+          <div class="entity-row">
+            <div class="initial">B</div>
+            <div><div class="title">byrd-building</div><div class="sub">2 days ago</div></div>
+            <div class="sub">·</div>
+          </div>
+          <div class="entity-row">
+            <div class="initial">B</div>
+            <div><div class="title">BenaliHQ</div><div class="sub">org</div></div>
+            <div class="sub">·</div>
+          </div>
+          <div class="entity-row">
+            <div class="initial">Q</div>
+            <div><div class="title">qbo-cli</div><div class="sub">repo</div></div>
+            <div class="sub">·</div>
+          </div>
+          <div class="entity-row">
+            <div class="initial">W</div>
+            <div><div class="title">WorkDesk OS</div><div class="sub">infrastructure</div></div>
+            <div class="sub">·</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="ba" style="margin-top: var(--space-4);">
+      <section class="before">
+        <div class="label">Before — synthetic italic empty states</div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div class="empty-row--before">No items here yet</div>
+          <div class="empty-row--before">Caught up — nothing pending</div>
+          <p class="prose" style="margin: 8px 0 0;">Per the audit, the toast component <em class="synth">also exhibits the side-stripe pattern</em> and should be rewritten.</p>
+        </div>
+      </section>
+      <section class="after">
+        <div class="label">After — color + weight, no faux italic</div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div class="empty-row">No items here yet</div>
+          <div class="empty-row success">Caught up — nothing pending</div>
+          <p class="prose" style="margin: 8px 0 0;">Per the audit, the toast component <em class="proposed">also exhibits the side-stripe pattern</em> and should be rewritten.</p>
+        </div>
+      </section>
+    </div>
+
+    <div class="note">
+      <strong>What changes in code:</strong> in <code>styles/app.css</code> remove <code>text-transform: capitalize</code> from the five sites (line numbers above). Remove <code>font-style: italic</code> from <code>.obj-empty-row</code> (390), <code>.empty-row</code> (494), <code>.row.empty-folder</code> (498), <code>.term-meta</code> (826), and <code>.composer-input::placeholder</code> (1228). Keep <code>.editor-body em { font-style: italic }</code> (622) since em-tags are user-authored content — but ship <code>dm-sans-400-italic.woff2</code> from <code>@fontsource-variable/dm-sans</code> so it's a real italic, not synthesized. <strong>For empty states, signal via color (<code>--text-faint</code>) + optional success-tint, not italic.</strong> Inline <code>&lt;em&gt;</code> in body text gets a dotted underline accent instead.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ FINDING 4 ═══════════════════════════ -->
+  <section class="finding" id="f4">
+    <header>
+      <div class="tag-row"><span class="tag p1">P1 · Color</span><span class="tag">tokens.css</span></div>
+      <h2>Tint pure white and shadows toward warm amber</h2>
+      <p class="problem">The warm-cream chrome reads as a unified system right up until a card or modal lands on <code>#ffffff</code>. Three pure-white assignments in <code>tokens.css</code> (<code>:81 background-primary</code>, <code>:90 background-modifier-form-field</code>, <code>:99 text-on-accent</code>) plus pure-gray shadows (<code>rgba(20,20,20,…)</code>) read as harsh-white islands instead of part of the same palette. Push the chroma 0.004 toward hue 75 (warm amber) and the surface is part of the room.</p>
+    </header>
+
+    <div class="surface-row" style="margin-top: var(--space-4);">
+      <div class="surface-swatch flat-white">
+        <div class="label-overlay">#ffffff · current</div>
+        <div class="corner-card">A note card on flat white</div>
+      </div>
+      <div class="surface-swatch warm-white">
+        <div class="label-overlay">oklch(99.6% 0.004 75) · proposed</div>
+        <div class="corner-card">A note card on warm white</div>
+      </div>
+    </div>
+
+    <div class="swatches">
+      <div class="swatch">
+        <div class="chip-color" style="background: #ffffff;"></div>
+        <div class="name">--background-primary</div>
+        <div class="val">#ffffff · current</div>
+      </div>
+      <div class="swatch">
+        <div class="chip-color" style="background: oklch(99.6% 0.004 75);"></div>
+        <div class="name">--background-primary</div>
+        <div class="val">oklch(99.6% 0.004 75)</div>
+      </div>
+      <div class="swatch">
+        <div class="chip-color" style="background: #faf9f7;"></div>
+        <div class="name">--background-secondary</div>
+        <div class="val">#faf9f7 · current</div>
+      </div>
+      <div class="swatch">
+        <div class="chip-color" style="background: oklch(98% 0.007 75);"></div>
+        <div class="name">--background-secondary</div>
+        <div class="val">oklch(98% 0.007 75)</div>
+      </div>
+    </div>
+
+    <h3 style="font-family: var(--font-display); font-size: 15px; font-weight: 600; margin: var(--space-6) 0 var(--space-2); letter-spacing: -0.005em;">Shadows — gray vs warm-tinted</h3>
+    <div class="shadow-row">
+      <div class="shadow-card gray">
+        <span class="swatch-label">Before · rgba(20,20,20,…)</span>
+        <span>Cool-gray shadow on cream surface reads slightly muddy.</span>
+      </div>
+      <div class="shadow-card warm">
+        <span class="swatch-label">After · oklch(20% 0.020 65 / α)</span>
+        <span>Warm-tinted shadow settles into the same palette as the chrome.</span>
+      </div>
+    </div>
+
+    <div class="code-block" style="margin-top: var(--space-5);"><span class="comment">/* tokens.css — diff (light theme) */</span>
+<span class="removed">  --background-primary:        #ffffff;</span>
+<span class="added">  --background-primary:        oklch(99.6% 0.004 75);   /* warm white */</span>
+<span class="removed">  --background-primary-alt:    #faf9f7;</span>
+<span class="added">  --background-primary-alt:    oklch(98% 0.007 75);</span>
+<span class="removed">  --background-secondary:      #faf9f7;</span>
+<span class="added">  --background-secondary:      oklch(98% 0.007 75);</span>
+<span class="removed">  --background-modifier-form-field: #ffffff;</span>
+<span class="added">  --background-modifier-form-field: oklch(99.6% 0.004 75);</span>
+<span class="removed">  --text-on-accent: #ffffff;</span>
+<span class="added">  --text-on-accent: oklch(99% 0.005 75);</span>
+
+  <span class="comment">/* Shadows — keep the geometry, switch the color model */</span>
+<span class="removed">  --ws-shadow-card:   0 1px 0 rgba(20,20,20,0.02), 0 1px 3px rgba(20,20,20,0.04);</span>
+<span class="removed">  --ws-shadow-hover:  0 1px 0 rgba(20,20,20,0.03), 0 2px 8px rgba(20,20,20,0.06);</span>
+<span class="removed">  --ws-shadow-modal:  0 1px 0 rgba(20,20,20,0.04), 0 12px 36px rgba(20,20,20,0.16);</span>
+<span class="added">  --ws-shadow-card:   0 1px 0 oklch(20% 0.020 65 / 0.025), 0 1px 3px oklch(20% 0.020 65 / 0.050);</span>
+<span class="added">  --ws-shadow-hover:  0 1px 0 oklch(20% 0.020 65 / 0.035), 0 2px 8px oklch(20% 0.020 65 / 0.070);</span>
+<span class="added">  --ws-shadow-modal:  0 1px 0 oklch(20% 0.020 65 / 0.045), 0 12px 36px oklch(20% 0.020 65 / 0.140);</span></div>
+
+    <div class="note">
+      <strong>What changes in code:</strong> swap five color values + three shadow stacks in <code>styles/tokens.css</code> light-theme block. Dark theme already uses warm coffee values, so only light-mode adjustments are needed (one matching dark shadow update for consistency). <strong>Browser support:</strong> <code>oklch()</code> ships in all current browsers (Chrome 111+, Safari 15.4+, Firefox 113+); Obsidian's Electron runtime is Chromium 122+, no fallback needed. The plugin already uses <code>color-mix(in oklch, …)</code> in production at <code>app.css:1125, 1202, 1625, 1626, 2028</code>, so the format is already in use.
+    </div>
+  </section>
+
+  <p style="text-align: center; color: var(--faint); font-size: 13px; margin-top: var(--space-7); padding-top: var(--space-5); border-top: 1px solid var(--hair);">End of preview. Reply with which findings to ship (one, several, or all), and I'll work through the actual code.</p>
+
+</div>
+</body>
+</html>
