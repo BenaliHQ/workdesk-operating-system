@@ -6,6 +6,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.6.11] — 2026-05-24
+
 ### Added
 
 - **Real italic face for DM Sans.** `dm-sans-italic.woff2` is now copied

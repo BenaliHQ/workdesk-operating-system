@@ -114,11 +114,14 @@ try {
 // ── Step 8: commit, tag, push ────────────────────────────────────────────
 sh('git add manifest.json versions.json CHANGELOG.md');
 sh(`git commit -m "chore: release v${newVersion}"`, { stdio: 'inherit' });
-sh(`git tag ${newVersion}`);
+// Tag with `v` prefix to stay in sequence with the established convention
+// (v1.0.0 through v1.6.3). Tags 1.6.4 through 1.7.0 dropped the prefix —
+// fixed here so future releases match the original convention.
+sh(`git tag v${newVersion}`);
 
-console.log(`\n→ Pushing main + tag ${newVersion}…\n`);
+console.log(`\n→ Pushing main + tag v${newVersion}…\n`);
 execSync('git push origin main', { cwd: REPO_ROOT, stdio: 'inherit' });
-execSync(`git push origin ${newVersion}`, { cwd: REPO_ROOT, stdio: 'inherit' });
+execSync(`git push origin v${newVersion}`, { cwd: REPO_ROOT, stdio: 'inherit' });
 
 console.log(`\n✓ Released v${newVersion}.`);
 console.log(`  CI is now building + publishing the GitHub Release.`);
