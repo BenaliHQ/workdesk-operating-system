@@ -77,6 +77,7 @@ export class WorkspaceSidedock {
 
 export class Workspace {
   layoutReady = true;
+  containerEl: HTMLElement = document.createElement('div');
   leftSplit: WorkspaceSidedock = new WorkspaceSidedock();
   rightSplit: WorkspaceSidedock = new WorkspaceSidedock();
   _getLeftLeafCalls = 0;
@@ -90,6 +91,12 @@ export class Workspace {
   on(_evt: string, _cb: unknown): unknown { return { _evt: _evt, _cb: _cb }; }
   trigger(_name: string, ..._args: unknown[]): void { /* no-op in tests */ }
   onLayoutReady(cb: () => void): void { cb(); }
+
+  iterateAllLeaves(cb: (leaf: WorkspaceLeaf) => void): void {
+    for (const list of Object.values(this._seededLeavesByType)) {
+      for (const leaf of list) cb(leaf as unknown as WorkspaceLeaf);
+    }
+  }
 
   _seedLeaf(type: string, viewMock: unknown): void {
     this._seededLeavesByType[type] = this._seededLeavesByType[type] ?? [];

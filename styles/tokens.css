@@ -2,16 +2,22 @@
    WorkDesk — Design tokens (single source of truth)
 
    Token model:
-   1. Obsidian-native variables (--background-primary, --text-normal, …) so
-      this plugin slots in cleanly with the host app, themes, and other
-      plugins. These are the names Claude Code should write CSS against.
-   2. A WorkDesk extension layer (--ws-…) for zone colors, motion, shadows
-      and other surfaces Obsidian doesn't provide.
-   3. The Obsidian variables are *assigned from* the WorkDesk source values
-      below, so changing the WorkDesk palette flows everywhere.
+   1. WorkDesk source tokens (--ws-*) live at :root — they're internal and
+      don't conflict with anything Obsidian-native, so they're globally
+      available.
+   2. WorkDesk extension tokens (zone palettes, shadows, hairlines, scrim,
+      terminal palette) live at .theme-light/:root and .theme-dark — they're
+      also non-conflicting with Obsidian-native names.
+   3. Obsidian-native variable reassignments (--background-primary,
+      --text-normal, etc.) are SCOPED to plugin-owned containers via
+      `body.workdesk-os-active :is(<containers>)`. This keeps native
+      Obsidian chrome (tooltips, the settings dialog, other plugins'
+      modals) on Obsidian's own values — only surfaces WorkDesk actually
+      owns get reassigned. main.ts toggles the body class on load/unload
+      and propagates it to popout windows via the window-open event.
 
-   Theme is switched by .theme-light / .theme-dark on <body> — same contract
-   as Obsidian core.
+   Theme switches via .theme-light / .theme-dark on <body> — same contract
+   as Obsidian core. Both classes combine with workdesk-os-active.
    ──────────────────────────────────────────────────────────────────────── */
 
 /* ╔═══════════════════════════════════════════════════════════════════════╗
@@ -73,30 +79,136 @@
 }
 
 /* ╔═══════════════════════════════════════════════════════════════════════╗
-   ║ 2. LIGHT THEME — cream / warm-neutral                                  ║
+   ║ 2. WORKDESK-EXTENSION TOKENS — light theme                             ║
+   ║    Zone palettes, shadows, hairlines, terminal palette. These are      ║
+   ║    WorkDesk-internal (`--ws-…`) so they don't conflict with Obsidian   ║
+   ║    and can stay at :root with theme-keyed variants.                    ║
    ╚═══════════════════════════════════════════════════════════════════════╝ */
 .theme-light,
 :root {
-  /* ── Obsidian-native surface tokens ───────────────────────────────── */
-  --background-primary:        #ffffff;        /* editor surface */
-  --background-primary-alt:    #faf9f7;        /* alt editor (e.g. for headings) */
-  --background-secondary:      #faf9f7;        /* left pane (zone pane) */
-  --background-secondary-alt:  #f3f1ee;        /* ribbon, app frame */
-  --background-modifier-hover: #f1efeb;
-  --background-modifier-active-hover: #ebe7e0;
-  --background-modifier-border:       #e9e5df;
-  --background-modifier-border-hover: #d8d2c8;
+  /* ── Zone palettes (pastel, low-sat) ──────────────────────────────── */
+  --ws-zone-atlas-bg:    #e7eef6;  --ws-zone-atlas-fg:    #4a6a8a;
+  --ws-zone-gtd-bg:      #e6efe6;  --ws-zone-gtd-fg:      #4f7a52;
+  --ws-zone-intel-bg:    #f5ecdc;  --ws-zone-intel-fg:    #8a6a2e;
+  --ws-zone-personal-bg: #f4e6e8;  --ws-zone-personal-fg: #8a4a55;
+  --ws-zone-system-bg:   #ececec;  --ws-zone-system-fg:   #5a5a5a;
+  --ws-zone-config-bg:   #ece9f3;  --ws-zone-config-fg:   #5e548a;
+  --ws-zone-files-bg:    #e8e8e6;  --ws-zone-files-fg:    #4a4a48;
+
+  /* ── Shadows ──────────────────────────────────────────────────────────
+     Warm-tinted shadows (hue 65) settle into the cream palette instead
+     of reading as a cool-gray island on warm surfaces. */
+  --ws-shadow-card:   0 1px 0 oklch(20% 0.020 65 / 0.025), 0 1px 3px oklch(20% 0.020 65 / 0.050);
+  --ws-shadow-hover:  0 1px 0 oklch(20% 0.020 65 / 0.035), 0 2px 8px oklch(20% 0.020 65 / 0.070);
+  --ws-shadow-modal:  0 1px 0 oklch(20% 0.020 65 / 0.045), 0 12px 36px oklch(20% 0.020 65 / 0.150);
+  --ws-shadow-popover:0 1px 0 oklch(20% 0.020 65 / 0.035), 0 6px 20px oklch(20% 0.020 65 / 0.110);
+
+  /* ── Hairlines & scrim ────────────────────────────────────────────── */
+  --ws-border-hair: oklch(94% 0.010 70);
+  --ws-scrim:       oklch(20% 0.020 65 / 0.18);
+  --ws-card-soft:   oklch(98.5% 0.006 75); /* tertiary surface inside cards */
+
+  /* ── Terminal palette (light, matches editor) ─────────────────────── */
+  --ws-term-fg:       #2a2a2a;
+  --ws-term-dim:      #9a958d;
+  --ws-term-prompt:   #5a6b7a;
+  --ws-term-accent:   #4a6a8a;
+  --ws-term-success:  #4f7a52;
+  --ws-term-warn:     #8a6a2e;
+  --ws-term-error:    #8a4a55;
+  --ws-term-caret:    #5a6b7a;
+}
+
+/* ╔═══════════════════════════════════════════════════════════════════════╗
+   ║ 3. WORKDESK-EXTENSION TOKENS — dark theme                              ║
+   ╚═══════════════════════════════════════════════════════════════════════╝ */
+.theme-dark {
+  --ws-zone-atlas-bg:    #1e2a38;  --ws-zone-atlas-fg:    #7fa6cc;
+  --ws-zone-gtd-bg:      #1f2a20;  --ws-zone-gtd-fg:      #8eb892;
+  --ws-zone-intel-bg:    #2c241a;  --ws-zone-intel-fg:    #cca676;
+  --ws-zone-personal-bg: #2c1e22;  --ws-zone-personal-fg: #cc8a93;
+  --ws-zone-system-bg:   #2a2622;  --ws-zone-system-fg:   #a39b91;
+  --ws-zone-config-bg:   #252035;  --ws-zone-config-fg:   #a89bd0;
+  --ws-zone-files-bg:    #2a2622;  --ws-zone-files-fg:    #a8a094;
+
+  --ws-shadow-card:    0 1px 0 rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.3);
+  --ws-shadow-hover:   0 1px 0 rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.4);
+  --ws-shadow-modal:   0 1px 0 rgba(0,0,0,0.4), 0 12px 36px rgba(0,0,0,0.5);
+  --ws-shadow-popover: 0 1px 0 rgba(0,0,0,0.35), 0 6px 20px rgba(0,0,0,0.35);
+
+  --ws-border-hair: #2e2924;
+  --ws-scrim:       rgba(0, 0, 0, 0.5);
+  --ws-card-soft:   #272420;
+
+  --ws-term-fg:       #d8d2c4;
+  --ws-term-dim:      #76706a;
+  --ws-term-prompt:   #8a9aa8;
+  --ws-term-accent:   #7fa6cc;
+  --ws-term-success:  #8eb892;
+  --ws-term-warn:     #cca676;
+  --ws-term-error:    #cc8a93;
+  --ws-term-caret:    #8a9aa8;
+}
+
+/* ╔═══════════════════════════════════════════════════════════════════════╗
+   ║ 4. OBSIDIAN-NATIVE TOKEN REASSIGNMENTS — scoped to plugin containers   ║
+   ║                                                                        ║
+   ║    These reassign Obsidian's core CSS variables to WorkDesk values.    ║
+   ║    Scoped under `body.workdesk-os-active :is(<plugin-containers>)`     ║
+   ║    so native Obsidian chrome (tooltips, settings dialog, other         ║
+   ║    plugins' modals) keeps its own values. The body class is toggled    ║
+   ║    by src/main.ts on load/unload and propagated to popout windows.     ║
+   ║                                                                        ║
+   ║    Container list intent:                                              ║
+   ║      • workspace-leaf-content[data-type^="workdesk-"]                  ║
+   ║          → ZoneView, HtmlView, TerminalView leaves                     ║
+   ║      • workspace-leaf-content[data-type="markdown"]                    ║
+   ║          → Operator's markdown notes (curated-surface intent)          ║
+   ║      • workspace-leaf-content[data-type="empty"]                       ║
+   ║          → New-tab empty page (so it matches the rest of the UI)      ║
+   ║      • .toast-stack, .ws-popover, .term-popover                        ║
+   ║          → DOM appended directly to <body> by plugin code              ║
+   ║      • .scrim                                                          ║
+   ║          → Command palette + Quick capture + future plugin modals      ║
+   ║      • .workdesk-os-rename-modal, .workdesk-os-settings                ║
+   ║          → Plugin's own modal + settings tab (in Obsidian's            ║
+   ║            modal-container, but identified by plugin-owned class)      ║
+   ╚═══════════════════════════════════════════════════════════════════════╝ */
+
+body.workdesk-os-active :is(
+  .workspace-leaf-content[data-type^="workdesk-"],
+  .workspace-leaf-content[data-type="markdown"],
+  .workspace-leaf-content[data-type="empty"],
+  .toast-stack,
+  .ws-popover,
+  .term-popover,
+  .scrim,
+  .workdesk-os-rename-modal,
+  .workdesk-os-settings
+) {
+  /* ── Light-theme Obsidian-native surface tokens ─────────────────────
+     Surfaces share a warm-amber hue (≈75) so cards, editor, and chrome
+     read as one palette. Pure #fff was breaking that — even a tiny
+     chroma anchors it to the cream system. */
+  --background-primary:        oklch(99.6% 0.004 75); /* editor surface */
+  --background-primary-alt:    oklch(98% 0.007 75);   /* alt editor (e.g. for headings) */
+  --background-secondary:      oklch(98% 0.007 75);   /* left pane (zone pane) */
+  --background-secondary-alt:  oklch(96% 0.010 75);   /* ribbon, app frame */
+  --background-modifier-hover: oklch(95.5% 0.011 70);
+  --background-modifier-active-hover: oklch(93.5% 0.013 65);
+  --background-modifier-border:       oklch(92% 0.012 70);
+  --background-modifier-border-hover: oklch(86% 0.014 70);
   --background-modifier-border-focus: #5a6b7a;
-  --background-modifier-form-field:   #ffffff;
+  --background-modifier-form-field:   oklch(99.6% 0.004 75);
   --background-modifier-error:        #f4e6e8;
   --background-modifier-success:      #e6efe6;
   --background-modifier-message:      #f5ecdc;
 
   /* ── Text ─────────────────────────────────────────────────────────── */
-  --text-normal:    #1a1a1a;
-  --text-muted:     #6b6862;
-  --text-faint:     #9a958d;
-  --text-on-accent: #ffffff;
+  --text-normal:    oklch(22% 0.015 70);
+  --text-muted:     oklch(48% 0.012 70);
+  --text-faint:     oklch(64% 0.010 70);
+  --text-on-accent: oklch(99% 0.005 75);
   --text-accent:    #5a6b7a;        /* slate — links + interactive */
   --text-accent-hover: #3f4d5b;
   --text-error:     #8a4a55;
@@ -117,42 +229,19 @@
   --code-keyword:    #5a6b7a;
   --code-string:     #4f7a52;
   --code-value:      #8a6a2e;
-
-  /* ── WorkDesk extension: zone palettes (pastel, low-sat) ──────────── */
-  --ws-zone-atlas-bg:    #e7eef6;  --ws-zone-atlas-fg:    #4a6a8a;
-  --ws-zone-gtd-bg:      #e6efe6;  --ws-zone-gtd-fg:      #4f7a52;
-  --ws-zone-intel-bg:    #f5ecdc;  --ws-zone-intel-fg:    #8a6a2e;
-  --ws-zone-personal-bg: #f4e6e8;  --ws-zone-personal-fg: #8a4a55;
-  --ws-zone-system-bg:   #ececec;  --ws-zone-system-fg:   #5a5a5a;
-  --ws-zone-config-bg:   #ece9f3;  --ws-zone-config-fg:   #5e548a;
-  --ws-zone-files-bg:    #e8e8e6;  --ws-zone-files-fg:    #4a4a48;
-
-  /* ── WorkDesk extension: shadows ──────────────────────────────────── */
-  --ws-shadow-card:   0 1px 0 rgba(20,20,20,0.02), 0 1px 3px rgba(20,20,20,0.04);
-  --ws-shadow-hover:  0 1px 0 rgba(20,20,20,0.03), 0 2px 8px rgba(20,20,20,0.06);
-  --ws-shadow-modal:  0 1px 0 rgba(20,20,20,0.04), 0 12px 36px rgba(20,20,20,0.16);
-  --ws-shadow-popover:0 1px 0 rgba(20,20,20,0.03), 0 6px 20px rgba(20,20,20,0.10);
-
-  /* ── WorkDesk extension: hairlines & scrim ────────────────────────── */
-  --ws-border-hair: #efece6;
-  --ws-scrim:       rgba(20, 20, 20, 0.18);
-  --ws-card-soft:   #fcfbf9;     /* tertiary surface inside cards */
-
-  /* ── Terminal palette (light, matches editor) ─────────────────────── */
-  --ws-term-fg:       #2a2a2a;
-  --ws-term-dim:      #9a958d;
-  --ws-term-prompt:   #5a6b7a;
-  --ws-term-accent:   #4a6a8a;
-  --ws-term-success:  #4f7a52;
-  --ws-term-warn:     #8a6a2e;
-  --ws-term-error:    #8a4a55;
-  --ws-term-caret:    #5a6b7a;
 }
 
-/* ╔═══════════════════════════════════════════════════════════════════════╗
-   ║ 3. DARK THEME — warm coffee, low contrast                              ║
-   ╚═══════════════════════════════════════════════════════════════════════╝ */
-.theme-dark {
+body.workdesk-os-active.theme-dark :is(
+  .workspace-leaf-content[data-type^="workdesk-"],
+  .workspace-leaf-content[data-type="markdown"],
+  .workspace-leaf-content[data-type="empty"],
+  .toast-stack,
+  .ws-popover,
+  .term-popover,
+  .scrim,
+  .workdesk-os-rename-modal,
+  .workdesk-os-settings
+) {
   --background-primary:        #2a2723;
   --background-primary-alt:    #272420;
   --background-secondary:      #211f1c;
@@ -189,39 +278,16 @@
   --code-keyword:    #8a9aa8;
   --code-string:     #8eb892;
   --code-value:      #cca676;
-
-  --ws-zone-atlas-bg:    #1e2a38;  --ws-zone-atlas-fg:    #7fa6cc;
-  --ws-zone-gtd-bg:      #1f2a20;  --ws-zone-gtd-fg:      #8eb892;
-  --ws-zone-intel-bg:    #2c241a;  --ws-zone-intel-fg:    #cca676;
-  --ws-zone-personal-bg: #2c1e22;  --ws-zone-personal-fg: #cc8a93;
-  --ws-zone-system-bg:   #2a2622;  --ws-zone-system-fg:   #a39b91;
-  --ws-zone-config-bg:   #252035;  --ws-zone-config-fg:   #a89bd0;
-  --ws-zone-files-bg:    #2a2622;  --ws-zone-files-fg:    #a8a094;
-
-  --ws-shadow-card:    0 1px 0 rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.3);
-  --ws-shadow-hover:   0 1px 0 rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.4);
-  --ws-shadow-modal:   0 1px 0 rgba(0,0,0,0.4), 0 12px 36px rgba(0,0,0,0.5);
-  --ws-shadow-popover: 0 1px 0 rgba(0,0,0,0.35), 0 6px 20px rgba(0,0,0,0.35);
-
-  --ws-border-hair: #2e2924;
-  --ws-scrim:       rgba(0, 0, 0, 0.5);
-  --ws-card-soft:   #272420;
-
-  --ws-term-fg:       #d8d2c4;
-  --ws-term-dim:      #76706a;
-  --ws-term-prompt:   #8a9aa8;
-  --ws-term-accent:   #7fa6cc;
-  --ws-term-success:  #8eb892;
-  --ws-term-warn:     #cca676;
-  --ws-term-error:    #cc8a93;
-  --ws-term-caret:    #8a9aa8;
 }
 
 /* ╔═══════════════════════════════════════════════════════════════════════╗
-   ║ 4. FOCUS RING — accessible, theme-aware                                ║
+   ║ 5. FOCUS RING — accessible, theme-aware                                ║
+   ║    Universal scope: applies whether or not the plugin is active. Uses ║
+   ║    a fallback so it still renders if --background-modifier-border-    ║
+   ║    focus isn't reassigned in the current context.                     ║
    ╚═══════════════════════════════════════════════════════════════════════╝ */
 *:focus-visible {
-  outline: 2px solid var(--background-modifier-border-focus);
+  outline: 2px solid var(--background-modifier-border-focus, #5a6b7a);
   outline-offset: 2px;
   border-radius: 4px;
 }

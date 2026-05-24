@@ -303,30 +303,57 @@ describe('phase 7 · standard plugin pattern', () => {
     expect(workspace.rightSplit._expandCalls).toBe(1);
   });
 
-  it('bundle contains a .tooltip contrast override so cream tokens cannot collide with white text', async () => {
+  it('Obsidian-native token reassignments are scoped under body.workdesk-os-active, never at :root', async () => {
     const fs = await import('node:fs');
     const path = await import('node:path');
-    const stylesPath = path.resolve(__dirname, '..', 'styles.css');
-    if (!fs.existsSync(stylesPath)) return;
-    const css = fs.readFileSync(stylesPath, 'utf8');
-    // The override sets explicit dark background + white text on .tooltip.
-    // Loose match so future palette tweaks don't brittlely break this test.
-    const tooltipBlockRe = /\.tooltip\s*\{[\s\S]*?background:\s*#[0-9a-f]{3,6}[^}]*color:\s*#[0-9a-f]{3,6}/i;
-    expect(tooltipBlockRe.test(css)).toBe(true);
+    const tokensPath = path.resolve(__dirname, '..', 'styles/tokens.css');
+    const tokensSrc = fs.readFileSync(tokensPath, 'utf8');
+
+    // Source of truth: tokens.css must scope Obsidian-native reassignments
+    // under the plugin-active class so native chrome (tooltips, settings
+    // dialog, other plugins' modals) keeps Obsidian's own values. The
+    // tooltip-contrast hack was needed precisely because this was once
+    // at :root — strategy C removes the need for it.
+    const scopedLightRe = /body\.workdesk-os-active\s+:is\([^)]*\)\s*\{[\s\S]*?--background-primary\s*:/;
+    const scopedDarkRe  = /body\.workdesk-os-active\.theme-dark\s+:is\([^)]*\)\s*\{[\s\S]*?--background-primary\s*:/;
+    expect(scopedLightRe.test(tokensSrc)).toBe(true);
+    expect(scopedDarkRe.test(tokensSrc)).toBe(true);
+
+    // Guard against regression: every `--background-primary:` declaration
+    // must live inside a rule whose selector contains `workdesk-os-active`.
+    // Walk the file as a sequence of (selector, body) pairs and check.
+    const ruleRe = /([^{}]+)\{([^{}]*)\}/g;
+    let match: RegExpExecArray | null;
+    while ((match = ruleRe.exec(tokensSrc)) !== null) {
+      const selector = match[1] ?? '';
+      const body = match[2] ?? '';
+      if (body.includes('--background-primary:')) {
+        if (!selector.includes('workdesk-os-active')) {
+          throw new Error(`--background-primary defined outside workdesk-os-active scope: selector=${selector.trim()}`);
+        }
+      }
+    }
   });
 
-  it('bundle restores opacity on Obsidian native modals so Settings is visible', async () => {
+  it('Plugin modal fade-in is scoped to .scrim .modal so native Obsidian modals stay visible', async () => {
     const fs = await import('node:fs');
     const path = await import('node:path');
-    const stylesPath = path.resolve(__dirname, '..', 'styles.css');
-    if (!fs.existsSync(stylesPath)) return;
-    const css = fs.readFileSync(stylesPath, 'utf8');
-    // Our plugin app.css ships `.modal { opacity: 0; transform: translateY(8px) }`
-    // for .scrim-wrapped modals. Obsidian's native modals live in
-    // .modal-container and never get a .scrim ancestor, so without an
-    // override they inherit opacity: 0 and never appear. The override
-    // pins .modal-container .modal back to opacity: 1.
-    const modalOverrideRe = /\.modal-container\s+\.modal\s*\{[\s\S]*?opacity:\s*1[\s\S]*?\}/i;
-    expect(modalOverrideRe.test(css)).toBe(true);
+    const appCssPath = path.resolve(__dirname, '..', 'styles/app.css');
+    const appCss = fs.readFileSync(appCssPath, 'utf8');
+
+    // The plugin renders its own modals (command palette, quick capture)
+    // wrapped in .scrim. The fade-in choreography (opacity 0 → 1) MUST
+    // be scoped to .scrim descendants so Obsidian's native modals (which
+    // live in .modal-container without a .scrim ancestor) aren't held at
+    // opacity: 0. The legacy `.modal { opacity: 0 }` rule and its
+    // .modal-container override are both obsolete under strategy C.
+    const scopedFadeRe = /\.scrim\s+\.modal\s*\{[\s\S]*?opacity:\s*0/i;
+    expect(scopedFadeRe.test(appCss)).toBe(true);
+
+    // The legacy unscoped `.modal { opacity: 0 }` must be gone. Match
+    // only the bare top-level rule (not `.scrim .modal` or
+    // `.scrim.open .modal`) to avoid false positives.
+    const legacyUnscopedRe = /(^|\n)\.modal\s*\{[\s\S]*?opacity:\s*0/m;
+    expect(legacyUnscopedRe.test(appCss)).toBe(false);
   });
 });

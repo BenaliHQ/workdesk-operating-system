@@ -926,3 +926,452 @@
   - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
   - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — 7393d10db839…
   - [ok] STATE.phases["7"] is PASS
+## 2026-05-23T15:04:18.379Z  verify phase0
+  - [ok] STATE.json validates against zod schema — schema=2
+  - [ok] deliverable: scripts/preflight.sh
+  - [ok] deliverable: manifest.json
+  - [ok] deliverable: package.json
+  - [ok] deliverable: tsconfig.json
+  - [ok] deliverable: esbuild.config.mjs
+  - [ok] deliverable: .gitignore
+  - [ok] deliverable: .nvmrc
+  - [ok] deliverable: README.md
+  - [ok] deliverable: LICENSE
+  - [ok] deliverable: styles/tokens.css
+  - [ok] deliverable: styles/app.css
+  - [ok] deliverable: styles/reduced-motion.css
+  - [ok] deliverable: styles/fonts.css
+  - [ok] deliverable: src/icons.ts
+  - [ok] deliverable: src/types.d.ts
+  - [ok] deliverable: fixtures/zones.yaml
+  - [ok] deliverable: fixtures/object-icons.yaml
+  - [ok] deliverable: src/main.ts
+  - [ok] deliverable: src/settings.ts
+  - [ok] deliverable: src/constants.ts
+  - [ok] deliverable: STATE.json
+  - [ok] deliverable: STATE.md
+  - [ok] deliverable: STATE.log
+  - [ok] deliverable: scripts/render-state-md.mjs
+  - [ok] deliverable: scripts/state-schema.mjs
+  - [ok] deliverable: scripts/copy-fonts.mjs
+  - [ok] deliverable: scripts/verify.mjs
+  - [ok] deliverable: scripts/run-all.sh
+  - [ok] deliverable: scripts/install-check.sh
+  - [ok] deliverable: tests/fixtures/sample-vault
+  - [ok] deliverable: tests/stubs/obsidian.ts
+  - [ok] deliverable: _inputs/design-handoff
+  - [ok] deliverable: _inputs/workdesk-terminal.main.ts
+  - [ok] styles/tokens.css matches _inputs source byte-for-byte — 55bb7a30d3a3…
+  - [FAIL] styles/app.css matches _inputs source byte-for-byte — SHA mismatch a=99fb28317f1d b=f0808dc09a16
+  - [FAIL] src/icons.ts ports ≥ 47 icons from shared/icons.js — port count (55) != source count (53)
+  - [ok] manifest.json id + minAppVersion + isDesktopOnly — id=workdesk-operating-system minAppVersion=1.11.4
+  - [ok] package.json deps are exact (no ^) — all exact
+  - [ok] tsc --strict --noEmit — strict mode
+  - [ok] pnpm build → main.js + styles.css — build ok
+  - [FAIL] fonts/ contains ≥ 8 .woff2 with SHAs in STATE.decisions.font_shas — no recorded sha for dm-sans-italic
+  - [ok] prompts/S*.md absent (mega-spec mode) — no prompts/S*.md
+## 2026-05-23T15:04:19.614Z  verify phase4a.2
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [FAIL] vitest phase4a.2 suite — vitest exit 1: 
+ RUN  v2.1.8 /Users/khalilbenali/code/workdesk-operating-system
+
+
+## 2026-05-23T15:04:21.159Z  verify phase4b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [FAIL] vitest phase4b suite — vitest exit 1: 
+ RUN  v2.1.8 /Users/khalilbenali/code/workdesk-operating-system
+
+
+## 2026-05-23T15:04:22.699Z  verify phase5b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] phase 5b source files present — 8 files
+  - [FAIL] main.ts registers Quick capture command + Focus toggle hotkeys — Cmd+Shift+M hotkey not bound
+  - [ok] main.ts records the onboarding-skipped divergence
+  - [ok] settings schema carries focus.completed
+  - [ok] vitest phase5b suite
+## 2026-05-23T15:04:24.657Z  verify phase6a
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] phase 6a source files present — 5 files
+  - [FAIL] main.ts installs global showToast + editor drag-hover — attachEditorDragHover not wired
+  - [ok] TreeRow wires fileMenuItems / folderMenuItems via showContextMenu
+  - [FAIL] terminal tabs wire terminalTabMenuItems on contextmenu — ENOENT: no such file or directory, open '/Users/khalilbenali/code/workdesk-operating-system/src/terminal/tabs.ts'
+  - [ok] styles.css ships .toast / .ws-popover / .skeleton / .banner rules — all selectors present
+  - [FAIL] vitest phase6a suite — vitest exit 1: 
+ RUN  v2.1.8 /Users/khalilbenali/code/workdesk-operating-system
+
+
+## 2026-05-23T15:04:26.165Z  verify phase6b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [FAIL] tokens.css + app.css SHAs still match STATE.decisions (no M1 drift) — app.css drift
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest a11y-audit suite
+  - [ok] vitest done-checklist suite
+  - [ok] tests/a11y-audit.report.md generated
+  - [ok] tests/done-checklist.report.md generated
+  - [ok] tests/manual-checklist.md generated with Yvette flow + 2-week dogfood
+  - [FAIL] manifest.json.version === "1.0.0" — version=1.6.10
+  - [ok] STATE.json decisions sha256 fields unchanged since M1 — 4 sha fields intact
+## 2026-05-23T15:04:28.880Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [ok] vitest all phases pass (including phase7)
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [FAIL] M1 SHA decisions unchanged (no drift) — app_css_sha256 drift (file=styles/app.css)
+  - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — 7393d10db839…
+  - [ok] STATE.phases["7"] is PASS
+## 2026-05-23T15:05:38.933Z  verify phase0
+  - [ok] STATE.json validates against zod schema — schema=2
+  - [ok] deliverable: scripts/preflight.sh
+  - [ok] deliverable: manifest.json
+  - [ok] deliverable: package.json
+  - [ok] deliverable: tsconfig.json
+  - [ok] deliverable: esbuild.config.mjs
+  - [ok] deliverable: .gitignore
+  - [ok] deliverable: .nvmrc
+  - [ok] deliverable: README.md
+  - [ok] deliverable: LICENSE
+  - [ok] deliverable: styles/tokens.css
+  - [ok] deliverable: styles/app.css
+  - [ok] deliverable: styles/reduced-motion.css
+  - [ok] deliverable: styles/fonts.css
+  - [ok] deliverable: src/icons.ts
+  - [ok] deliverable: src/types.d.ts
+  - [ok] deliverable: fixtures/zones.yaml
+  - [ok] deliverable: fixtures/object-icons.yaml
+  - [ok] deliverable: src/main.ts
+  - [ok] deliverable: src/settings.ts
+  - [ok] deliverable: src/constants.ts
+  - [ok] deliverable: STATE.json
+  - [ok] deliverable: STATE.md
+  - [ok] deliverable: STATE.log
+  - [ok] deliverable: scripts/render-state-md.mjs
+  - [ok] deliverable: scripts/state-schema.mjs
+  - [ok] deliverable: scripts/copy-fonts.mjs
+  - [ok] deliverable: scripts/verify.mjs
+  - [ok] deliverable: scripts/run-all.sh
+  - [ok] deliverable: scripts/install-check.sh
+  - [ok] deliverable: tests/fixtures/sample-vault
+  - [ok] deliverable: tests/stubs/obsidian.ts
+  - [ok] deliverable: _inputs/design-handoff
+  - [ok] deliverable: _inputs/workdesk-terminal.main.ts
+  - [ok] styles/tokens.css matches _inputs source byte-for-byte — 8b740a2cca29…
+  - [ok] styles/app.css matches _inputs source byte-for-byte — 8fd645e2ac6b…
+  - [FAIL] src/icons.ts ports ≥ 47 icons from shared/icons.js — port count (55) != source count (53)
+  - [ok] manifest.json id + minAppVersion + isDesktopOnly — id=workdesk-operating-system minAppVersion=1.11.4
+  - [ok] package.json deps are exact (no ^) — all exact
+  - [ok] tsc --strict --noEmit — strict mode
+  - [ok] pnpm build → main.js + styles.css — build ok
+  - [ok] fonts/ contains ≥ 8 .woff2 with SHAs in STATE.decisions.font_shas — 9 fonts verified
+  - [ok] prompts/S*.md absent (mega-spec mode) — no prompts/S*.md
+## 2026-05-23T15:05:48.909Z  verify phase0
+  - [ok] STATE.json validates against zod schema — schema=2
+  - [ok] deliverable: scripts/preflight.sh
+  - [ok] deliverable: manifest.json
+  - [ok] deliverable: package.json
+  - [ok] deliverable: tsconfig.json
+  - [ok] deliverable: esbuild.config.mjs
+  - [ok] deliverable: .gitignore
+  - [ok] deliverable: .nvmrc
+  - [ok] deliverable: README.md
+  - [ok] deliverable: LICENSE
+  - [ok] deliverable: styles/tokens.css
+  - [ok] deliverable: styles/app.css
+  - [ok] deliverable: styles/reduced-motion.css
+  - [ok] deliverable: styles/fonts.css
+  - [ok] deliverable: src/icons.ts
+  - [ok] deliverable: src/types.d.ts
+  - [ok] deliverable: fixtures/zones.yaml
+  - [ok] deliverable: fixtures/object-icons.yaml
+  - [ok] deliverable: src/main.ts
+  - [ok] deliverable: src/settings.ts
+  - [ok] deliverable: src/constants.ts
+  - [ok] deliverable: STATE.json
+  - [ok] deliverable: STATE.md
+  - [ok] deliverable: STATE.log
+  - [ok] deliverable: scripts/render-state-md.mjs
+  - [ok] deliverable: scripts/state-schema.mjs
+  - [ok] deliverable: scripts/copy-fonts.mjs
+  - [ok] deliverable: scripts/verify.mjs
+  - [ok] deliverable: scripts/run-all.sh
+  - [ok] deliverable: scripts/install-check.sh
+  - [ok] deliverable: tests/fixtures/sample-vault
+  - [ok] deliverable: tests/stubs/obsidian.ts
+  - [ok] deliverable: _inputs/design-handoff
+  - [ok] deliverable: _inputs/workdesk-terminal.main.ts
+  - [ok] styles/tokens.css matches _inputs source byte-for-byte — 8b740a2cca29…
+  - [ok] styles/app.css matches _inputs source byte-for-byte — 8fd645e2ac6b…
+  - [FAIL] src/icons.ts ports ≥ 47 icons from shared/icons.js — port count (55) != source count (53)
+  - [ok] manifest.json id + minAppVersion + isDesktopOnly — id=workdesk-operating-system minAppVersion=1.11.4
+  - [ok] package.json deps are exact (no ^) — all exact
+  - [ok] tsc --strict --noEmit — strict mode
+  - [ok] pnpm build → main.js + styles.css — build ok
+  - [ok] fonts/ contains ≥ 8 .woff2 with SHAs in STATE.decisions.font_shas — 9 fonts verified
+  - [ok] prompts/S*.md absent (mega-spec mode) — no prompts/S*.md
+## 2026-05-23T15:05:50.051Z  verify phase1
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase1 suite
+## 2026-05-23T15:05:51.869Z  verify phase2
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase2 suite
+## 2026-05-23T15:05:53.754Z  verify phase3
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase3 suite
+## 2026-05-23T15:05:55.639Z  verify phase4a.1
+  - [ok] vendored terminal main.ts SHA matches STATE — ec705c8c50dd…
+  - [ok] vendored main.ts preserves required class declarations — 4 tokens present
+  - [ok] vendored LICENSE present
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase4a.1 suite
+## 2026-05-23T15:05:57.709Z  verify phase4a.2
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [FAIL] vitest phase4a.2 suite — vitest exit 1: 
+ RUN  v2.1.8 /Users/khalilbenali/code/workdesk-operating-system
+
+
+## 2026-05-23T15:05:59.233Z  verify phase4b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [FAIL] vitest phase4b suite — vitest exit 1: 
+ RUN  v2.1.8 /Users/khalilbenali/code/workdesk-operating-system
+
+
+## 2026-05-23T15:06:00.777Z  verify phase5a
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase5a suite
+## 2026-05-23T15:06:02.719Z  verify phase5b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] phase 5b source files present — 8 files
+  - [FAIL] main.ts registers Quick capture command + Focus toggle hotkeys — Cmd+Shift+M hotkey not bound
+  - [ok] main.ts records the onboarding-skipped divergence
+  - [ok] settings schema carries focus.completed
+  - [ok] vitest phase5b suite
+## 2026-05-23T15:06:04.682Z  verify phase6a
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] phase 6a source files present — 5 files
+  - [FAIL] main.ts installs global showToast + editor drag-hover — attachEditorDragHover not wired
+  - [ok] TreeRow wires fileMenuItems / folderMenuItems via showContextMenu
+  - [FAIL] terminal tabs wire terminalTabMenuItems on contextmenu — ENOENT: no such file or directory, open '/Users/khalilbenali/code/workdesk-operating-system/src/terminal/tabs.ts'
+  - [ok] styles.css ships .toast / .ws-popover / .skeleton / .banner rules — all selectors present
+  - [FAIL] vitest phase6a suite — vitest exit 1: 
+ RUN  v2.1.8 /Users/khalilbenali/code/workdesk-operating-system
+
+
+## 2026-05-23T15:06:06.256Z  verify phase6b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] tokens.css + app.css SHAs still match STATE.decisions (no M1 drift) — both match
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest a11y-audit suite
+  - [ok] vitest done-checklist suite
+  - [ok] tests/a11y-audit.report.md generated
+  - [ok] tests/done-checklist.report.md generated
+  - [ok] tests/manual-checklist.md generated with Yvette flow + 2-week dogfood
+  - [FAIL] manifest.json.version === "1.0.0" — version=1.6.10
+  - [ok] STATE.json decisions sha256 fields unchanged since M1 — 4 sha fields intact
+## 2026-05-23T15:06:09.082Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [ok] vitest all phases pass (including phase7)
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [FAIL] STATE.decisions.obsidian_scope_css_sha256 present and matches source — obsidian_scope_css_sha256 mismatch: expected 7393d10db839… got 80644a415183…
+  - [ok] STATE.phases["7"] is PASS
+## 2026-05-23T15:06:30.216Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [ok] vitest all phases pass (including phase7)
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [FAIL] STATE.decisions.obsidian_scope_css_sha256 present and matches source — obsidian_scope_css_sha256 mismatch: expected 7393d10db839… got 80644a415183…
+  - [ok] STATE.phases["7"] is PASS
+## 2026-05-23T15:06:43.587Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [ok] vitest all phases pass (including phase7)
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — 80644a415183…
+  - [ok] STATE.phases["7"] is PASS
+## 2026-05-23T15:06:52.029Z  verify phase0
+  - [ok] STATE.json validates against zod schema — schema=2
+  - [ok] deliverable: scripts/preflight.sh
+  - [ok] deliverable: manifest.json
+  - [ok] deliverable: package.json
+  - [ok] deliverable: tsconfig.json
+  - [ok] deliverable: esbuild.config.mjs
+  - [ok] deliverable: .gitignore
+  - [ok] deliverable: .nvmrc
+  - [ok] deliverable: README.md
+  - [ok] deliverable: LICENSE
+  - [ok] deliverable: styles/tokens.css
+  - [ok] deliverable: styles/app.css
+  - [ok] deliverable: styles/reduced-motion.css
+  - [ok] deliverable: styles/fonts.css
+  - [ok] deliverable: src/icons.ts
+  - [ok] deliverable: src/types.d.ts
+  - [ok] deliverable: fixtures/zones.yaml
+  - [ok] deliverable: fixtures/object-icons.yaml
+  - [ok] deliverable: src/main.ts
+  - [ok] deliverable: src/settings.ts
+  - [ok] deliverable: src/constants.ts
+  - [ok] deliverable: STATE.json
+  - [ok] deliverable: STATE.md
+  - [ok] deliverable: STATE.log
+  - [ok] deliverable: scripts/render-state-md.mjs
+  - [ok] deliverable: scripts/state-schema.mjs
+  - [ok] deliverable: scripts/copy-fonts.mjs
+  - [ok] deliverable: scripts/verify.mjs
+  - [ok] deliverable: scripts/run-all.sh
+  - [ok] deliverable: scripts/install-check.sh
+  - [ok] deliverable: tests/fixtures/sample-vault
+  - [ok] deliverable: tests/stubs/obsidian.ts
+  - [ok] deliverable: _inputs/design-handoff
+  - [ok] deliverable: _inputs/workdesk-terminal.main.ts
+  - [ok] styles/tokens.css matches _inputs source byte-for-byte — 8b740a2cca29…
+  - [ok] styles/app.css matches _inputs source byte-for-byte — 8fd645e2ac6b…
+  - [FAIL] src/icons.ts ports ≥ 47 icons from shared/icons.js — port count (55) != source count (53)
+  - [ok] manifest.json id + minAppVersion + isDesktopOnly — id=workdesk-operating-system minAppVersion=1.11.4
+  - [ok] package.json deps are exact (no ^) — all exact
+  - [ok] tsc --strict --noEmit — strict mode
+  - [ok] pnpm build → main.js + styles.css — build ok
+  - [ok] fonts/ contains ≥ 8 .woff2 with SHAs in STATE.decisions.font_shas — 9 fonts verified
+  - [ok] prompts/S*.md absent (mega-spec mode) — no prompts/S*.md
+## 2026-05-23T15:06:53.186Z  verify phase1
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase1 suite
+## 2026-05-23T15:06:55.040Z  verify phase2
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase2 suite
+## 2026-05-23T15:06:56.952Z  verify phase3
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase3 suite
+## 2026-05-23T15:06:58.863Z  verify phase4a.1
+  - [ok] vendored terminal main.ts SHA matches STATE — ec705c8c50dd…
+  - [ok] vendored main.ts preserves required class declarations — 4 tokens present
+  - [ok] vendored LICENSE present
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase4a.1 suite
+## 2026-05-23T15:07:00.907Z  verify phase4a.2
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [FAIL] vitest phase4a.2 suite — vitest exit 1: 
+ RUN  v2.1.8 /Users/khalilbenali/code/workdesk-operating-system
+
+
+## 2026-05-23T15:07:02.471Z  verify phase4b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [FAIL] vitest phase4b suite — vitest exit 1: 
+ RUN  v2.1.8 /Users/khalilbenali/code/workdesk-operating-system
+
+
+## 2026-05-23T15:07:04.030Z  verify phase5a
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest phase5a suite
+## 2026-05-23T15:07:05.972Z  verify phase5b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] phase 5b source files present — 8 files
+  - [FAIL] main.ts registers Quick capture command + Focus toggle hotkeys — Cmd+Shift+M hotkey not bound
+  - [ok] main.ts records the onboarding-skipped divergence
+  - [ok] settings schema carries focus.completed
+  - [ok] vitest phase5b suite
+## 2026-05-23T15:07:07.932Z  verify phase6a
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] phase 6a source files present — 5 files
+  - [FAIL] main.ts installs global showToast + editor drag-hover — attachEditorDragHover not wired
+  - [ok] TreeRow wires fileMenuItems / folderMenuItems via showContextMenu
+  - [FAIL] terminal tabs wire terminalTabMenuItems on contextmenu — ENOENT: no such file or directory, open '/Users/khalilbenali/code/workdesk-operating-system/src/terminal/tabs.ts'
+  - [ok] styles.css ships .toast / .ws-popover / .skeleton / .banner rules — all selectors present
+  - [FAIL] vitest phase6a suite — vitest exit 1: 
+ RUN  v2.1.8 /Users/khalilbenali/code/workdesk-operating-system
+
+
+## 2026-05-23T15:07:09.500Z  verify phase6b
+  - [ok] vendored terminal main.ts SHA still matches STATE — ec705c8c50dd…
+  - [ok] tokens.css + app.css SHAs still match STATE.decisions (no M1 drift) — both match
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build
+  - [ok] vitest a11y-audit suite
+  - [ok] vitest done-checklist suite
+  - [ok] tests/a11y-audit.report.md generated
+  - [ok] tests/done-checklist.report.md generated
+  - [ok] tests/manual-checklist.md generated with Yvette flow + 2-week dogfood
+  - [FAIL] manifest.json.version === "1.0.0" — version=1.6.10
+  - [ok] STATE.json decisions sha256 fields unchanged since M1 — 4 sha fields intact
+## 2026-05-23T15:07:12.323Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [ok] vitest all phases pass (including phase7)
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — 80644a415183…
+  - [ok] STATE.phases["7"] is PASS

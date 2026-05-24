@@ -316,7 +316,6 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   color: var(--text-normal);
   margin: 0 0 2px;
   line-height: var(--ws-lh-20);
-  text-transform: capitalize;
 }
 .pane-hero .hero-sub {
   font-size: var(--ws-fs-12);
@@ -359,7 +358,6 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   color: var(--text-normal);
   margin: 0 0 2px;
   line-height: 1.15;
-  text-transform: capitalize;
 }
 .workdesk-os-zone-hero-meta .sub {
   font-size: var(--ws-fs-12);
@@ -382,12 +380,13 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   background: var(--background-secondary);
 }
 
-/* Empty-folder placeholder — shown when an expanded card has zero children. */
+/* Empty-folder placeholder — shown when an expanded card has zero children.
+   Signal via faint color + subtle letter-spacing, not synthesized italic. */
 .obj-empty-row {
   padding: var(--ws-space-2) var(--ws-space-5);
   font-size: var(--ws-fs-12);
   color: var(--text-faint);
-  font-style: italic;
+  letter-spacing: 0.005em;
 }
 
 .pane-toolbar {
@@ -449,7 +448,7 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   text-transform: uppercase;
 }
 .obj-text { min-width: 0; }
-.obj-title { font-size: var(--ws-fs-14); font-weight: 500; line-height: 1.25; color: var(--text-normal); text-transform: capitalize; }
+.obj-title { font-size: var(--ws-fs-14); font-weight: 500; line-height: 1.25; color: var(--text-normal); }
 .obj-sub   { font-size: var(--ws-fs-12); color: var(--text-faint); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .obj-meta  { font-size: var(--ws-fs-11); color: var(--text-faint); font-variant-numeric: tabular-nums; padding-right: var(--ws-space-2); }
 .obj-meta.caught-up { color: var(--text-success); }
@@ -491,11 +490,11 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   padding: 10px var(--ws-space-4);
   color: var(--text-faint);
   font-size: var(--ws-fs-13);
-  font-style: italic;
+  letter-spacing: 0.005em;
   display: flex; align-items: center; gap: 8px;
 }
-.empty-row.caught-up { color: var(--text-success); font-style: normal; font-weight: 500; }
-.row.empty-folder { color: var(--text-faint); font-style: italic; cursor: default; }
+.empty-row.caught-up { color: var(--text-success); font-weight: 500; letter-spacing: 0; }
+.row.empty-folder { color: var(--text-faint); cursor: default; }
 .row.empty-folder:hover { background: transparent; }
 
 /* Files view (zone-as-folder flat tree) */
@@ -508,7 +507,6 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   height: 34px;
 }
 .flat-tree .row.is-zone .name {
-  text-transform: capitalize;
   letter-spacing: -0.005em;
 }
 .zone-pip {
@@ -727,32 +725,147 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
 .editor-body td { padding: 10px 14px; border-bottom: 1px solid var(--ws-border-hair); vertical-align: top; }
 .editor-body tr:last-child td { border-bottom: none; }
 
-.editor-body .callout {
-  border-radius: 8px;
+/* ── Callouts ──────────────────────────────────────────────────────────
+   Targets Obsidian's native callout DOM (the .editor-body block above was
+   for the design-handoff demo surface only). Reshapes the callout from
+   the default 4px side-stripe to a full color-mixed border + tinted
+   surface + leading icon chip.
+
+   Obsidian DOM:
+     .callout[data-callout="type"]
+       .callout-title
+         .callout-icon  (default Lucide SVG)
+         .callout-title-inner
+       .callout-content
+   Renders in both reading view (.markdown-reading-view) and live preview
+   (.markdown-source-view .cm-callout). The base selector uses
+   :is(.markdown-rendered, .markdown-source-view, .markdown-reading-view)
+   as an ancestor to ensure specificity beats Obsidian's default
+   `.callout { border-inline-start: 4px solid var(--callout-color) }`
+   at the same source-order position. `border-inline-start-width: 1px`
+   is set explicitly because the default 4px width otherwise wins via
+   the border-shorthand fallback in some Obsidian versions. */
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout {
+  --callout-color: var(--ws-zone-atlas-fg);
+  --callout-bg:    var(--ws-zone-atlas-bg);
+  background: color-mix(in oklch, var(--callout-bg) 50%, var(--background-primary));
+  background-image: none;
+  border: 1px solid color-mix(in oklch, var(--callout-color) 30%, var(--background-modifier-border));
+  /* Forced longhands defeat Obsidian's default border-inline-start: 4px solid
+     var(--callout-color), which otherwise survives the cascade. !important is
+     used deliberately here — without it, Obsidian's same-specificity rule wins
+     by source order in some loader paths. */
+  border-inline-start-width: 1px !important;
+  border-inline-start-color: color-mix(in oklch, var(--callout-color) 30%, var(--background-modifier-border)) !important;
+  border-left-width: 1px !important;
+  border-right-width: 1px !important;
+  border-radius: var(--ws-radius-card);
   padding: var(--ws-space-3) var(--ws-space-4);
   margin: var(--ws-space-4) 0;
-  border-left: 3px solid;
+  mix-blend-mode: normal;
+  box-shadow: none;
 }
-.editor-body .callout p { margin: 0; }
-.editor-body .callout p + p { margin-top: 0.5em; }
-.editor-body .callout-title {
+/* Neutralize any pseudo-element-drawn stripe (some Obsidian versions and
+   themes render the colored edge via ::before instead of a real border). */
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout::before {
+  content: none !important;
+  display: none !important;
+}
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout .callout-title {
+  display: flex; align-items: center;
+  gap: var(--ws-space-2);
+  padding: 0 0 4px;
+  color: var(--callout-color);
+  background: transparent;
+}
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout .callout-icon {
+  /* Naked inline icon next to the title — no chip wrapper. Strip any
+     background/border/padding Obsidian (or my earlier passes) might have
+     applied. Identity comes from the icon color + title color + tinted
+     callout body. */
+  flex-shrink: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none;
+  color: var(--callout-color) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout .callout-icon svg {
+  width: 16px !important;
+  height: 16px !important;
+  color: var(--callout-color) !important;
+  stroke: currentColor;
+}
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout .callout-title-inner {
+  font-family: var(--ws-font-display);
   font-weight: 600;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 6px;
-  display: flex; align-items: center; gap: 6px;
+  font-size: var(--ws-fs-14);
+  letter-spacing: -0.005em;
+  color: var(--callout-color);
 }
-.editor-body .callout.note    { border-color: var(--ws-zone-atlas-fg);  background: var(--ws-zone-atlas-bg);    color: var(--text-normal); }
-.editor-body .callout.note    .callout-title { color: var(--ws-zone-atlas-fg); }
-.editor-body .callout.warning { border-color: var(--ws-zone-intel-fg);  background: var(--ws-zone-intel-bg); }
-.editor-body .callout.warning .callout-title { color: var(--ws-zone-intel-fg); }
-.editor-body .callout.success { border-color: var(--ws-zone-gtd-fg);    background: var(--ws-zone-gtd-bg); }
-.editor-body .callout.success .callout-title { color: var(--ws-zone-gtd-fg); }
-.editor-body .callout.info    { border-color: var(--ws-zone-config-fg); background: var(--ws-zone-config-bg); }
-.editor-body .callout.info    .callout-title { color: var(--ws-zone-config-fg); }
-.editor-body .callout.error   { border-color: var(--ws-zone-personal-fg); background: var(--ws-zone-personal-bg); }
-.editor-body .callout.error   .callout-title { color: var(--ws-zone-personal-fg); }
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout .callout-content {
+  color: var(--text-normal);
+}
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout .callout-content p { margin: 0; line-height: 1.55; }
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout .callout-content p + p { margin-top: 0.5em; }
+
+/* Per-type role mapping. Obsidian ships many synonyms — group them so
+   tip/info/note all land on the same palette, etc. The
+   :is(.markdown-rendered, …) ancestor bumps specificity above Obsidian's
+   default `.callout[data-callout="X"]` rules so our hex-color values
+   win over their default comma-separated RGB ints (which break our
+   color-mix() expressions). */
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="note"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="info"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="tip"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="hint"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="todo"] {
+  --callout-color: var(--ws-zone-atlas-fg);
+  --callout-bg:    var(--ws-zone-atlas-bg);
+}
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="success"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="check"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="done"] {
+  --callout-color: var(--ws-zone-gtd-fg);
+  --callout-bg:    var(--ws-zone-gtd-bg);
+}
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="warning"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="caution"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="attention"] {
+  --callout-color: var(--ws-zone-intel-fg);
+  --callout-bg:    var(--ws-zone-intel-bg);
+}
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="failure"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="fail"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="missing"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="danger"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="error"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="bug"] {
+  --callout-color: var(--ws-zone-personal-fg);
+  --callout-bg:    var(--ws-zone-personal-bg);
+}
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="question"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="help"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="faq"] {
+  --callout-color: var(--ws-zone-config-fg);
+  --callout-bg:    var(--ws-zone-config-bg);
+}
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="example"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="quote"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="cite"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="abstract"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="summary"],
+:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="tldr"] {
+  --callout-color: var(--ws-zone-system-fg);
+  --callout-bg:    var(--ws-zone-system-bg);
+}
 
 .editor-body .properties {
   background: var(--ws-card-soft);
@@ -823,7 +936,7 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
 .term-tool    { color: var(--ws-term-prompt); }    /* tool-call marker color */
 .term-add     { color: var(--ws-term-success); }   /* diff additions */
 .term-del     { color: var(--ws-term-error); }     /* diff deletions */
-.term-meta    { color: var(--ws-term-dim); font-style: italic; }
+.term-meta    { color: var(--ws-term-dim); opacity: 0.85; }
 .term-box     { color: var(--ws-term-dim); }       /* box-drawing chars */
 .term-input-row { display: flex; align-items: center; gap: var(--ws-space-2); margin-top: var(--ws-space-3); }
 .term-input-row .caret {
@@ -1225,7 +1338,7 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   overflow-y: auto;
   caret-color: var(--ws-term-caret);
 }
-.composer-input::placeholder { color: var(--text-faint); font-style: italic; }
+.composer-input::placeholder { color: var(--text-faint); }
 .composer-actions {
   display: flex;
   align-items: flex-end;
@@ -1646,7 +1759,11 @@ body.col-resizing * { cursor: col-resize !important; }
 .scrim.center { align-items: center; justify-content: center; }
 .scrim.top    { align-items: flex-start; justify-content: center; padding-top: 12vh; }
 
-.modal {
+/* Scoped to .scrim children so WorkDesk's fade-in choreography only applies
+   to WorkDesk-owned modals (command palette, quick capture, etc.) — never
+   to Obsidian's native modals (settings, file rename, other plugins'
+   modals) which live in .modal-container without a .scrim ancestor. */
+.scrim .modal {
   background: var(--background-primary);
   border-radius: var(--ws-radius-modal);
   box-shadow: var(--ws-shadow-modal);
@@ -1854,7 +1971,12 @@ svg { display: block; }
 
 /* ── Toast notifications ────────────────────────────────────────────────
    Bottom-right system-style stack. Fire via window.showToast(msg, severity,
-   duration?). Severity: success | error | info | loading. */
+   duration?). Severity: success | error | info | loading.
+
+   Severity is signaled by (a) a 28px leading glyph chip in the role's
+   zone-palette bg/fg pair and (b) a full color-mixed border tint. No
+   side-stripes. Toast.ts injects `.glyph` already; this CSS reshapes it
+   into the chip without any TS change. */
 .toast-stack {
   position: fixed;
   bottom: 16px; right: 16px;
@@ -1865,8 +1987,8 @@ svg { display: block; }
   max-width: 360px;
 }
 .toast {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 14px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
   background: var(--background-primary);
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--ws-radius-card);
@@ -1881,30 +2003,53 @@ svg { display: block; }
 @keyframes toast-in  { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes toast-out { to { transform: translateY(8px); opacity: 0; } }
 .toast .glyph {
-  width: 18px; height: 18px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
   display: grid; place-items: center;
   flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  background: var(--background-modifier-hover);
+  color: var(--text-muted);
 }
-.toast .body { flex: 1; line-height: 1.45; }
+.toast .body { flex: 1; line-height: 1.45; min-width: 0; }
 .toast .body strong { display: block; font-weight: 600; font-size: 13px; }
 .toast .body .sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
 .toast .close {
-  width: 20px; height: 20px;
+  width: 28px; height: 28px;
   border: none; background: transparent;
   color: var(--text-faint);
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   display: grid; place-items: center;
+  font-size: 18px; line-height: 1;
+  flex-shrink: 0;
+  transition: background var(--ws-dur-fast), color var(--ws-dur-fast);
 }
 .toast .close:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
-.toast.success   { border-left: 3px solid var(--text-success); }
-.toast.success   .glyph { color: var(--text-success); }
-.toast.error     { border-left: 3px solid var(--text-error); }
-.toast.error     .glyph { color: var(--text-error); }
-.toast.info      { border-left: 3px solid var(--text-accent); }
-.toast.info      .glyph { color: var(--text-accent); }
-.toast.loading   { border-left: 3px solid var(--text-muted); }
-.toast.loading   .glyph svg { animation: spin 1s linear infinite; transform-origin: center; }
+.toast .close:focus-visible {
+  outline: 2px solid var(--background-modifier-border-focus);
+  outline-offset: 2px;
+}
+.toast.success {
+  background: color-mix(in oklch, var(--ws-zone-gtd-bg) 45%, var(--background-primary));
+  border-color: color-mix(in oklch, var(--text-success) 28%, var(--background-modifier-border));
+}
+.toast.success .glyph { background: var(--ws-zone-gtd-bg); color: var(--ws-zone-gtd-fg); }
+.toast.error {
+  background: color-mix(in oklch, var(--ws-zone-personal-bg) 45%, var(--background-primary));
+  border-color: color-mix(in oklch, var(--text-error) 28%, var(--background-modifier-border));
+}
+.toast.error .glyph { background: var(--ws-zone-personal-bg); color: var(--ws-zone-personal-fg); }
+.toast.info {
+  background: color-mix(in oklch, var(--ws-zone-atlas-bg) 45%, var(--background-primary));
+  border-color: color-mix(in oklch, var(--text-accent) 28%, var(--background-modifier-border));
+}
+.toast.info .glyph { background: var(--ws-zone-atlas-bg); color: var(--ws-zone-atlas-fg); }
+.toast.loading .glyph { background: var(--ws-zone-system-bg); color: var(--ws-zone-system-fg); animation: toast-loading-pulse 1.4s var(--ws-ease-out) infinite; }
+@keyframes toast-loading-pulse { 50% { opacity: 0.55; } }
+.toast.loading .glyph svg { animation: spin 1s linear infinite; transform-origin: center; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── Generic popover (right-click context menu, model menu, session menu) ─

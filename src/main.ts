@@ -66,6 +66,18 @@ export default class WorkdeskOSPlugin extends Plugin {
     await this.loadSettings();
     installGlobalToast();
 
+    // Container scope marker. styles/tokens.css scopes Obsidian-native
+    // variable reassignments under `body.workdesk-os-active :is(<plugin
+    // containers>)` so native Obsidian chrome (tooltips, settings dialog,
+    // other plugins' modals) keeps its own values. This class must be on
+    // every document where the plugin renders — including popout windows.
+    this.applyActivationClassToAll();
+    this.registerEvent(
+      this.app.workspace.on('window-open', (_workspaceWindow, win) => {
+        win?.document?.body?.classList.add('workdesk-os-active');
+      }),
+    );
+
     this.registerIcons();
     await this.loadZones();
 
@@ -241,6 +253,35 @@ export default class WorkdeskOSPlugin extends Plugin {
       el.classList.remove('workdesk-icon', 'workdesk-active', 'workdesk-focus-active');
     }
     this.ribbonElements = [];
+    this.removeActivationClassFromAll();
+  }
+
+  /** Apply or remove the `workdesk-os-active` body class across every
+   *  document where the plugin renders — main window plus any open popout
+   *  windows. Container-scoped tokens in styles/tokens.css gate on this
+   *  class so the plugin's surfaces get WorkDesk values while native
+   *  Obsidian chrome stays on Obsidian defaults. */
+  private forEachPluginDocBody(fn: (body: HTMLElement) => void): void {
+    const seen = new Set<Document>();
+    this.app.workspace.iterateAllLeaves((leaf) => {
+      const doc = leaf.view?.containerEl?.ownerDocument;
+      if (doc && !seen.has(doc) && doc.body) {
+        seen.add(doc);
+        fn(doc.body);
+      }
+    });
+    if (seen.size === 0) {
+      const fallbackDoc = this.app.workspace.containerEl?.ownerDocument;
+      if (fallbackDoc?.body) fn(fallbackDoc.body);
+    }
+  }
+
+  private applyActivationClassToAll(): void {
+    this.forEachPluginDocBody((body) => body.classList.add('workdesk-os-active'));
+  }
+
+  private removeActivationClassFromAll(): void {
+    this.forEachPluginDocBody((body) => body.classList.remove('workdesk-os-active'));
   }
 
   private registerIcons(): void {
