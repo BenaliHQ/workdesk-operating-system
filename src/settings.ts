@@ -54,6 +54,17 @@ export interface WorkdeskSettings {
     filenamePattern: string;
     autoLogToSystem: boolean;
     inputDevice?: string;
+    /** Where the STT API key comes from. `direct` = operator pasted it into
+     *  Obsidian's SecretComponent. `infisical` = pulled on-demand from the
+     *  Infisical CLI and cached in Obsidian's secretStorage. */
+    keySource: 'direct' | 'infisical';
+    infisical: {
+      projectId: string;
+      secretName: string;
+      environment: string;
+      /** ISO timestamp of the last successful pull. Surfaced in settings UI. */
+      lastPulledAt?: string;
+    };
   };
   terminal: {
     rightPaneIsTerminal: boolean;
@@ -138,9 +149,15 @@ export const DEFAULT_SETTINGS: WorkdeskSettings = {
     provider: 'groq',
     model: 'whisper-large-v3',
     streamPartials: true,
-    defaultDest: 'gtd/inbox',
-    filenamePattern: '{{timestamp}}-{{slug}}',
+    defaultDest: 'personal/captures',
+    filenamePattern: '{{date}} Capture - {{title}}',
     autoLogToSystem: true,
+    keySource: 'direct',
+    infisical: {
+      projectId: '',
+      secretName: 'PERSONAL_GROQ_WHISPER_API_KEY',
+      environment: 'prod',
+    },
   },
   terminal: {
     rightPaneIsTerminal: true,

@@ -15,8 +15,6 @@ import { fileURLToPath } from 'node:url';
 import { App, Plugin } from 'obsidian';
 
 import { CommandPalette } from '../src/modals/CommandPalette';
-import { QuickCaptureModal } from '../src/modals/QuickCapture';
-import { CaptureFlow, type CaptureVault } from '../src/services/capture/capture-flow';
 import { renderTreeRow } from '../src/components/TreeRow';
 import { renderZoneCard } from '../src/components/ZoneCard';
 import { renderZoneEmpty } from '../src/components/EmptyStates';
@@ -160,54 +158,9 @@ function buildPolishFixture(): HTMLElement {
   return root;
 }
 
-class NullCaptureFlow extends CaptureFlow {
-  constructor() {
-    super({
-      provider: {
-        name: 'null',
-        model: 'fixture',
-        transcribe: async () => ({ text: 'fixture transcript' }),
-      },
-      vault: { createNote: async () => {}, appendToFile: async () => {} } as CaptureVault,
-    });
-  }
-  async beginRecording(): Promise<void> { /* no-op for a11y fixtures */ }
-  cancel(): void { /* no-op */ }
-  async saveAndTranscribe(): Promise<{ notePath: string; transcript: string }> {
-    return { notePath: 'personal/captures/fixture.md', transcript: 'fixture transcript' };
-  }
-}
-
-function buildQuickCaptureFixture(): HTMLElement {
-  const app = new App();
-  const plugin = new Plugin() as unknown as Plugin & {
-    settings: WorkdeskSettings;
-    saveSettings: () => Promise<void>;
-    loadSettings: () => Promise<void>;
-  };
-  plugin.settings = structuredClone(DEFAULT_SETTINGS);
-  plugin.saveSettings = async () => {};
-  plugin.loadSettings = async () => {};
-  plugin.app = app;
-
-  const flow = new NullCaptureFlow();
-  const vault: CaptureVault = {
-    createNote: async () => {},
-    appendToFile: async () => {},
-  };
-
-  const modal = new QuickCaptureModal(
-    plugin as unknown as Parameters<typeof QuickCaptureModal>[0],
-    { vault, flow },
-  );
-  modal.open();
-  return modal.containerEl;
-}
-
 beforeAll(() => {
   fixtures.push({ name: 'zone-pane', build: buildZoneFixture });
   fixtures.push({ name: 'command-palette', build: buildPaletteFixture });
-  fixtures.push({ name: 'quick-capture', build: buildQuickCaptureFixture });
   fixtures.push({ name: 'settings-tab', build: buildSettingsFixture });
   fixtures.push({ name: 'polish-primitives', build: buildPolishFixture });
 });

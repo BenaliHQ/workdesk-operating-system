@@ -19,15 +19,20 @@ import {
 import { wikilinkAndTagDecorations } from './editor/wikilink-ext';
 import { CommandPalette } from './modals/CommandPalette';
 import { InsertTemplateModal } from './modals/InsertTemplate';
-import { QuickCaptureModal } from './modals/QuickCapture';
 import { RenameItemModal } from './modals/RenameItem';
 import { applyTemplateVariables, formatDate } from './services/templates';
 import { checkAndUpdate } from './services/updater';
 import { WorkdeskSettingTab } from './settings/tab';
 import { createFocusController, type FocusController } from './services/focus';
 import { obsidianCaptureVault } from './services/capture/obsidian-vault';
+import {
+  createVoiceMemoController,
+  type VoiceMemoController,
+  type VoiceMemoEvent,
+} from './services/capture/voice-memo-controller';
+import { getProvider } from './services/stt/provider';
 import { installStatusObserver } from './services/terminal-status';
-import { installGlobalToast, showToast } from './components/Toast';
+import { installGlobalToast, showToast, clearToast } from './components/Toast';
 import { wsSvg } from './icons';
 import { scanZones, scanFilesView, nodeFsAdapter } from './services/vault-scan';
 import type { IconName, Zone, ZoneId } from './types';
@@ -53,10 +58,18 @@ const ZONE_RIBBON_IDS: readonly ZoneId[] = [
   'atlas', 'gtd', 'intel', 'personal', 'system', 'config', 'files',
 ];
 
+const STT_SECRET_KEY = 'stt-groq';
+const VOICE_MEMO_TOAST_ID = 'workdesk-voice-memo';
+const VOICE_MEMO_DESTINATION = 'personal/captures';
+
 export default class WorkdeskOSPlugin extends Plugin {
   settings!: WorkdeskSettings;
   activeZone: ZoneId = 'atlas';
   focus: FocusController | null = null;
+  private voiceMemo: VoiceMemoController | null = null;
+  private micRibbonEl: HTMLElement | null = null;
+  private recordingStartedAt: number | null = null;
+  private recordingTickTimer: number | null = null;
   private ribbonElements: HTMLElement[] = [];
   private zones: Record<string, Zone> = {};
   // First-run orientation is handled by WorkDesk OS's /onboarding skill,
@@ -188,9 +201,9 @@ export default class WorkdeskOSPlugin extends Plugin {
     });
 
     this.addCommand({
-      id: `${COMMAND_ID_PREFIX}:capture:open`,
-      name: 'Quick capture',
-      callback: () => this.openQuickCapture(),
+      id: `${COMMAND_ID_PREFIX}:capture:voice-memo`,
+      name: 'Capture voice memo',
+      callback: () => { void this.toggleVoiceMemo(); },
     });
 
     this.addCommand({
@@ -203,6 +216,14 @@ export default class WorkdeskOSPlugin extends Plugin {
       id: `${COMMAND_ID_PREFIX}:update`,
       name: 'Check for plugin updates',
       callback: () => { void checkAndUpdate(this); },
+    });
+
+    this.voiceMemo = createVoiceMemoController({
+      provider: () => this.buildSttProvider(),
+      vault: obsidianCaptureVault(this.app),
+      destination: () => this.settings.capture.defaultDest?.trim() || VOICE_MEMO_DESTINATION,
+      autoLogToSystem: this.settings.capture.autoLogToSystem,
+      onTransition: (event) => this.renderVoiceMemoState(event),
     });
 
     this.registerRibbonIcons();
@@ -248,11 +269,15 @@ export default class WorkdeskOSPlugin extends Plugin {
   }
 
   onunload(): void {
+    this.stopRecordingTicker();
+    this.voiceMemo?.cancel();
+    clearToast(VOICE_MEMO_TOAST_ID);
     activeDocument.body.classList.remove('workdesk-hide-native-ribbon-icons');
     for (const el of this.ribbonElements) {
-      el.classList.remove('workdesk-icon', 'workdesk-active', 'workdesk-focus-active');
+      el.classList.remove('workdesk-icon', 'workdesk-active', 'workdesk-focus-active', 'workdesk-recording');
     }
     this.ribbonElements = [];
+    this.micRibbonEl = null;
     this.removeActivationClassFromAll();
   }
 
@@ -415,13 +440,14 @@ export default class WorkdeskOSPlugin extends Plugin {
       { name: 'workdesk-today', title: "WorkDesk: Today's daily note", handler: () => this.openDaily() },
       { name: 'workdesk-terminal', title: 'WorkDesk: Toggle terminal pane', handler: () => this.toggleTerminalPane() },
       { name: 'workdesk-focus', title: 'WorkDesk: Toggle focus mode', handler: () => { this.toggleFocus(); } },
-      { name: 'workdesk-mic', title: 'WorkDesk: Quick capture', handler: () => this.openQuickCapture() },
+      { name: 'workdesk-mic', title: 'WorkDesk: Capture voice memo', handler: () => this.toggleVoiceMemo() },
       { name: 'workdesk-settings', title: 'WorkDesk: Open WorkDesk settings', handler: () => this.openWorkdeskSettings() },
     ];
     for (const util of utilityIcons) {
       const el = this.addRibbonIcon(util.name, util.title, () => { void util.handler(); });
       el.classList.add('workdesk-icon');
       this.ribbonElements.push(el);
+      if (util.name === 'workdesk-mic') this.micRibbonEl = el;
     }
   }
 
@@ -563,9 +589,95 @@ export default class WorkdeskOSPlugin extends Plugin {
     showToast('Switched to gtd · run /triage in terminal to process inbox', 'info');
   }
 
-  private openQuickCapture(): void {
-    const modal = new QuickCaptureModal(this, { vault: obsidianCaptureVault(this.app) });
-    modal.open();
+  async toggleVoiceMemo(): Promise<void> {
+    if (!this.voiceMemo) return;
+    await this.voiceMemo.toggle();
+  }
+
+  private buildSttProvider(): ReturnType<typeof getProvider> | null {
+    const key = this.app.secretStorage.getSecret(STT_SECRET_KEY) ?? '';
+    if (!key.trim()) return null;
+    return getProvider(this.settings, { apiKey: key });
+  }
+
+  private renderVoiceMemoState(event: VoiceMemoEvent): void {
+    const mic = this.micRibbonEl;
+    const recording = event.state === 'recording' || event.state === 'requesting-permission';
+    mic?.classList.toggle('workdesk-recording', recording);
+
+    if (event.state !== 'recording') this.stopRecordingTicker();
+
+    switch (event.state) {
+      case 'requesting-permission':
+        showToast('Requesting microphone…', 'loading', { id: VOICE_MEMO_TOAST_ID });
+        return;
+      case 'recording':
+        this.startRecordingTicker();
+        return;
+      case 'transcribing':
+        showToast('Transcribing…', 'loading', { id: VOICE_MEMO_TOAST_ID });
+        return;
+      case 'success':
+        clearToast(VOICE_MEMO_TOAST_ID);
+        showToast(event.notePath ?? 'Capture saved', 'success', {
+          title: 'Voice memo saved',
+          sub: event.transcript,
+        });
+        return;
+      case 'error':
+        clearToast(VOICE_MEMO_TOAST_ID);
+        showToast(event.error ?? 'Voice memo failed', 'error', { title: 'Voice memo' });
+        return;
+      case 'idle':
+        clearToast(VOICE_MEMO_TOAST_ID);
+        return;
+    }
+  }
+
+  private startRecordingTicker(): void {
+    this.recordingStartedAt = Date.now();
+    // Seed the toast with placeholder text; we then replace the body's message
+    // span with structured DOM so the timer digits live inside a fixed-width
+    // inline-block — that anchors the surrounding text so it can't shift even
+    // if the inherited font lacks tabular figures.
+    showToast('Recording', 'loading', {
+      id: VOICE_MEMO_TOAST_ID,
+      title: 'Voice memo',
+    });
+    this.renderRecordingMessageDom();
+    if (this.recordingTickTimer !== null) activeWindow.clearInterval(this.recordingTickTimer);
+    this.recordingTickTimer = activeWindow.setInterval(() => {
+      if (this.recordingStartedAt === null) return;
+      this.updateRecordingTimer(Date.now() - this.recordingStartedAt);
+    }, 1000);
+  }
+
+  private stopRecordingTicker(): void {
+    if (this.recordingTickTimer !== null) {
+      activeWindow.clearInterval(this.recordingTickTimer);
+      this.recordingTickTimer = null;
+    }
+    this.recordingStartedAt = null;
+  }
+
+  private renderRecordingMessageDom(): void {
+    const toast = activeDocument.querySelector<HTMLElement>(
+      `.toast[data-id="${VOICE_MEMO_TOAST_ID}"]`,
+    );
+    const messageSpan = toast?.querySelector<HTMLElement>('.body > span:not(.sub)');
+    if (!messageSpan) return;
+    messageSpan.replaceChildren();
+    messageSpan.appendChild(activeDocument.createTextNode('Recording '));
+    const timerEl = messageSpan.createSpan({ cls: 'wd-rec-time' });
+    timerEl.textContent = formatElapsed(0);
+    messageSpan.appendChild(activeDocument.createTextNode(' — tap mic to stop'));
+  }
+
+  private updateRecordingTimer(elapsedMs: number): void {
+    const timerEl = activeDocument.querySelector<HTMLElement>(
+      `.toast[data-id="${VOICE_MEMO_TOAST_ID}"] .wd-rec-time`,
+    );
+    if (timerEl) timerEl.textContent = formatElapsed(elapsedMs);
   }
 
   private async openDaily(): Promise<void> {
@@ -693,6 +805,18 @@ function leafIsHostedBy(leaf: unknown, container: unknown): boolean {
   const getRoot = (leaf as { getRoot?: () => unknown }).getRoot;
   if (typeof getRoot !== 'function') return false;
   return getRoot.call(leaf) === container;
+}
+
+/** Formats elapsed ms as `mm:ss` (or `h:mm:ss` past an hour, for the rare
+ *  long voice memo). */
+function formatElapsed(ms: number): string {
+  const totalSec = Math.floor(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  const pad = (n: number): string => String(n).padStart(2, '0');
+  if (h > 0) return `${h}:${pad(m)}:${pad(s)}`;
+  return `${pad(m)}:${pad(s)}`;
 }
 
 function mergeDeep<T>(base: T, patch: Partial<T>): T {

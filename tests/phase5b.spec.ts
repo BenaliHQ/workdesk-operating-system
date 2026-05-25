@@ -4,9 +4,10 @@ import { CaptureFlow, type CaptureVault } from '../src/services/capture/capture-
 import {
   captureFilename,
   captureNoteContents,
-  firstWordsSlug,
+  dotDate,
+  firstSentenceTitle,
+  isoTimestampForLog,
   logLine,
-  isoTimestampForFilename,
 } from '../src/services/capture/filename';
 import { createFocusController } from '../src/services/focus';
 import { OpenAICompatibleProvider } from '../src/services/stt/openai-compatible';
@@ -19,7 +20,6 @@ import {
   type RecorderHandle,
 } from '../src/services/capture/recorder';
 import { DEFAULT_SETTINGS, type WorkdeskSettings } from '../src/settings';
-import { QuickCaptureModal } from '../src/modals/QuickCapture';
 
 beforeEach(() => {
   document.body.innerHTML = '';
@@ -79,18 +79,41 @@ function makeVaultStub(): CaptureVault & { creates: Array<{ path: string; data: 
 }
 
 describe('phase 5b · filename helpers', () => {
-  it('firstWordsSlug takes first six words, lower-cases, ASCII-collapses', () => {
-    expect(firstWordsSlug('Brainstorm — Pricing & MOTION (V2)!')).toBe('brainstorm-pricing-motion-v2');
+  it('firstSentenceTitle preserves case + punctuation up to the first sentence', () => {
+    expect(firstSentenceTitle("I'm watching the Denver Nuggets game. The other team is losing."))
+      .toBe("I'm watching the Denver Nuggets game.");
   });
 
-  it('firstWordsSlug falls back to "capture" on empty or noise input', () => {
-    expect(firstWordsSlug('')).toBe('capture');
-    expect(firstWordsSlug('— … !!!')).toBe('capture');
+  it('firstSentenceTitle returns the whole transcript when no sentence break is present', () => {
+    expect(firstSentenceTitle('Yes this is a test of capture')).toBe('Yes this is a test of capture');
   });
 
-  it('captureFilename combines timestamp + slug', () => {
-    const d = new Date('2026-05-13T11:02:14.000Z');
-    expect(captureFilename('Yes this is a test of capture', d)).toBe('2026-05-13T11-02-14Z-yes-this-is-a-test-of');
+  it('firstSentenceTitle caps at 80 chars on long unpunctuated streams', () => {
+    const long = 'one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen';
+    const out = firstSentenceTitle(long);
+    expect(out.length).toBeLessThanOrEqual(80);
+    expect(out.startsWith('one two three')).toBe(true);
+  });
+
+  it('firstSentenceTitle strips filesystem-unsafe characters', () => {
+    expect(firstSentenceTitle('Save the file to /usr/local/bin please'))
+      .toBe('Save the file to usrlocalbin please');
+  });
+
+  it('firstSentenceTitle falls back to "Capture" on empty input', () => {
+    expect(firstSentenceTitle('')).toBe('Capture');
+    expect(firstSentenceTitle('   ')).toBe('Capture');
+  });
+
+  it('dotDate emits YYYY.MM.DD in local time', () => {
+    const d = new Date(2026, 4, 13, 12, 0, 0);
+    expect(dotDate(d)).toBe('2026.05.13');
+  });
+
+  it('captureFilename combines dot-date + Capture keyword + first sentence', () => {
+    const d = new Date(2026, 4, 13, 12, 0, 0);
+    expect(captureFilename('Yes this is a test of capture', d))
+      .toBe('2026.05.13 Capture - Yes this is a test of capture');
   });
 
   it('captureNoteContents emits the canonical frontmatter shape', () => {
@@ -110,9 +133,9 @@ describe('phase 5b · filename helpers', () => {
     expect(line).toMatch(/^2026-05-13T11:02:14Z capture: Yes this is a test/);
   });
 
-  it('isoTimestampForFilename strips colons + ms', () => {
+  it('isoTimestampForLog strips milliseconds', () => {
     const d = new Date('2026-05-13T11:02:14.512Z');
-    expect(isoTimestampForFilename(d)).toBe('2026-05-13T11-02-14Z');
+    expect(isoTimestampForLog(d)).toBe('2026-05-13T11:02:14Z');
   });
 });
 
@@ -120,7 +143,7 @@ describe('phase 5b · capture flow happy path', () => {
   it('records, transcribes, writes note + log line', async () => {
     const { factory, permission } = makeFakeRecorder([makeFakeBlob()]);
     const vault = makeVaultStub();
-    const fixedNow = new Date('2026-05-13T11:02:14.000Z');
+    const fixedNow = new Date(2026, 4, 13, 12, 0, 0);
 
     const provider = {
       name: 'groq',
@@ -145,7 +168,7 @@ describe('phase 5b · capture flow happy path', () => {
     const result = await flow.saveAndTranscribe('personal/captures');
 
     expect(transitions).toEqual(['requesting-permission', 'recording', 'uploading', 'success']);
-    expect(result.notePath).toBe('personal/captures/2026-05-13T11-02-14Z-yes-this-is-a-test-of.md');
+    expect(result.notePath).toBe('personal/captures/2026.05.13 Capture - Yes this is a test of quick capture.md');
     expect(vault.creates).toHaveLength(1);
     expect(vault.creates[0]!.path).toBe(result.notePath);
     expect(vault.creates[0]!.data).toContain('type: capture');
@@ -153,7 +176,7 @@ describe('phase 5b · capture flow happy path', () => {
 
     expect(vault.appends).toHaveLength(1);
     expect(vault.appends[0]!.path).toBe('system/log.md');
-    expect(vault.appends[0]!.data).toMatch(/^2026-05-13T11:02:14Z capture: Yes this is a test/);
+    expect(vault.appends[0]!.data).toMatch(/capture: Yes this is a test/);
   });
 
   it('routes to system/inbox when the chip selects it', async () => {
@@ -354,9 +377,9 @@ describe('phase 5b · obsidian vault adapter', () => {
   it('createNote auto-creates the parent folder when missing', async () => {
     const app = new App();
     const adapter = obsidianCaptureVault(app);
-    await adapter.createNote('personal/captures/2026-05-13T11-02-14Z-test.md', 'body');
+    await adapter.createNote('personal/captures/2026.05.13 Capture - test.md', 'body');
     const creates = (app.vault as unknown as { _createCalls: Array<{ path: string; data: string }> })._createCalls;
-    expect(creates.some((c) => c.path.endsWith('-test.md'))).toBe(true);
+    expect(creates.some((c) => c.path.endsWith('Capture - test.md'))).toBe(true);
   });
 
   it('appendToFile appends when the file exists, creates it otherwise', async () => {
@@ -369,45 +392,6 @@ describe('phase 5b · obsidian vault adapter', () => {
     const vault = app.vault as unknown as { _createCalls: Array<{ path: string; data: string }>; _appendCalls: Array<{ path: string; data: string }> };
     expect(vault._createCalls.some((c) => c.path === 'system/log.md')).toBe(true);
     expect(vault._appendCalls.some((c) => c.path === 'system/log.md' && c.data === 'line two\n')).toBe(true);
-  });
-});
-
-describe('phase 5b · quick capture modal wiring', () => {
-  it('renders the .qc shell with dialog ARIA and destination chips', () => {
-    const app = new App();
-    app.secretStorage.setSecret('stt-groq', 'gsk_test');
-    const fakePlugin = {
-      app,
-      settings: structuredClone(DEFAULT_SETTINGS),
-    };
-
-    const { factory, permission } = makeFakeRecorder([makeFakeBlob()]);
-    const vault = makeVaultStub();
-    const flow = new CaptureFlow({
-      provider: { name: 'groq', model: 'whisper-large-v3', transcribe: async () => ({ text: 'hi' }) },
-      vault,
-      recorderFactory: factory,
-      permission,
-    });
-
-    const modal = new (QuickCaptureModal as unknown as new (p: unknown, d: unknown) => {
-      open(): void;
-      close(): void;
-      containerEl: HTMLElement;
-    })(fakePlugin, { vault, flow });
-    modal.open();
-
-    expect(document.querySelector('.qc')).not.toBeNull();
-    expect(modal.containerEl.getAttribute('role')).toBe('dialog');
-    expect(modal.containerEl.getAttribute('aria-modal')).toBe('true');
-    const chips = document.querySelectorAll('.qc-foot .dest');
-    expect(chips.length).toBe(3);
-    expect(Array.from(chips).map((c) => (c as HTMLElement).dataset.dest)).toEqual([
-      'personal/captures',
-      'system/inbox',
-      'gtd/inbox',
-    ]);
-    modal.close();
   });
 });
 

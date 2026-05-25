@@ -273,10 +273,10 @@ const CLASSIFICATIONS: Record<string, Classification> = {
     kind: 'machine',
     assert: () => (exists('src/modals/CommandPalette.ts') ? null : 'CommandPalette missing'),
   },
-  'Quick capture': {
+  'Voice memo capture': {
     kind: 'machine',
     assert: () => {
-      if (!exists('src/modals/QuickCapture.ts')) return 'QuickCapture missing';
+      if (!exists('src/services/capture/voice-memo-controller.ts')) return 'voice-memo-controller missing';
       if (!exists('src/services/capture/capture-flow.ts')) return 'capture-flow missing';
       if (!exists('src/services/stt/provider.ts')) return 'stt provider missing';
       return null;
@@ -462,8 +462,8 @@ afterAll(() => {
   hLines.push('Walk through one workday in WorkDesk end-to-end:');
   hLines.push('1. Open a fresh WorkDesk OS vault. Enable the plugin via Community Plugins.');
   hLines.push('2. Click each ribbon zone and confirm the zone pane updates. Slate rail + colored halo on active slot.');
-  hLines.push('3. Press ⌘K. Search for "Quick capture". Press Enter. Modal opens. Cancel.');
-  hLines.push('4. Press ⌘⇧M. Mic ring pulses. Speak. Save. Toast confirms the capture and the note appears under `personal/captures/`.');
+  hLines.push('3. Press ⌘K. Search for "Capture voice memo". Press Enter. Recording starts; click the mic ribbon icon again to stop. Toast confirms the capture.');
+  hLines.push('4. Click the mic ribbon icon. It pulses red while recording. Click again to stop. Note appears under `personal/captures/` as `{YYYY.MM.DD} Capture - {first sentence}.md`.');
   hLines.push('5. Press ⌘⇧F. Both panes collapse. Press Esc. Both panes return.');
   hLines.push('6. Open the terminal (right pane). Run a Claude Code session for ≥ 5 minutes.');
   hLines.push('7. Drag a file from the file tree onto the terminal canvas. Confirm the path inserts with a success toast.');
