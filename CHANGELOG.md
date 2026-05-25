@@ -6,6 +6,51 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **One-tap voice memo capture.** Mic ribbon icon redesigned as a single-
+  tap toggle (replaces the `QuickCaptureModal`). First tap starts
+  recording — the icon pulses red and a sticky toast shows elapsed time
+  inside a fixed-width monospace column so digit-width variance can't
+  shift the layout. Second tap stops, transcribes via the configured STT
+  provider, and writes the note straight to `personal/captures/`.
+- **`{YYYY.MM.DD} Capture - {first sentence}.md` filename pattern**
+  matching the captures practice declared in WorkDesk OS v1.6.0+. The
+  file tree reads like prose; signals filter by frontmatter, not
+  filename. Frontmatter (`type`, `source-kind`, `transcribed-at`,
+  `provider`, `model`) unchanged.
+- **Infisical as an optional STT key source.** Settings → Quick capture
+  exposes a "Key source" dropdown: **Direct input** (paste the key,
+  current behavior) or **Infisical** (project ID + secret name + env +
+  a "Pull from Infisical" button that shells out to the CLI and caches
+  the value in Obsidian's secret storage). Capture-time behavior is
+  identical regardless of source.
+- **Loud error toasts** for the previously silent failure modes:
+  missing key, mic permission denied, transcribe failure, Infisical CLI
+  not authenticated, secret not found, project ID not recognized.
+
+### Changed
+
+- **Default capture destination flipped** from `gtd/inbox` to
+  `personal/captures` so a fresh install matches the captures practice
+  out of the box.
+- **Command rename:** `wdos:capture:open` → `wdos:capture:voice-memo`.
+
+### Fixed
+
+- **Dynamic `import('obsidian')` in the OpenAI-compatible STT provider
+  replaced with a static `import { requestUrl } from 'obsidian'`.**
+  esbuild leaves dynamic imports of externals as bare specifiers, which
+  Obsidian's renderer can't resolve — surfaced once a real STT key was
+  wired and the transcribe path actually ran. Static imports get
+  bundled to `require('obsidian')` and resolve cleanly.
+
+### Removed
+
+- **`QuickCaptureModal`** and its `wdos:capture:open` command alias.
+  The redesigned ribbon icon + `wdos:capture:voice-memo` command cover
+  the same ground without a modal.
+
 ## [1.6.11] — 2026-05-24
 
 ### Added
