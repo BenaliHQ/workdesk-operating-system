@@ -7,6 +7,7 @@
 //
 // HttpFn is injected so tests can mock the network without monkey-patching.
 
+import { requestUrl } from 'obsidian';
 import type { SttProvider, TranscriptionResult } from './provider';
 import type { BlobLike } from '../capture/recorder';
 
@@ -157,18 +158,7 @@ function pickLanguage(payload: Record<string, unknown> | undefined): string | un
 }
 
 async function obsidianHttp(req: HttpRequest): Promise<HttpResponse> {
-  const obsidian = (await import('obsidian')) as unknown as {
-    requestUrl?: (req: {
-      url: string;
-      method: string;
-      contentType: string;
-      body: ArrayBuffer;
-      headers: Record<string, string>;
-      throw?: boolean;
-    }) => Promise<{ status: number; text: string; json?: unknown }>;
-  };
-  if (!obsidian.requestUrl) throw new Error('Obsidian requestUrl not available');
-  const res = await obsidian.requestUrl({
+  const res = await requestUrl({
     url: req.url,
     method: req.method,
     contentType: req.contentType,

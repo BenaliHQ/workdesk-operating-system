@@ -1,9 +1,9 @@
 # DONE-checklist · machine pass
 
-Generated on 2026-05-24T02:41:26.900Z
+Generated on 2026-05-25T16:56:03.620Z
 
-Total machine items: 34
-Passed: 34
+Total machine items: 33
+Passed: 33
 Failed: 0
 
 ## Phase 0 · Install + load
@@ -40,7 +40,6 @@ Failed: 0
 ## Phase 5 · Modals
 
 - ✓ **Command palette**
-- ✓ **Quick capture**
 - ✓ **Settings**
 - ✓ **Focus mode**
 ## Phase 6 · Polish

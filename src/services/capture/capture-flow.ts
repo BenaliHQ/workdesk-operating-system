@@ -9,7 +9,7 @@ import { AudioRecorder, type RecorderFactory, type PermissionGate, type BlobLike
 import {
   captureFilename,
   captureNoteContents,
-  firstWordsSlug,
+  firstSentenceTitle,
   logLine,
 } from './filename';
 import type { SttProvider } from '../stt/provider';
@@ -168,9 +168,9 @@ export class CaptureFlow {
     return this.transcript;
   }
 
-  /** Test affordance: surface the slug that would be used for a transcript. */
-  slugPreview(transcript: string): string {
-    return firstWordsSlug(transcript);
+  /** Test affordance: surface the title that would be used for a transcript. */
+  titlePreview(transcript: string): string {
+    return firstSentenceTitle(transcript);
   }
 
   private setState(next: CaptureState): void {

@@ -191,6 +191,50 @@ body.focus-on .status-bar:hover { opacity: 1; }
   color: var(--text-normal);
 }
 
+/* Voice memo recording — mic icon pulses while recording is live. */
+.workspace-ribbon .workdesk-icon.workdesk-recording {
+  color: var(--color-red, #d33a3a);
+  animation: workdesk-mic-pulse 1.4s ease-in-out infinite;
+}
+
+/* Toast body — tabular digits so a ticking timer doesn't reflow the card
+ * width every second (1 is narrower than 0 in most proportional fonts).
+ * Both syntaxes set in case the font's default features don't include tnum. */
+.toast .body {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Voice memo recording toast — fixed card size + the digit area inside a
+ * monospace inline-block. Without this, the digits in the timer (e.g. 1 vs
+ * 0) render at different widths in the inherited proportional font, and the
+ * surrounding "Recording … — tap mic to stop" text shifts side to side as
+ * the count ticks. Monospace + reserved column width = stable layout. */
+.toast-stack .toast[data-id="workdesk-voice-memo"] {
+  min-width: 360px;
+  width: 360px;
+}
+.toast-stack .toast[data-id="workdesk-voice-memo"] .body span:not(.sub) {
+  white-space: nowrap;
+}
+.toast-stack .toast[data-id="workdesk-voice-memo"] .wd-rec-time {
+  display: inline-block;
+  min-width: 5ch;
+  text-align: left;
+  font-family: ui-monospace, 'Geist Mono', 'JetBrains Mono', 'SF Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+@keyframes workdesk-mic-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workspace-ribbon .workdesk-icon.workdesk-recording {
+    animation: none;
+  }
+}
+
 /* HtmlView iframe — sized to fit pane via class rather than inline styles. */
 .workdesk-html-view .wd-html-iframe {
   width: 100%;

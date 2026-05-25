@@ -1,34 +1,56 @@
-// Capture filename + slug helpers.
+// Capture filename + frontmatter helpers.
 //
-// `{timestamp}-{slug}` where slug is up to the first six words of the
-// transcript, lower-cased, ASCII-only, non-word runs collapsed to single
-// hyphens. Empty or pure-noise transcripts fall back to "capture".
+// Filename pattern: `{YYYY.MM.DD} Capture - {first sentence}`
+// (matches the captures practice declared in WorkDesk OS — see
+// config/practices/captures.md in the distribution).
+//
+// The first-sentence title preserves case and punctuation so the file tree
+// reads like prose. Filesystem-unsafe characters are stripped, and the title
+// is capped at 80 chars so long ramblings don't blow out the filename.
+//
+// Frontmatter retains `transcribed-at`, `provider`, and `model` so each
+// capture self-documents which STT pass produced it.
 
-export function isoTimestampForFilename(date: Date = new Date()): string {
-  // ISO with `:` and `.` stripped so the filename is portable.
-  // e.g. 2026-05-13T11-02-14Z
-  return date.toISOString().replace(/\.\d+Z$/, 'Z').replace(/:/g, '-');
+const FILESYSTEM_UNSAFE = /[/\\:*?"<>|]/g;
+const MAX_TITLE_LEN = 80;
+
+/** YYYY.MM.DD using the local date (matches the daily-note convention). */
+export function dotDate(date: Date = new Date()): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}.${m}.${d}`;
 }
 
+/** ISO timestamp for frontmatter and log lines: `2026-05-13T11:02:14Z`. */
 export function isoTimestampForLog(date: Date = new Date()): string {
-  // Standard ISO with milliseconds dropped for the log line.
   return date.toISOString().replace(/\.\d+Z$/, 'Z');
 }
 
-export function firstWordsSlug(transcript: string, maxWords = 6): string {
-  const normalized = transcript
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '');
-  const tokens = normalized.match(/[a-z0-9]+/g) ?? [];
-  const slug = tokens.slice(0, maxWords).join('-').replace(/-+/g, '-');
-  return slug.length > 0 ? slug : 'capture';
+/** Extracts a human-readable title from the transcript: the first sentence
+ *  (split on `.`, `!`, `?`), capped at 80 chars, with filesystem-unsafe
+ *  characters stripped. Falls back to "Capture" on empty input. */
+export function firstSentenceTitle(transcript: string, maxLen = MAX_TITLE_LEN): string {
+  const normalized = transcript.trim().replace(/\s+/g, ' ');
+  if (!normalized) return 'Capture';
+
+  const sentenceMatch = normalized.match(/^.+?[.!?](?=\s|$)/);
+  let title = sentenceMatch ? sentenceMatch[0] : normalized;
+
+  if (title.length > maxLen) {
+    title = title.slice(0, maxLen).replace(/[\s,;:.!?-]+$/, '');
+  }
+
+  title = title.replace(FILESYSTEM_UNSAFE, '').trim();
+  return title || 'Capture';
 }
 
+/** Full filename (no extension): `2026.05.13 Capture - First sentence here`. */
 export function captureFilename(transcript: string, date: Date = new Date()): string {
-  return `${isoTimestampForFilename(date)}-${firstWordsSlug(transcript)}`;
+  return `${dotDate(date)} Capture - ${firstSentenceTitle(transcript)}`;
 }
 
+/** Single-line entry for `system/log.md` so every capture has an audit trail. */
 export function logLine(transcript: string, date: Date = new Date()): string {
   const trimmed = transcript.trim().replace(/\s+/g, ' ');
   const head = trimmed.length > 64 ? `${trimmed.slice(0, 64).trimEnd()}…` : trimmed;

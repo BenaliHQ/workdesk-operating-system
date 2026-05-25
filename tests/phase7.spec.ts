@@ -166,7 +166,7 @@ describe('phase 7 · standard plugin pattern', () => {
   it('addCommand registrations from prior phases survive', () => {
     const cmds = plugin.app.commands.commands as Record<string, unknown>;
     expect(cmds['workdesk:open-palette']).toBeDefined();
-    expect(cmds['workdesk:capture:open']).toBeDefined();
+    expect(cmds['workdesk:capture:voice-memo']).toBeDefined();
     expect(cmds['workdesk:focus:toggle']).toBeDefined();
   });
 
