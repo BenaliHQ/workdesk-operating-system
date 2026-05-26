@@ -750,16 +750,19 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   --callout-bg:    var(--ws-zone-atlas-bg);
   background: color-mix(in oklch, var(--callout-bg) 50%, var(--background-primary));
   background-image: none;
-  border: 1px solid color-mix(in oklch, var(--callout-color) 30%, var(--background-modifier-border));
-  /* Forced longhands defeat Obsidian's default border-inline-start: 4px solid
-     var(--callout-color), which otherwise survives the cascade. !important is
-     used deliberately here — without it, Obsidian's same-specificity rule wins
-     by source order in some loader paths. */
-  border-inline-start-width: 1px !important;
-  border-inline-start-color: color-mix(in oklch, var(--callout-color) 30%, var(--background-modifier-border)) !important;
-  border-left-width: 1px !important;
-  border-right-width: 1px !important;
-  border-radius: var(--ws-radius-card);
+  /* Borderless: only the leading edge carries role color. Forced longhands
+     with !important defeat Obsidian's default
+     `border-inline-start: 4px solid var(--callout-color)` and any block-side
+     borders the shorthand fallback would otherwise apply. */
+  border: none;
+  border-inline-start-style: solid !important;
+  border-inline-start-width: 3px !important;
+  border-inline-start-color: var(--callout-color) !important;
+  border-left-width: 3px !important;
+  border-right-width: 0 !important;
+  border-top-width: 0 !important;
+  border-bottom-width: 0 !important;
+  border-radius: 8px;
   padding: var(--ws-space-3) var(--ws-space-4);
   margin: var(--ws-space-4) 0;
   mix-blend-mode: normal;
@@ -775,8 +778,11 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   display: flex; align-items: center;
   gap: var(--ws-space-2);
   padding: 0 0 4px;
+  margin-bottom: 6px;
   color: var(--callout-color);
   background: transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 :is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout .callout-icon {
   /* Naked inline icon next to the title — no chip wrapper. Strip any
@@ -806,8 +812,8 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
 :is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout .callout-title-inner {
   font-family: var(--ws-font-display);
   font-weight: 600;
-  font-size: var(--ws-fs-14);
-  letter-spacing: -0.005em;
+  font-size: var(--ws-fs-12);
+  letter-spacing: 0.06em;
   color: var(--callout-color);
 }
 :is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout .callout-content {
@@ -865,6 +871,30 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
 :is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="tldr"] {
   --callout-color: var(--ws-zone-system-fg);
   --callout-bg:    var(--ws-zone-system-bg);
+}
+
+/* ── Wikilinks — atlas-blue, dotted underline, tinted hover ─────────────
+   Reading view paints internal links as `<a class="internal-link">`;
+   live-preview / source-view paints them as `<span class="cm-hmd-internal-link">`
+   inside a `.markdown-source-view.mod-cm6`. Both surfaces get the same
+   visual: role color, 1px dotted underline at 3px offset, tinted hover
+   background derived from the atlas role palette. External links keep
+   Obsidian's defaults — visual differentiation between internal and
+   external is intentional. */
+:is(.markdown-rendered, .markdown-preview-view) a.internal-link,
+.markdown-source-view.mod-cm6 .cm-hmd-internal-link {
+  color: var(--ws-zone-atlas-fg);
+  text-decoration: underline dotted;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+:is(.markdown-rendered, .markdown-preview-view) a.internal-link:hover,
+.markdown-source-view.mod-cm6 .cm-hmd-internal-link:hover {
+  color: var(--ws-zone-atlas-fg);
+  background: var(--ws-zone-atlas-bg);
+  border-radius: 3px;
+  padding: 0 2px;
+  margin: 0 -2px;
 }
 
 .editor-body .properties {
