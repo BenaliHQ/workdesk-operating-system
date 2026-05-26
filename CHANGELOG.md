@@ -6,6 +6,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.7.2] — 2026-05-26
+
 ### Changed
 
 - **Callout border reverted to the v1.6.11 treatment.** Full thin
