@@ -13,6 +13,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "precommit": "pnpm typecheck && pnpm lint",
+    "preview-callouts": "node scripts/preview-callouts.mjs",
     "release": "node scripts/release.mjs"
   },
   "dependencies": {

@@ -96,7 +96,7 @@
     "context7_required": false,
     "context7_fallback": "webfetch",
     "tokens_css_sha256": "8b740a2cca29dac513059dd18b8a4a02b008de5b54feea21af0f6d07983257c5",
-    "app_css_sha256": "7e6f48a0320ea2d3b6e3aefbae7c69c4ae2fc0c4ee9d9b2337d9e7d0c9abb44a",
+    "app_css_sha256": "fa89a8d6f5749687e4e712622a708b1dc7d1c139e349b7f10a276208ae22a6dd",
     "icons_js_sha256": "48b5d1aad1c46f5c118deb5d9ca70d3d93e5b362ff4abdc1e0e02e46ef7bbd31",
     "vendored_terminal_main_sha256": "ec705c8c50dd73b0788792ec4340ca053d3d83271e12c72a6892e43367cd22bc",
     "font_shas": {
