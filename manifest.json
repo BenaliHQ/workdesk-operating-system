@@ -1,7 +1,7 @@
 {
   "id": "workdesk-operating-system",
   "name": "Workdesk Operating System",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "minAppVersion": "1.11.4",
   "description": "Curated visual surface for WorkdeskOS vaults — zones, command palette, quick capture, and a Claude Code terminal.",
   "author": "Benali",

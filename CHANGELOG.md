@@ -6,6 +6,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.7.1] — 2026-05-26
+
 ### Changed
 
 - **Borderless callouts.** Callouts now carry role color on a 3px
