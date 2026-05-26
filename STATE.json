@@ -96,7 +96,7 @@
     "context7_required": false,
     "context7_fallback": "webfetch",
     "tokens_css_sha256": "8b740a2cca29dac513059dd18b8a4a02b008de5b54feea21af0f6d07983257c5",
-    "app_css_sha256": "f6b1a53bff1ebdbe902e45d92a2540eb06003fed28b03f0ce680c12a7de4866c",
+    "app_css_sha256": "7e6f48a0320ea2d3b6e3aefbae7c69c4ae2fc0c4ee9d9b2337d9e7d0c9abb44a",
     "icons_js_sha256": "48b5d1aad1c46f5c118deb5d9ca70d3d93e5b362ff4abdc1e0e02e46ef7bbd31",
     "vendored_terminal_main_sha256": "ec705c8c50dd73b0788792ec4340ca053d3d83271e12c72a6892e43367cd22bc",
     "font_shas": {
@@ -132,7 +132,7 @@
     "context7_available": false,
     "architecture": "standard-plugin-pattern",
     "architecture_prior": "full-surface-takeover (v1.0.0 — see M4 spec)",
-    "obsidian_scope_css_sha256": "80644a415183d37726fb09bb99a891c5545b4fd4b60cb4cf87c6e986b22be199",
+    "obsidian_scope_css_sha256": "01a9da5ea4b9d2dbc65a737af1c86c8109d7edea8a6cb9583beac5238feee831",
     "ribbon_pattern": "addRibbonIcon × 12",
     "workspace_seed_strategy": "on-demand-reveal (no migrateWorkspaceOnce)",
     "css_scoping_strategy": "build-time-strip-and-scope (scripts/scope-app-css.mjs)",

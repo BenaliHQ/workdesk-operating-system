@@ -6,6 +6,26 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **Borderless callouts.** Callouts now carry role color on a 3px
+  leading edge with no surrounding border, 8px radius, and a tinted
+  background — the full thin border shipped in v1.6.11 is retired.
+  Lines up with the surface treatment Khalil had been running locally
+  via the `workdesk-link-callout-polish` snippet; that snippet can now
+  be disabled.
+- **Callout titles in small caps.** Title font drops to 12px, uppercases,
+  and gains 0.06em letter-spacing for a designer-style header — the
+  16px naked icon and role color carry over unchanged.
+
+### Added
+
+- **Wikilink polish.** Internal links in reading view (`a.internal-link`)
+  and live-preview (`.cm-hmd-internal-link`) render in atlas-blue with a
+  1px dotted underline at 3px offset. Hover paints an atlas-tinted
+  rounded background. External links keep Obsidian's defaults so the
+  internal/external distinction reads at a glance.
+
 ## [1.7.0] — 2026-05-25
 
 ### Added
