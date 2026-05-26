@@ -750,19 +750,16 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   --callout-bg:    var(--ws-zone-atlas-bg);
   background: color-mix(in oklch, var(--callout-bg) 50%, var(--background-primary));
   background-image: none;
-  /* Borderless: only the leading edge carries role color. Forced longhands
-     with !important defeat Obsidian's default
-     `border-inline-start: 4px solid var(--callout-color)` and any block-side
-     borders the shorthand fallback would otherwise apply. */
-  border: none;
-  border-inline-start-style: solid !important;
-  border-inline-start-width: 3px !important;
-  border-inline-start-color: var(--callout-color) !important;
-  border-left-width: 3px !important;
-  border-right-width: 0 !important;
-  border-top-width: 0 !important;
-  border-bottom-width: 0 !important;
-  border-radius: 8px;
+  border: 1px solid color-mix(in oklch, var(--callout-color) 30%, var(--background-modifier-border));
+  /* Forced longhands defeat Obsidian's default border-inline-start: 4px solid
+     var(--callout-color), which otherwise survives the cascade. !important is
+     used deliberately here — without it, Obsidian's same-specificity rule wins
+     by source order in some loader paths. */
+  border-inline-start-width: 1px !important;
+  border-inline-start-color: color-mix(in oklch, var(--callout-color) 30%, var(--background-modifier-border)) !important;
+  border-left-width: 1px !important;
+  border-right-width: 1px !important;
+  border-radius: var(--ws-radius-card);
   padding: var(--ws-space-3) var(--ws-space-4);
   margin: var(--ws-space-4) 0;
   mix-blend-mode: normal;
@@ -812,7 +809,7 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
 :is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout .callout-title-inner {
   font-family: var(--ws-font-display);
   font-weight: 600;
-  font-size: var(--ws-fs-12);
+  font-size: var(--ws-fs-14);
   letter-spacing: 0.06em;
   color: var(--callout-color);
 }

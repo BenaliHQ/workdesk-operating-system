@@ -6,6 +6,34 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **Callout border reverted to the v1.6.11 treatment.** Full thin
+  1px color-mixed border on all four sides, tinted background per
+  role, `--ws-radius-card` (10px) radius. Reverses the borderless
+  3px-leading-edge change shipped in v1.7.1, which didn't match
+  operator intent (snippet content was misread as design intent;
+  the local snippet's borderless rules never actually won the
+  cascade against the v1.6.11 plugin rules, so the operator had
+  been seeing the thin-border treatment all along).
+- **Callout title size restored to 14px** (`--ws-fs-14`). Keeps
+  v1.7.1's uppercase + 0.06em letter-spacing — the title-polish
+  win was kept, only the size shrink reverted.
+
+### Added
+
+- **`pnpm preview-callouts` headless screenshot harness.** Renders
+  the full plugin visual surface (cream-amber background, Manrope
+  display + DM Sans body + Geist Mono code, zone-palette swatches,
+  six callouts, internal/external wikilinks) using the freshly-built
+  `styles.css`, captures via headless Chrome, writes to
+  `_inputs/callout-preview-<timestamp>.png`. No new npm deps.
+- **UI visual-verification gate documented in `CLAUDE.md`.** Tag-and-
+  push is now blocked until the operator confirms the rendered
+  visual with a screenshot. Closes the gap that caused the v1.7.1
+  misship — programmatic verification (typecheck / vitest / lint /
+  phase7) is necessary but not sufficient for visual changes.
+
 ## [1.7.1] — 2026-05-26
 
 ### Changed
