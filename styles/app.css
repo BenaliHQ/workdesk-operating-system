@@ -745,25 +745,20 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
    at the same source-order position. `border-inline-start-width: 1px`
    is set explicitly because the default 4px width otherwise wins via
    the border-shorthand fallback in some Obsidian versions. */
+/* Callout background, border, radius, and per-type role color mapping
+   live in workdesk-surface.css (the bundled spike-vault snippet). Its
+   `.callout` rule paints a raw atlas-tint background with a hairline
+   border + 3px role-colored left edge — the spike-vault treatment.
+   App.css intentionally does NOT redefine those properties here; we
+   only layer the title + icon polish (uppercase, naked icon, weight)
+   that workdesk-surface.css doesn't ship.
+
+   The `--callout-color` alias below mirrors workdesk-surface.css's
+   `--wd-callout-color`, set per-type to each role's foreground. Our
+   title/icon rules below reference `--callout-color` so they pick up
+   the role color regardless of whether workdesk-surface.css is loaded. */
 :is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout {
-  --callout-color: var(--ws-zone-atlas-fg);
-  --callout-bg:    var(--ws-zone-atlas-bg);
-  background: color-mix(in oklch, var(--callout-bg) 50%, var(--background-primary));
-  background-image: none;
-  border: 1px solid color-mix(in oklch, var(--callout-color) 30%, var(--background-modifier-border));
-  /* Forced longhands defeat Obsidian's default border-inline-start: 4px solid
-     var(--callout-color), which otherwise survives the cascade. !important is
-     used deliberately here — without it, Obsidian's same-specificity rule wins
-     by source order in some loader paths. */
-  border-inline-start-width: 1px !important;
-  border-inline-start-color: color-mix(in oklch, var(--callout-color) 30%, var(--background-modifier-border)) !important;
-  border-left-width: 1px !important;
-  border-right-width: 1px !important;
-  border-radius: var(--ws-radius-card);
-  padding: var(--ws-space-3) var(--ws-space-4);
-  margin: var(--ws-space-4) 0;
-  mix-blend-mode: normal;
-  box-shadow: none;
+  --callout-color: var(--wd-callout-color, var(--wd-zone-atlas-fg, currentColor));
 }
 /* Neutralize any pseudo-element-drawn stripe (some Obsidian versions and
    themes render the colored edge via ::before instead of a real border). */
@@ -819,56 +814,9 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
 :is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout .callout-content p { margin: 0; line-height: 1.55; }
 :is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout .callout-content p + p { margin-top: 0.5em; }
 
-/* Per-type role mapping. Obsidian ships many synonyms — group them so
-   tip/info/note all land on the same palette, etc. The
-   :is(.markdown-rendered, …) ancestor bumps specificity above Obsidian's
-   default `.callout[data-callout="X"]` rules so our hex-color values
-   win over their default comma-separated RGB ints (which break our
-   color-mix() expressions). */
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="note"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="info"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="tip"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="hint"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="todo"] {
-  --callout-color: var(--ws-zone-atlas-fg);
-  --callout-bg:    var(--ws-zone-atlas-bg);
-}
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="success"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="check"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="done"] {
-  --callout-color: var(--ws-zone-gtd-fg);
-  --callout-bg:    var(--ws-zone-gtd-bg);
-}
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="warning"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="caution"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="attention"] {
-  --callout-color: var(--ws-zone-intel-fg);
-  --callout-bg:    var(--ws-zone-intel-bg);
-}
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="failure"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="fail"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="missing"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="danger"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="error"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="bug"] {
-  --callout-color: var(--ws-zone-personal-fg);
-  --callout-bg:    var(--ws-zone-personal-bg);
-}
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="question"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="help"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="faq"] {
-  --callout-color: var(--ws-zone-config-fg);
-  --callout-bg:    var(--ws-zone-config-bg);
-}
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="example"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="quote"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="cite"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="abstract"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="summary"],
-:is(.markdown-rendered, .markdown-source-view, .markdown-reading-view, .markdown-preview-view) .callout[data-callout="tldr"] {
-  --callout-color: var(--ws-zone-system-fg);
-  --callout-bg:    var(--ws-zone-system-bg);
-}
+/* Per-type role mapping lives in workdesk-surface.css. App.css mirrors
+   the role-color alias on this surface so the title + icon rules above
+   pick it up reliably. */
 
 /* ── Wikilinks — atlas-blue, dotted underline, tinted hover ─────────────
    Reading view paints internal links as `<a class="internal-link">`;

@@ -37,6 +37,16 @@ execSync('node scripts/scope-app-css.mjs', { stdio: 'inherit', cwd: __dirname })
 const cssOrder = [
   'styles/fonts.css',
   'styles/tokens.css',
+  // WorkDesk surface theme — the comprehensive `workdesk.css` originally
+  // shipped as a vault snippet (config/appearance/workdesk.css in the
+  // Workdesk-OS vault). Overrides Obsidian's primitive color tokens
+  // (--color-base-00..100) at body level so the cream surface paints
+  // EVERYWHERE — chrome, sidebars, file explorer, modals — not just the
+  // narrowly-scoped markdown leaf area. Bundled AFTER tokens.css so its
+  // body-level primitive overrides win the cascade over tokens.css's
+  // container-scoped reassignments, and BEFORE the rest so per-region
+  // styles in app.css / obsidian-scope.css can still refine.
+  'styles/workdesk-surface.css',
   // Vendored vin terminal stylesheet (see src/vendor/workdesk-terminal/
   // NOTICE.md). Includes the upstream xterm.js structural rules
   // (.xterm-viewport / .xterm-screen / .xterm-helper-textarea positioning)
