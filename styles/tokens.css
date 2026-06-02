@@ -175,110 +175,14 @@
    ║            modal-container, but identified by plugin-owned class)      ║
    ╚═══════════════════════════════════════════════════════════════════════╝ */
 
-body.workdesk-os-active :is(
-  .workspace-leaf-content[data-type^="workdesk-"],
-  .workspace-leaf-content[data-type="markdown"],
-  .workspace-leaf-content[data-type="empty"],
-  .toast-stack,
-  .ws-popover,
-  .term-popover,
-  .scrim,
-  .workdesk-os-rename-modal,
-  .workdesk-os-settings
-) {
-  /* ── Light-theme Obsidian-native surface tokens ─────────────────────
-     Surfaces share a warm-amber hue (≈75) so cards, editor, and chrome
-     read as one palette. Pure #fff was breaking that — even a tiny
-     chroma anchors it to the cream system. */
-  --background-primary:        oklch(99.6% 0.004 75); /* editor surface */
-  --background-primary-alt:    oklch(98% 0.007 75);   /* alt editor (e.g. for headings) */
-  --background-secondary:      oklch(98% 0.007 75);   /* left pane (zone pane) */
-  --background-secondary-alt:  oklch(96% 0.010 75);   /* ribbon, app frame */
-  --background-modifier-hover: oklch(95.5% 0.011 70);
-  --background-modifier-active-hover: oklch(93.5% 0.013 65);
-  --background-modifier-border:       oklch(92% 0.012 70);
-  --background-modifier-border-hover: oklch(86% 0.014 70);
-  --background-modifier-border-focus: #5a6b7a;
-  --background-modifier-form-field:   oklch(99.6% 0.004 75);
-  --background-modifier-error:        #f4e6e8;
-  --background-modifier-success:      #e6efe6;
-  --background-modifier-message:      #f5ecdc;
-
-  /* ── Text ─────────────────────────────────────────────────────────── */
-  --text-normal:    oklch(22% 0.015 70);
-  --text-muted:     oklch(48% 0.012 70);
-  --text-faint:     oklch(64% 0.010 70);
-  --text-on-accent: oklch(99% 0.005 75);
-  --text-accent:    #5a6b7a;        /* slate — links + interactive */
-  --text-accent-hover: #3f4d5b;
-  --text-error:     #8a4a55;
-  --text-success:   #4f7a52;
-  --text-warning:   #8a6a2e;
-  --text-selection: rgba(90, 107, 122, 0.18);
-
-  /* ── Interactive ──────────────────────────────────────────────────── */
-  --interactive-normal:  #f3f1ee;
-  --interactive-hover:   #ebe7e0;
-  --interactive-accent:  #5a6b7a;
-  --interactive-accent-hover: #3f4d5b;
-
-  /* ── Code blocks (Obsidian-native) ────────────────────────────────── */
-  --code-background: #f6f3ed;
-  --code-normal:     #2a2a2a;
-  --code-comment:    #9a958d;
-  --code-keyword:    #5a6b7a;
-  --code-string:     #4f7a52;
-  --code-value:      #8a6a2e;
-}
-
-body.workdesk-os-active.theme-dark :is(
-  .workspace-leaf-content[data-type^="workdesk-"],
-  .workspace-leaf-content[data-type="markdown"],
-  .workspace-leaf-content[data-type="empty"],
-  .toast-stack,
-  .ws-popover,
-  .term-popover,
-  .scrim,
-  .workdesk-os-rename-modal,
-  .workdesk-os-settings
-) {
-  --background-primary:        #2a2723;
-  --background-primary-alt:    #272420;
-  --background-secondary:      #211f1c;
-  --background-secondary-alt:  #1c1a17;
-  --background-modifier-hover: #322e29;
-  --background-modifier-active-hover: #3a3530;
-  --background-modifier-border:       #3a342d;
-  --background-modifier-border-hover: #4a4238;
-  --background-modifier-border-focus: #8a9aa8;
-  --background-modifier-form-field:   #2a2723;
-  --background-modifier-error:        #2c1e22;
-  --background-modifier-success:      #1f2a20;
-  --background-modifier-message:      #2c241a;
-
-  --text-normal:    #ebe5d9;
-  --text-muted:     #a8a094;
-  --text-faint:     #76706a;
-  --text-on-accent: #1c1a17;
-  --text-accent:    #8a9aa8;
-  --text-accent-hover: #a8b8c5;
-  --text-error:     #cc8a93;
-  --text-success:   #8eb892;
-  --text-warning:   #cca676;
-  --text-selection: rgba(138, 154, 168, 0.22);
-
-  --interactive-normal:  #322e29;
-  --interactive-hover:   #3a3530;
-  --interactive-accent:  #8a9aa8;
-  --interactive-accent-hover: #a8b8c5;
-
-  --code-background: #27241f;
-  --code-normal:     #d8d2c4;
-  --code-comment:    #76706a;
-  --code-keyword:    #8a9aa8;
-  --code-string:     #8eb892;
-  --code-value:      #cca676;
-}
+/* Obsidian-native token reassignments now live in workdesk-surface.css,
+   which is bundled right after this file. workdesk-surface.css overrides
+   Obsidian's primitive --color-base-00..100 tokens at body level so the
+   cream cascade reaches every native Obsidian surface (chrome, sidebars,
+   file explorer, modals), not just the markdown leaf area. The
+   container-scoped reassignments that previously lived here were too
+   narrow to be visible — they fought for a 0.4%-lightness shift inside
+   a single container, which the operator's eye couldn't pick up. */
 
 /* ╔═══════════════════════════════════════════════════════════════════════╗
    ║ 5. FOCUS RING — accessible, theme-aware                                ║

@@ -303,36 +303,45 @@ describe('phase 7 · standard plugin pattern', () => {
     expect(workspace.rightSplit._expandCalls).toBe(1);
   });
 
-  it('Obsidian-native token reassignments are scoped under body.workdesk-os-active, never at :root', async () => {
+  it('Obsidian-native token reassignments live in workdesk-surface.css at body.theme-* scope', async () => {
     const fs = await import('node:fs');
     const path = await import('node:path');
     const tokensPath = path.resolve(__dirname, '..', 'styles/tokens.css');
+    const surfacePath = path.resolve(__dirname, '..', 'styles/workdesk-surface.css');
     const tokensSrc = fs.readFileSync(tokensPath, 'utf8');
+    const surfaceSrc = fs.readFileSync(surfacePath, 'utf8');
 
-    // Source of truth: tokens.css must scope Obsidian-native reassignments
-    // under the plugin-active class so native chrome (tooltips, settings
-    // dialog, other plugins' modals) keeps Obsidian's own values. The
-    // tooltip-contrast hack was needed precisely because this was once
-    // at :root — strategy C removes the need for it.
-    const scopedLightRe = /body\.workdesk-os-active\s+:is\([^)]*\)\s*\{[\s\S]*?--background-primary\s*:/;
-    const scopedDarkRe  = /body\.workdesk-os-active\.theme-dark\s+:is\([^)]*\)\s*\{[\s\S]*?--background-primary\s*:/;
-    expect(scopedLightRe.test(tokensSrc)).toBe(true);
-    expect(scopedDarkRe.test(tokensSrc)).toBe(true);
-
-    // Guard against regression: every `--background-primary:` declaration
-    // must live inside a rule whose selector contains `workdesk-os-active`.
-    // Walk the file as a sequence of (selector, body) pairs and check.
+    // v1.8.0 architectural shift: Obsidian-native token reassignments moved
+    // OUT of tokens.css (where they were container-scoped under
+    // body.workdesk-os-active, deliberately narrow) and INTO workdesk-surface.css
+    // (the bundled spike-vault snippet, where they're at body.theme-light /
+    // body.theme-dark scope). This widens the cream cascade to every native
+    // Obsidian surface — chrome, sidebars, file explorer, modals — instead of
+    // the markdown leaf alone. tokens.css now only carries WorkDesk-internal
+    // --ws-* tokens; the Obsidian-native layer is workdesk-surface.css's
+    // responsibility.
+    //
+    // tokens.css must NOT declare --background-primary anymore.
     const ruleRe = /([^{}]+)\{([^{}]*)\}/g;
     let match: RegExpExecArray | null;
     while ((match = ruleRe.exec(tokensSrc)) !== null) {
       const selector = match[1] ?? '';
       const body = match[2] ?? '';
       if (body.includes('--background-primary:')) {
-        if (!selector.includes('workdesk-os-active')) {
-          throw new Error(`--background-primary defined outside workdesk-os-active scope: selector=${selector.trim()}`);
-        }
+        throw new Error(
+          `tokens.css must not declare --background-primary anymore (v1.8.0); workdesk-surface.css owns it. ` +
+          `Found in selector: ${selector.trim()}`,
+        );
       }
     }
+
+    // workdesk-surface.css must declare the light + dark surface reassignments
+    // at body.theme-* scope — this is what produces the spike-vault cream
+    // everywhere across the app, not just inside the markdown leaf.
+    const lightScopeRe = /body\.theme-light[\s,][\s\S]*?\{[\s\S]*?--background-primary\s*:/;
+    const darkScopeRe = /body\.theme-dark\b[\s\S]*?\{[\s\S]*?--background-primary\s*:/;
+    expect(lightScopeRe.test(surfaceSrc)).toBe(true);
+    expect(darkScopeRe.test(surfaceSrc)).toBe(true);
   });
 
   it('Plugin modal fade-in is scoped to .scrim .modal so native Obsidian modals stay visible', async () => {

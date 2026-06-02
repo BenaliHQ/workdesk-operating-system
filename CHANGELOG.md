@@ -6,6 +6,38 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Spike-vault surface theme bundled into the plugin.** The 799-line
+  `workdesk.css` snippet — previously only loaded as a personal CSS
+  snippet in the spike vault — now ships as `styles/workdesk-surface.css`
+  inside the plugin bundle. Every operator on BRAT gets the full
+  spike-vault visual treatment automatically. No snippet install required.
+- **Bold cream surface across the entire app.** Background goes from
+  the previous whisper-cream `oklch(99.6% 0.004 75)` (≈ `#fcfbf9`,
+  essentially indistinguishable from white) to a visible `#f3f1ee`
+  warm cream. Cascades to chrome, sidebars, ribbon, file explorer,
+  modals — not just inside the markdown editor leaf.
+- **Spike-vault callout treatment.** Raw role-tint background (atlas,
+  gtd, intel, personal), hairline border on three sides, 3px
+  role-colored left edge, 6px radius. Replaces v1.6.11's full-color-
+  mixed border which read as muddy on the bolder cream surface.
+
+### Changed
+
+- **Obsidian-native token reassignments moved out of `tokens.css`.**
+  v1.6.11's container-scoped reassignments (under
+  `body.workdesk-os-active :is(<plugin containers>)`) were too narrow
+  to be visible — the operator's eye couldn't pick up a 0.4%-lightness
+  shift inside a single container. Reassignments now live in
+  `workdesk-surface.css` at `body.theme-light` / `body.theme-dark`
+  scope, which produces the cream everywhere. `phase7` test updated
+  to assert the new architecture.
+- **`app.css` callout base + per-type role mapping removed.**
+  Workdesk-surface.css owns those now. App.css keeps only the title
+  polish (uppercase, 0.06em letter-spacing, 14px Manrope), the naked
+  icon styling, and the wikilink rules.
+
 ## [1.7.2] — 2026-05-26
 
 ### Changed
