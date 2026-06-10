@@ -6,6 +6,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.8.1] — 2026-06-10
+
 ### Fixed
 
 - **Zone trees no longer stop at three levels deep.** The vault scanner's
