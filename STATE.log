@@ -1465,3 +1465,62 @@
   - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
   - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — 01a9da5ea4b9…
   - [ok] STATE.phases["7"] is PASS
+## 2026-06-02T23:35:48.592Z  verify phase0
+  - [ok] STATE.json validates against zod schema — schema=2
+  - [ok] deliverable: scripts/preflight.sh
+  - [ok] deliverable: manifest.json
+  - [ok] deliverable: package.json
+  - [ok] deliverable: tsconfig.json
+  - [ok] deliverable: esbuild.config.mjs
+  - [ok] deliverable: .gitignore
+  - [ok] deliverable: .nvmrc
+  - [ok] deliverable: README.md
+  - [ok] deliverable: LICENSE
+  - [ok] deliverable: styles/tokens.css
+  - [ok] deliverable: styles/app.css
+  - [ok] deliverable: styles/reduced-motion.css
+  - [ok] deliverable: styles/fonts.css
+  - [ok] deliverable: src/icons.ts
+  - [ok] deliverable: src/types.d.ts
+  - [ok] deliverable: fixtures/zones.yaml
+  - [ok] deliverable: fixtures/object-icons.yaml
+  - [ok] deliverable: src/main.ts
+  - [ok] deliverable: src/settings.ts
+  - [ok] deliverable: src/constants.ts
+  - [ok] deliverable: STATE.json
+  - [ok] deliverable: STATE.md
+  - [ok] deliverable: STATE.log
+  - [ok] deliverable: scripts/render-state-md.mjs
+  - [ok] deliverable: scripts/state-schema.mjs
+  - [ok] deliverable: scripts/copy-fonts.mjs
+  - [ok] deliverable: scripts/verify.mjs
+  - [ok] deliverable: scripts/run-all.sh
+  - [ok] deliverable: scripts/install-check.sh
+  - [ok] deliverable: tests/fixtures/sample-vault
+  - [ok] deliverable: tests/stubs/obsidian.ts
+  - [ok] deliverable: _inputs/design-handoff
+  - [ok] deliverable: _inputs/workdesk-terminal.main.ts
+  - [FAIL] styles/tokens.css matches _inputs source byte-for-byte — SHA mismatch a=248bb8cc21b0 b=8b740a2cca29
+  - [FAIL] styles/app.css matches _inputs source byte-for-byte — SHA mismatch a=6f63f4f34f29 b=f6b1a53bff1e
+  - [FAIL] src/icons.ts ports ≥ 47 icons from shared/icons.js — port count (55) != source count (53)
+  - [ok] manifest.json id + minAppVersion + isDesktopOnly — id=workdesk-operating-system minAppVersion=1.11.4
+  - [ok] package.json deps are exact (no ^) — all exact
+  - [ok] tsc --strict --noEmit — strict mode
+  - [ok] pnpm build → main.js + styles.css — build ok
+  - [ok] fonts/ contains ≥ 8 .woff2 with SHAs in STATE.decisions.font_shas — 9 fonts verified
+  - [ok] prompts/S*.md absent (mega-spec mode) — no prompts/S*.md
+## 2026-06-02T23:36:03.284Z  verify phase7
+  - [ok] TypeScript strict compiles
+  - [ok] pnpm build (runs scope-app-css.mjs + bundles)
+  - [ok] vitest all phases pass (including phase7)
+  - [ok] main.ts no longer mounts custom shell or WorkdeskRibbon
+  - [ok] main.ts registers ribbon icons + revealZone helper
+  - [ok] main.ts references all 12 ribbon icon names — 12 names
+  - [ok] shell.ts deleted
+  - [ok] RibbonControl.ts deleted
+  - [ok] generated app css has no .app or body top-level rules
+  - [ok] bundle includes obsidian-scope.css and no top-level .app grid rule
+  - [ok] manifest.json.version >= 1.1.0 (phase 7 shipped at 1.1.0)
+  - [ok] M1 SHA decisions unchanged (no drift) — 4 sha fields intact
+  - [ok] STATE.decisions.obsidian_scope_css_sha256 present and matches source — 01a9da5ea4b9…
+  - [ok] STATE.phases["7"] is PASS

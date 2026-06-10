@@ -79,6 +79,34 @@ describe('phase 2 · scanner', () => {
     expect(proj?.type).toBe('folder');
   });
 
+  it('walkTree has no depth cap — deep project folders keep their children', () => {
+    // Regression: the old maxDepth=3 default meant a folder like
+    // atlas/businesses/<biz>/projects/<project> arrived with children: []
+    // baked in at scan time, so its row could never be opened in the UI.
+    const tree = walkTree(fs, `${ROOT}/atlas`);
+    const businesses = tree.find((n) => n.name === 'businesses');
+    const benali = businesses?.children?.find((n) => n.name === 'benali');
+    const projects = benali?.children?.find((n) => n.name === 'projects');
+    const project = projects?.children?.find((n) => n.name === 'example-legal-foundation');
+    expect(project?.type).toBe('folder');
+    expect(project?.children?.map((n) => n.name)).toContain('_brief.md');
+    const notes = project?.children?.find((n) => n.name === 'notes');
+    expect(notes?.children?.map((n) => n.name)).toContain('note.md');
+  });
+
+  it('scanZones builds zone-object trees to full depth', () => {
+    const zones = scanZones(fs, {
+      vaultRoot: ROOT,
+      manifestPath: 'config/zones.yaml',
+      pluginRoot: PLUGIN_ROOT,
+    });
+    const businesses = zones.atlas.objects.find((o) => o.id === 'businesses');
+    const benali = businesses?.children?.find((n) => n.name === 'benali');
+    const projects = benali?.children?.find((n) => n.name === 'projects');
+    const project = projects?.children?.find((n) => n.name === 'example-legal-foundation');
+    expect(project?.children?.length ?? 0).toBeGreaterThan(0);
+  });
+
   it('scanFilesView produces a flat view of the vault root', () => {
     const flat = scanFilesView(fs, { vaultRoot: ROOT });
     const names = flat.map((n) => n.name);

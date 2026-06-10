@@ -6,6 +6,18 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Zone trees no longer stop at three levels deep.** The vault scanner's
+  `walkTree` defaulted to `maxDepth = 3`, so any folder three levels below
+  a zone-object root (e.g. a project folder at
+  `atlas/businesses/<biz>/projects/<project>`) was scanned with an empty
+  `children` array baked in — its row rendered a chevron that toggled but
+  opened nothing. The cap is removed; zone-object trees now walk to full
+  depth. The Files view had the same bug at depth 2 and is uncapped too.
+  No new I/O class: `countDescendants` already recursed every subtree for
+  folder counts. Regression-tested against a 5-level fixture path.
+
 ## [1.8.0] — 2026-06-02
 
 ### Added

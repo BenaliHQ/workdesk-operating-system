@@ -85,7 +85,12 @@ export function loadIconManifest(
 
 // ───────── Tree walk ─────────
 
-export function walkTree(fs: FsAdapter, folder: string, depth = 1, maxDepth = 3): TreeNode[] {
+// No depth cap by default: the tree is built eagerly at scan time and
+// TreeRow only renders pre-scanned children, so any folder past the cap
+// would render as a row that can't be opened (chevron toggles, nothing
+// appears). countDescendants already recurses the full subtree for counts,
+// so walking to full depth adds node construction, not new I/O classes.
+export function walkTree(fs: FsAdapter, folder: string, depth = 1, maxDepth = Infinity): TreeNode[] {
   if (!fs.exists(folder)) return [];
   const entries = fs.list(folder).filter((e) => !e.name.startsWith('.'));
   entries.sort((a, b) => {
@@ -269,7 +274,7 @@ export function scanZones(fs: FsAdapter, opts: ScanOptions): Record<Exclude<Zone
 // ───────── Files-mode flat view ─────────
 
 export function scanFilesView(fs: FsAdapter, opts: { vaultRoot: string }): TreeNode[] {
-  return walkTree(fs, opts.vaultRoot, 1, 2);
+  return walkTree(fs, opts.vaultRoot);
 }
 
 // ───────── Node fs adapter (tests + dev) ─────────
