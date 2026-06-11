@@ -6,6 +6,15 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **HtmlView "Open in browser" button now opens the file.** The URL was built
+  as `'file://' + file.path`, but `TFile.path` is vault-relative — the first
+  folder was parsed as a hostname and the button did nothing; spaces in
+  filenames were unencoded on top. The URL is now built from the
+  `FileSystemAdapter`'s absolute path and percent-encoded via `pathToFileURL`.
+  Found by an `/improve` audit; executed from `plans/001`.
+
 ## [1.8.1] — 2026-06-10
 
 ### Fixed
