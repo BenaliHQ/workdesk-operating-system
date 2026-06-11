@@ -5,9 +5,17 @@
 // in settings adds `allow-scripts`. Both are gated through the settings
 // schema; this view reads the resolved settings from the plugin instance.
 
-import { FileView, TFile, WorkspaceLeaf } from 'obsidian';
+import { FileSystemAdapter, FileView, TFile, WorkspaceLeaf } from 'obsidian';
+import { pathToFileURL } from 'node:url';
 import type WorkdeskOSPlugin from '../main';
 import { VIEW_TYPE_WORKDESK_HTML } from '../constants';
+
+/** Absolute, percent-encoded file:// URL for a vault file, or null when the
+ *  adapter isn't the desktop FileSystemAdapter (e.g. tests, mobile). */
+export function fileUrlForVaultFile(adapter: unknown, vaultRelativePath: string): string | null {
+  if (!(adapter instanceof FileSystemAdapter)) return null;
+  return pathToFileURL(adapter.getFullPath(vaultRelativePath)).href;
+}
 
 export class HtmlView extends FileView {
   allowNoFile = false;
@@ -57,7 +65,10 @@ export class HtmlView extends FileView {
     btn.className = 'btn ghost';
     btn.type = 'button';
     btn.textContent = 'Open in browser ↗';
-    btn.addEventListener('click', () => window.open('file://' + file.path));
+    btn.addEventListener('click', () => {
+      const url = fileUrlForVaultFile(this.app.vault.adapter, file.path);
+      if (url) window.open(url);
+    });
     chip.appendChild(btn);
     this.contentEl.appendChild(chip);
   }

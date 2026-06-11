@@ -88,6 +88,8 @@ await esbuild.build({
     'node:os',
     'node:path',
     'node:child_process',
+    'node:url',
+    'url',
   ],
   sourcemap: dev,
   minify: !dev,

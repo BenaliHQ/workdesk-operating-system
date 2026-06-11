@@ -244,7 +244,11 @@ export function setIcon(_el: HTMLElement, _name: string): void {}
 // app.vault.adapter via `instanceof FileSystemAdapter`; the stub lets that
 // guard fall through to the test fallback path.
 export class FileSystemAdapter {
-  getBasePath(): string { return ''; }
+  basePath = '';
+  getBasePath(): string { return this.basePath; }
+  getFullPath(normalizedPath: string): string {
+    return `${this.basePath}/${normalizedPath}`;
+  }
 }
 
 // Minimal YAML loader using JSON-only subset. Tests that exercise the zone
