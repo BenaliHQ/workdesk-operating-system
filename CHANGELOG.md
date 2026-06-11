@@ -6,6 +6,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.8.2] — 2026-06-11
+
 ### Fixed
 
 - **HtmlView "Open in browser" button now opens the file.** The URL was built
