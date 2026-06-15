@@ -22,6 +22,10 @@ data.json
 # plugin into a vault. Not a tracked source artifact.
 pty-helper.py
 
+# Hot Reload dev marker — present only when the repo is symlinked as a plugin
+# into a vault and pjeby/hot-reload watches it. Per-developer, not a source artifact.
+.hotreload
+
 # Per-developer AI-assist tooling (Claude Code skills, slash commands). The
 # obsidian-plugin skill is documented in
 # `~/Workdesk-OS/intel/research/obsidian-plugin-development.md` §9 — contributors

@@ -333,20 +333,59 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
 }
 .pane-hero .hero-collapse:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
 
+/* Zone pane scroll container — make the view-content a flex column so the
+   hero stays pinned and only the object-list scrolls (fixes the list scrolling
+   up behind the header). padding:0 removes the default view-content inset so
+   the hero + its grid run full-bleed to the pane edges. */
+.workdesk-zone-pane.workdesk-zone-pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+}
+
 /* Workdesk zone hero — oversized glyph + zone name + per-zone management
    label. Replaces the wrap-prone single-line layout from the old design. */
 .workdesk-os-zone-hero {
+  flex: 0 0 auto;
   align-items: center;
   gap: var(--ws-space-4);
   padding: var(--ws-space-6) var(--ws-space-5) var(--ws-space-4);
+  position: relative;
+  overflow: hidden;
 }
+/* Scoped brand moment — a faint Ledger engineering grid that dissolves into
+   the surface behind the hero. Plugin-owned markup, neutral hairlines; never
+   touches native chrome and doesn't compete with the accent. */
+.workdesk-os-zone-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg,  color-mix(in srgb, var(--text-normal) 5%, transparent) 0 1px, transparent 1px 46px),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--text-normal) 5%, transparent) 0 1px, transparent 1px 46px);
+  -webkit-mask-image: radial-gradient(150% 130% at 22% 40%, #000 0%, rgba(0,0,0,0.3) 48%, transparent 72%);
+          mask-image: radial-gradient(150% 130% at 22% 40%, #000 0%, rgba(0,0,0,0.3) 48%, transparent 72%);
+  pointer-events: none;
+  z-index: 0;
+}
+/* Variant C — zone-colored glyph in a tinted tile; title stays ink. The tile
+   tint/fg come from --zone-bg/--zone-fg set on the hero by ZoneView. */
 .workdesk-os-zone-hero-icon {
+  position: relative;
+  z-index: 1;
   flex-shrink: 0;
-  width: 44px; height: 44px;
+  width: 52px; height: 52px;
   display: grid; place-items: center;
-  color: var(--text-muted);
+  border-radius: 13px;
+  background: var(--zone-bg, var(--background-modifier-hover));
+  color: var(--zone-fg, var(--text-muted));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--zone-fg, var(--text-muted)) 14%, transparent);
 }
 .workdesk-os-zone-hero-meta {
+  position: relative;
+  z-index: 1;
   min-width: 0;
   display: flex; flex-direction: column;
 }
@@ -422,7 +461,10 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   flex: 1;
 }
 .obj {
-  background: var(--background-primary);
+  flex-shrink: 0;   /* the object-list is a flex column with a constrained
+                       height now (pinned hero + scrolling list); without this
+                       the cards shrink to fit and clip their rows. */
+  background: var(--background-secondary-alt);
   border-radius: var(--ws-radius-card);
   box-shadow: var(--ws-shadow-card);
   overflow: hidden;
