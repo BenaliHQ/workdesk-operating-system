@@ -129,10 +129,10 @@
   /* bg/fg grounds are warmed off pure GitHub white/charcoal so the terminal
      sits with the warm WorkDesk surface instead of reading as a stark white
      (or cool) rectangle. ANSI hues stay GitHub; only the grounds are warmed. */
-  --ws-xterm-bg:            #f6f4ef;
+  --ws-xterm-bg:            #f4f1ea;
   --ws-xterm-fg:            #24292e;
   --ws-xterm-cursor:        #0969da;
-  --ws-xterm-cursor-fg:     #f6f4ef;
+  --ws-xterm-cursor-fg:     #f4f1ea;
   --ws-xterm-sel:           rgba(9, 105, 218, 0.18);
   --ws-xterm-sel-fg:        #24292e;
   --ws-xterm-black:         #24292e;
@@ -184,10 +184,10 @@
   --ws-term-caret:    #8a9aa8;
 
   /* ── xterm.js terminal-content palette (GitHub Dark Dimmed) ──────────── */
-  --ws-xterm-bg:            #1d1b18;
+  --ws-xterm-bg:            #1c1a17;
   --ws-xterm-fg:            #d8d2c6;
   --ws-xterm-cursor:        #6cb6ff;
-  --ws-xterm-cursor-fg:     #1d1b18;
+  --ws-xterm-cursor-fg:     #1c1a17;
   --ws-xterm-sel:           rgba(108, 182, 255, 0.22);
   --ws-xterm-sel-fg:        #e6e0d6;
   --ws-xterm-black:         #4a463f;

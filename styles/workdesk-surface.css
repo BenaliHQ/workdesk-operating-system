@@ -150,10 +150,14 @@
   --wd-files-tint: #e9e7e2;
   --wd-files-fg:   #4a4844;
 
-  /* ---- TEXT (delegate to Obsidian native, with light fallbacks) ---- */
-  --wd-text-primary:   var(--text-normal, #1a1a1a);
-  --wd-text-secondary: var(--text-muted,  #5a5a5a);
-  --wd-text-tertiary:  var(--text-faint,  #7a7a7a);
+  /* ---- TEXT (direct values) ----
+     Must NOT reference --text-normal/-muted/-faint: those are derived from
+     --color-base-* which we reassign to these very tokens, creating a cycle
+     that resolves to invalid (→ black text). Black reads fine on the cream
+     light surface but is invisible on dark — the dark-mode breakage. */
+  --wd-text-primary:   #1a1a1a;
+  --wd-text-secondary: #5a5a5a;
+  --wd-text-tertiary:  #7a7a7a;
 
   /* ---- TYPOGRAPHY STACKS ----
      Font files are vendored by plugins (workdesk-surface loads DM Sans,
@@ -192,8 +196,8 @@
   --wd-surface-row-hover:   #2c2823;
   --wd-surface-row-active:  #36312a;
 
-  /* ACCENT (dark) */
-  --wd-accent-slate: #8a9aa8;
+  /* ACCENT (dark) — lighter slate-blue, same family as the light #4f6d8c */
+  --wd-accent-slate: #7fa6cc;
 
   /* ZONE TINTS (dark) — revised 2026-05-09 for 3:1+ contrast vs warm-dark surface */
   --wd-zone-atlas-tint:    #3a567a;
@@ -213,10 +217,10 @@
   --wd-files-tint: #423d35;
   --wd-files-fg:   #b8b0a4;
 
-  /* TEXT — dark-mode fallbacks */
-  --wd-text-primary:   var(--text-normal, #f0ece8);
-  --wd-text-secondary: var(--text-muted,  #b0a8a0);
-  --wd-text-tertiary:  var(--text-faint,  #7a726a);
+  /* TEXT — direct values (no cycle; see the light block) */
+  --wd-text-primary:   #f0ece8;
+  --wd-text-secondary: #b0a8a0;
+  --wd-text-tertiary:  #7a726a;
 }
 
 
