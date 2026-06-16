@@ -157,13 +157,15 @@
    ║ 3. WORKDESK-EXTENSION TOKENS — dark theme                              ║
    ╚═══════════════════════════════════════════════════════════════════════╝ */
 .theme-dark {
-  --ws-zone-atlas-bg:    #1e2a38;  --ws-zone-atlas-fg:    #7fa6cc;
-  --ws-zone-gtd-bg:      #1f2a20;  --ws-zone-gtd-fg:      #8eb892;
-  --ws-zone-intel-bg:    #2c241a;  --ws-zone-intel-fg:    #cca676;
-  --ws-zone-personal-bg: #2c1e22;  --ws-zone-personal-fg: #cc8a93;
-  --ws-zone-system-bg:   #2a2622;  --ws-zone-system-fg:   #a39b91;
-  --ws-zone-config-bg:   #252035;  --ws-zone-config-fg:   #a89bd0;
-  --ws-zone-files-bg:    #2a2622;  --ws-zone-files-fg:    #a8a094;
+  /* Harmonized to mirror the light zone hues; matches the dark --wd-zone-*
+     set in workdesk-surface.css. All fg-on-tile + fg-on-pane clear WCAG AA. */
+  --ws-zone-atlas-bg:    #24364a;  --ws-zone-atlas-fg:    #8fb6da;
+  --ws-zone-gtd-bg:      #26352a;  --ws-zone-gtd-fg:      #9bc89f;
+  --ws-zone-intel-bg:    #342d1d;  --ws-zone-intel-fg:    #d4b078;
+  --ws-zone-personal-bg: #352630;  --ws-zone-personal-fg: #d6a0aa;
+  --ws-zone-system-bg:   #2f2c27;  --ws-zone-system-fg:   #bbb2a6;
+  --ws-zone-config-bg:   #2c2640;  --ws-zone-config-fg:   #b4a6d9;
+  --ws-zone-files-bg:    #2c2924;  --ws-zone-files-fg:    #b1a99c;
 
   --ws-shadow-card:    0 1px 0 rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.3);
   --ws-shadow-hover:   0 1px 0 rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.4);

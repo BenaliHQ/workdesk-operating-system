@@ -362,15 +362,14 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   content: "";
   position: absolute;
   inset: 0;
-  /* Vertical-only "ledger" hairlines — no horizontal lines means the grid
-     can never draw a line next to the real top/bottom border (the doubled /
-     close-line artifact). Offset by half a cell so no line sits on the left
-     edge; the radial dissolve fades it out toward all edges. */
-  background-position: 23px 0;
   background-image:
-    repeating-linear-gradient(90deg, color-mix(in srgb, var(--text-normal) 5.5%, transparent) 0 1px, transparent 1px 46px);
-  -webkit-mask-image: radial-gradient(130% 120% at 24% 50%, #000 0%, rgba(0,0,0,0.28) 46%, transparent 68%);
-          mask-image: radial-gradient(130% 120% at 24% 50%, #000 0%, rgba(0,0,0,0.28) 46%, transparent 68%);
+    /* Horizontal lines sit at 38px within each cell (not 0) so none lands on
+       the top edge next to the tab-header border — the only change vs the
+       original grid. Vertical lines and the mask are untouched. */
+    repeating-linear-gradient(0deg,  transparent 0 38px, color-mix(in srgb, var(--text-normal) 5%, transparent) 38px 39px, transparent 39px 46px),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--text-normal) 5%, transparent) 0 1px, transparent 1px 46px);
+  -webkit-mask-image: radial-gradient(150% 130% at 22% 40%, #000 0%, rgba(0,0,0,0.3) 48%, transparent 72%);
+          mask-image: radial-gradient(150% 130% at 22% 40%, #000 0%, rgba(0,0,0,0.3) 48%, transparent 72%);
   pointer-events: none;
   z-index: 0;
 }
