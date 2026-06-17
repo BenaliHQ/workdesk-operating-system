@@ -137,7 +137,7 @@ export class ZoneView extends ItemView {
     if (icon) {
       const glyph = createDiv();
       glyph.className = 'workdesk-os-zone-hero-icon';
-      glyph.appendChild(wsSvgEl(icon, 40));
+      glyph.appendChild(wsSvgEl(icon, 32));
       hero.appendChild(glyph);
     }
 

@@ -26,13 +26,17 @@ export function renderZoneCard(opts: ZoneCardOpts): HTMLElement {
   row.tabIndex = 0;
   row.setAttribute('role', 'button');
 
-  // Initial-letter glyph in place of the icon. First non-whitespace character
-  // of the title, uppercased. Falls back to '·' if the title is empty.
-  const dot = createSpan();
-  dot.className = 'obj-dot obj-initial';
-  const firstChar = opts.obj.title.trim().charAt(0);
-  dot.textContent = (firstChar || '·').toUpperCase();
-  row.appendChild(dot);
+  // Folder-style row: a rotating chevron + a folder glyph (file-explorer feel),
+  // replacing the old initial-letter chip.
+  const chev = createSpan();
+  chev.className = 'obj-chev';
+  chev.appendChild(wsSvgEl('chevron', 14));
+  row.appendChild(chev);
+
+  const folder = createSpan();
+  folder.className = 'obj-folder';
+  folder.appendChild(wsSvgEl('folder', 18));
+  row.appendChild(folder);
 
   const text = createDiv();
   text.className = 'obj-text';

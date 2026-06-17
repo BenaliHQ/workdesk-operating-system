@@ -379,9 +379,9 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   position: relative;
   z-index: 1;
   flex-shrink: 0;
-  width: 52px; height: 52px;
+  width: 48px; height: 48px;
   display: grid; place-items: center;
-  border-radius: 13px;
+  border-radius: 8px;
   background: var(--zone-bg, var(--background-modifier-hover));
   color: var(--zone-fg, var(--text-muted));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--zone-fg, var(--text-muted)) 14%, transparent);
@@ -407,19 +407,17 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   letter-spacing: 0.01em;
 }
 
-/* Initial-letter chip on object cards — replaces the SVG icon. Pastel
-   surface uses the same --background-secondary so the cards keep their
-   calm tone. */
-.obj-initial {
-  width: 32px; height: 32px;
-  border-radius: 50%;
+/* Folder-row glyphs — a rotating chevron + a folder icon (file-explorer feel),
+   replacing the old initial-letter chip. */
+.obj-chev {
+  color: var(--text-faint);
   display: grid; place-items: center;
-  font-family: var(--ws-font-display);
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  transition: transform var(--ws-dur-fast) var(--ws-ease-out);
+}
+.obj:not(.collapsed) .obj-chev { transform: rotate(90deg); }
+.obj-folder {
   color: var(--text-muted);
-  background: var(--background-secondary);
+  display: grid; place-items: center;
 }
 
 /* Empty-folder placeholder — shown when an expanded card has zero children.
@@ -468,7 +466,7 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
                        height now (pinned hero + scrolling list); without this
                        the cards shrink to fit and clip their rows. */
   background: var(--background-secondary-alt);
-  border-radius: var(--ws-radius-card);
+  border-radius: 6px;
   box-shadow: var(--ws-shadow-card);
   overflow: hidden;
   transition: box-shadow var(--ws-dur-base) var(--ws-ease-out);
@@ -476,21 +474,12 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
 .obj:hover { box-shadow: var(--ws-shadow-hover); }
 .obj-row {
   display: grid;
-  grid-template-columns: 36px 1fr auto;
+  grid-template-columns: 16px 22px 1fr auto;
   align-items: center;
-  gap: var(--ws-space-3);
-  padding: 11px var(--ws-space-3);
+  gap: var(--ws-space-2);
+  padding: 9px var(--ws-space-3);
   cursor: pointer;
   user-select: none;
-}
-.obj-icon {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  display: grid; place-items: center;
-  font-size: var(--ws-fs-14);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  text-transform: uppercase;
 }
 .obj-text { min-width: 0; }
 .obj-title { font-size: var(--ws-fs-14); font-weight: 500; line-height: 1.25; color: var(--text-normal); }
