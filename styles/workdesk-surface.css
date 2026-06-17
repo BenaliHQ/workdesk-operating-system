@@ -115,41 +115,49 @@
 
 :root {
 
-  /* ---- SURFACE (light mode default) ---- */
-  --wd-surface-app:         #f3f1ee;
-  --wd-surface-pane:        #faf9f7;
-  --wd-surface-card:        #ffffff;
-  --wd-surface-card-soft:   #fdfcfa;
-  --wd-surface-border-hair: #ebe7e0;
+  /* ---- SURFACE (light mode default) — Ledger porcelain/chalk ---- */
+  --wd-surface-app:         #f4f1ea;
+  --wd-surface-pane:        #faf9f5;
+  --wd-surface-card:        #fbfaf5;
+  --wd-surface-card-soft:   #fcfbf6;
+  --wd-surface-border-hair: #e9e4da;
   --wd-surface-border-soft: #e3ddd5;
   --wd-surface-row-hover:   #f0ede7;
   --wd-surface-row-active:  #e8e3da;
 
-  /* ---- ACCENT ---- */
-  --wd-accent-slate: #5a6b7a;
+  /* ---- ACCENT ---- one accent, used natively by Obsidian everywhere
+     (buttons, toggles, focus, links, selection). Tweak this single token to
+     restyle the accent; do NOT split it into separate chrome/text colors.
+     Refined slate-blue: kept distinct from semantic success-green and the gtd
+     zone so each color keeps its meaning; brand green lives in scoped pieces. */
+  --wd-accent-slate: #4f6d8c;
 
-  /* ---- ZONE TINTS (light) ---- */
-  --wd-zone-atlas-tint:    #e7eef6;
-  --wd-zone-atlas-fg:      #4a6a8a;
-  --wd-zone-gtd-tint:      #e6efe6;
-  --wd-zone-gtd-fg:        #3f6a42;
-  --wd-zone-intel-tint:    #f5ecdc;
-  --wd-zone-intel-fg:      #7a5a26;
-  --wd-zone-personal-tint: #f4e6e8;
-  --wd-zone-personal-fg:   #8a4a55;
-  --wd-zone-system-tint:   #ececec;
-  --wd-zone-system-fg:     #5a5a5a;
-  --wd-zone-config-tint:   #ece9f3;
+  /* ---- ZONE TINTS (light) — harmonized warm hues; gtd→pine, intel→brass ---- */
+  --wd-zone-atlas-tint:    #e6ecf3;
+  --wd-zone-atlas-fg:      #3f5d7a;
+  --wd-zone-gtd-tint:      #e7ede4;
+  --wd-zone-gtd-fg:        #41503c;
+  --wd-zone-intel-tint:    #f3ecdb;
+  --wd-zone-intel-fg:      #8a6a26;
+  --wd-zone-personal-tint: #f2e6e6;
+  --wd-zone-personal-fg:   #8a4a50;
+  --wd-zone-system-tint:   #ece9e4;
+  --wd-zone-system-fg:     #5a564e;
+  --wd-zone-config-tint:   #ebe7f0;
   --wd-zone-config-fg:     #5e548a;
 
   /* ---- FILES MODE (light) ---- */
-  --wd-files-tint: #e8e8e6;
-  --wd-files-fg:   #4a4a48;
+  --wd-files-tint: #e9e7e2;
+  --wd-files-fg:   #4a4844;
 
-  /* ---- TEXT (delegate to Obsidian native, with light fallbacks) ---- */
-  --wd-text-primary:   var(--text-normal, #1a1a1a);
-  --wd-text-secondary: var(--text-muted,  #5a5a5a);
-  --wd-text-tertiary:  var(--text-faint,  #7a7a7a);
+  /* ---- TEXT (direct values) ----
+     Must NOT reference --text-normal/-muted/-faint: those are derived from
+     --color-base-* which we reassign to these very tokens, creating a cycle
+     that resolves to invalid (→ black text). Black reads fine on the cream
+     light surface but is invisible on dark — the dark-mode breakage. */
+  --wd-text-primary:   #1a1a1a;
+  --wd-text-secondary: #5a5a5a;
+  --wd-text-tertiary:  #7a7a7a;
 
   /* ---- TYPOGRAPHY STACKS ----
      Font files are vendored by plugins (workdesk-surface loads DM Sans,
@@ -188,31 +196,33 @@
   --wd-surface-row-hover:   #2c2823;
   --wd-surface-row-active:  #36312a;
 
-  /* ACCENT */
-  --wd-accent-slate: #8a9aa8;
+  /* ACCENT (dark) — lighter slate-blue, same family as the light #4f6d8c */
+  --wd-accent-slate: #7fa6cc;
 
   /* ZONE TINTS (dark) — revised 2026-05-09 for 3:1+ contrast vs warm-dark surface */
-  --wd-zone-atlas-tint:    #3a567a;
-  --wd-zone-atlas-fg:      #b5d4f0;
-  --wd-zone-gtd-tint:      #3a5a3e;
-  --wd-zone-gtd-fg:        #b8e0bc;
-  --wd-zone-intel-tint:    #5a4628;
-  --wd-zone-intel-fg:      #e8c896;
-  --wd-zone-personal-tint: #5a3a42;
-  --wd-zone-personal-fg:   #e8b0b8;
-  --wd-zone-system-tint:   #4a4238;
-  --wd-zone-system-fg:     #c8c0b6;
-  --wd-zone-config-tint:   #3e3656;
-  --wd-zone-config-fg:     #c8bce8;
+  /* Matches the dark --ws-zone-* set in tokens.css (hero tiles, ribbon, dots)
+     so callout tints and the visible zone color agree, mirroring the light. */
+  --wd-zone-atlas-tint:    #24364a;
+  --wd-zone-atlas-fg:      #8fb6da;
+  --wd-zone-gtd-tint:      #26352a;
+  --wd-zone-gtd-fg:        #9bc89f;
+  --wd-zone-intel-tint:    #342d1d;
+  --wd-zone-intel-fg:      #d4b078;
+  --wd-zone-personal-tint: #352630;
+  --wd-zone-personal-fg:   #d6a0aa;
+  --wd-zone-system-tint:   #2f2c27;
+  --wd-zone-system-fg:     #bbb2a6;
+  --wd-zone-config-tint:   #2c2640;
+  --wd-zone-config-fg:     #b4a6d9;
 
   /* FILES MODE (dark) */
-  --wd-files-tint: #423d35;
-  --wd-files-fg:   #b8b0a4;
+  --wd-files-tint: #2c2924;
+  --wd-files-fg:   #b1a99c;
 
-  /* TEXT — dark-mode fallbacks */
-  --wd-text-primary:   var(--text-normal, #f0ece8);
-  --wd-text-secondary: var(--text-muted,  #b0a8a0);
-  --wd-text-tertiary:  var(--text-faint,  #7a726a);
+  /* TEXT — direct values (no cycle; see the light block) */
+  --wd-text-primary:   #f0ece8;
+  --wd-text-secondary: #b0a8a0;
+  --wd-text-tertiary:  #7a726a;
 }
 
 
@@ -278,9 +288,13 @@ body.theme-dark {
    with higher specificity than the body { ... } where it's derived) */
 body.theme-light,
 body.theme-dark {
+  /* Unified pane background: all panes (main + sidebars) share one ground
+     (porcelain). Cards/objects use the lighter chalk (--background-secondary-
+     alt) so they lift off the unified ground instead of every pane being a
+     slightly different shade. */
   --background-primary:        var(--wd-surface-app);
-  --background-primary-alt:    var(--wd-surface-pane);
-  --background-secondary:      var(--wd-surface-pane);
+  --background-primary-alt:    var(--wd-surface-app);
+  --background-secondary:      var(--wd-surface-app);
   --background-secondary-alt:  var(--wd-surface-card);
   --background-modifier-border:        var(--wd-surface-border-hair);
   --background-modifier-border-hover:  var(--wd-surface-border-soft);

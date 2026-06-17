@@ -6,6 +6,50 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Zone hero brand moment.** The zone pane header renders the active zone's
+  icon as a colored tile (from the zone palette) over a faint, radially-masked
+  Ledger "engineering grid" that dissolves into the surface. It's a scoped,
+  plugin-owned brand texture that never touches native Obsidian chrome.
+
+### Changed
+
+- **Terminal now uses a dedicated, purpose-built color palette (GitHub
+  Light / GitHub Dark Dimmed).** The xterm.js terminal previously derived its
+  background/foreground from the WorkDesk *brand* surface variables and used a
+  hardcoded ANSI palette, which read washed-out on the cream surface. The full
+  terminal-content palette (background, foreground, cursor, selection, and all
+  16 ANSI colors) now lives in `styles/tokens.css` as `--ws-xterm-*` tokens
+  (light + dark), so it is design-system-owned and tunable without touching
+  JS. This palette is intentionally independent of the brand palette — a
+  terminal needs proven, well-separated, legible colors. All terminal text
+  clears WCAG AA (≥4.5:1) on its background.
+- **Surface re-tuned toward the Ledger palette, the native-first way.** Grounds
+  moved to porcelain/chalk; the single Obsidian accent token was refined to a
+  slate-blue (`#4f6d8c`) and used natively everywhere — no custom per-element
+  accent overrides (the earlier graphite/pine split was reverted). Zone hues
+  were harmonized (warm; gtd→pine, intel→brass) and the active zone's color now
+  carries into the hero icon tile.
+- **Unified pane backgrounds.** All panes share one porcelain ground; cards and
+  objects use the lighter chalk so they lift off the ground, instead of every
+  pane being a slightly different shade.
+
+### Fixed
+
+- **Dim/secondary terminal text is no longer washed-out.** ANSI bright-black —
+  the color Claude Code paints "faint" output with (file-content previews,
+  line numbers, command echoes) — was too light to read on the light surface.
+  It is now pinned to a legible value in both themes.
+- **Terminal now repaints when the Obsidian theme changes.** Switching
+  light↔dark reassigned `xterm.options.theme` but never refreshed the
+  renderer, so the terminal stayed stuck in the previous palette until it was
+  reopened. `updateTheme()` now forces a repaint.
+- **Zone list no longer scrolls up behind the header.** The zone pane is now a
+  proper flex column: the hero stays pinned, only the object list scrolls, and
+  the header + grid run full-bleed to the pane edges. Object cards are no longer
+  shrunk-to-fit (which clipped their rows) by the constrained-height list.
+
 ## [1.8.2] — 2026-06-11
 
 ### Fixed

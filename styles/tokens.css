@@ -87,13 +87,13 @@
 .theme-light,
 :root {
   /* ── Zone palettes (pastel, low-sat) ──────────────────────────────── */
-  --ws-zone-atlas-bg:    #e7eef6;  --ws-zone-atlas-fg:    #4a6a8a;
-  --ws-zone-gtd-bg:      #e6efe6;  --ws-zone-gtd-fg:      #4f7a52;
-  --ws-zone-intel-bg:    #f5ecdc;  --ws-zone-intel-fg:    #8a6a2e;
-  --ws-zone-personal-bg: #f4e6e8;  --ws-zone-personal-fg: #8a4a55;
-  --ws-zone-system-bg:   #ececec;  --ws-zone-system-fg:   #5a5a5a;
-  --ws-zone-config-bg:   #ece9f3;  --ws-zone-config-fg:   #5e548a;
-  --ws-zone-files-bg:    #e8e8e6;  --ws-zone-files-fg:    #4a4a48;
+  --ws-zone-atlas-bg:    #e6ecf3;  --ws-zone-atlas-fg:    #3f5d7a;
+  --ws-zone-gtd-bg:      #e7ede4;  --ws-zone-gtd-fg:      #41503c;
+  --ws-zone-intel-bg:    #f3ecdb;  --ws-zone-intel-fg:    #8a6a26;
+  --ws-zone-personal-bg: #f2e6e6;  --ws-zone-personal-fg: #8a4a50;
+  --ws-zone-system-bg:   #ece9e4;  --ws-zone-system-fg:   #5a564e;
+  --ws-zone-config-bg:   #ebe7f0;  --ws-zone-config-fg:   #5e548a;
+  --ws-zone-files-bg:    #e9e7e2;  --ws-zone-files-fg:    #4a4844;
 
   /* ── Shadows ──────────────────────────────────────────────────────────
      Warm-tinted shadows (hue 65) settle into the cream palette instead
@@ -117,19 +117,55 @@
   --ws-term-warn:     #8a6a2e;
   --ws-term-error:    #8a4a55;
   --ws-term-caret:    #5a6b7a;
+
+  /* ── xterm.js terminal-content palette (GitHub Light) ───────────────────
+     The colors xterm.js paints the actual shell output with. Consumed by
+     getObsidianTheme() in src/vendor/workdesk-terminal. DELIBERATELY
+     independent of the WorkDesk brand palette above: a terminal needs
+     proven, well-separated, legible ANSI colors, not marketing colors.
+     Every text color clears WCAG AA (≥4.5:1) on --ws-xterm-bg — note
+     --ws-xterm-bright-black (Claude Code's "faint" color) is pinned to a
+     legible value, fixing the washed-out file-preview text. */
+  /* bg/fg grounds are warmed off pure GitHub white/charcoal so the terminal
+     sits with the warm WorkDesk surface instead of reading as a stark white
+     (or cool) rectangle. ANSI hues stay GitHub; only the grounds are warmed. */
+  --ws-xterm-bg:            #f4f1ea;
+  --ws-xterm-fg:            #24292e;
+  --ws-xterm-cursor:        #0969da;
+  --ws-xterm-cursor-fg:     #f4f1ea;
+  --ws-xterm-sel:           rgba(9, 105, 218, 0.18);
+  --ws-xterm-sel-fg:        #24292e;
+  --ws-xterm-black:         #24292e;
+  --ws-xterm-red:           #cf222e;
+  --ws-xterm-green:         #1a7f37;
+  --ws-xterm-yellow:        #8a6100;
+  --ws-xterm-blue:          #0969da;
+  --ws-xterm-magenta:       #8250df;
+  --ws-xterm-cyan:          #1b7c83;
+  --ws-xterm-white:         #6e7781;
+  --ws-xterm-bright-black:  #57606a;  /* "dim" — legible, ≥4.5:1 */
+  --ws-xterm-bright-red:    #a40e26;
+  --ws-xterm-bright-green:  #1a7f37;
+  --ws-xterm-bright-yellow: #633c01;
+  --ws-xterm-bright-blue:   #218bff;
+  --ws-xterm-bright-magenta:#8250df;
+  --ws-xterm-bright-cyan:   #3192aa;
+  --ws-xterm-bright-white:  #24292e;
 }
 
 /* ╔═══════════════════════════════════════════════════════════════════════╗
    ║ 3. WORKDESK-EXTENSION TOKENS — dark theme                              ║
    ╚═══════════════════════════════════════════════════════════════════════╝ */
 .theme-dark {
-  --ws-zone-atlas-bg:    #1e2a38;  --ws-zone-atlas-fg:    #7fa6cc;
-  --ws-zone-gtd-bg:      #1f2a20;  --ws-zone-gtd-fg:      #8eb892;
-  --ws-zone-intel-bg:    #2c241a;  --ws-zone-intel-fg:    #cca676;
-  --ws-zone-personal-bg: #2c1e22;  --ws-zone-personal-fg: #cc8a93;
-  --ws-zone-system-bg:   #2a2622;  --ws-zone-system-fg:   #a39b91;
-  --ws-zone-config-bg:   #252035;  --ws-zone-config-fg:   #a89bd0;
-  --ws-zone-files-bg:    #2a2622;  --ws-zone-files-fg:    #a8a094;
+  /* Harmonized to mirror the light zone hues; matches the dark --wd-zone-*
+     set in workdesk-surface.css. All fg-on-tile + fg-on-pane clear WCAG AA. */
+  --ws-zone-atlas-bg:    #24364a;  --ws-zone-atlas-fg:    #8fb6da;
+  --ws-zone-gtd-bg:      #26352a;  --ws-zone-gtd-fg:      #9bc89f;
+  --ws-zone-intel-bg:    #342d1d;  --ws-zone-intel-fg:    #d4b078;
+  --ws-zone-personal-bg: #352630;  --ws-zone-personal-fg: #d6a0aa;
+  --ws-zone-system-bg:   #2f2c27;  --ws-zone-system-fg:   #bbb2a6;
+  --ws-zone-config-bg:   #2c2640;  --ws-zone-config-fg:   #b4a6d9;
+  --ws-zone-files-bg:    #2c2924;  --ws-zone-files-fg:    #b1a99c;
 
   --ws-shadow-card:    0 1px 0 rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.3);
   --ws-shadow-hover:   0 1px 0 rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.4);
@@ -148,6 +184,30 @@
   --ws-term-warn:     #cca676;
   --ws-term-error:    #cc8a93;
   --ws-term-caret:    #8a9aa8;
+
+  /* ── xterm.js terminal-content palette (GitHub Dark Dimmed) ──────────── */
+  --ws-xterm-bg:            #1c1a17;
+  --ws-xterm-fg:            #d8d2c6;
+  --ws-xterm-cursor:        #6cb6ff;
+  --ws-xterm-cursor-fg:     #1c1a17;
+  --ws-xterm-sel:           rgba(108, 182, 255, 0.22);
+  --ws-xterm-sel-fg:        #e6e0d6;
+  --ws-xterm-black:         #4a463f;
+  --ws-xterm-red:           #f47067;
+  --ws-xterm-green:         #6bc46d;
+  --ws-xterm-yellow:        #daaa3f;
+  --ws-xterm-blue:          #6cb6ff;
+  --ws-xterm-magenta:       #dcbdfb;
+  --ws-xterm-cyan:          #76e3ea;
+  --ws-xterm-white:         #d8d2c6;
+  --ws-xterm-bright-black:  #8a847e;  /* "dim" — legible, ≥4.5:1 */
+  --ws-xterm-bright-red:    #ff938a;
+  --ws-xterm-bright-green:  #8ddb8c;
+  --ws-xterm-bright-yellow: #e0c890;
+  --ws-xterm-bright-blue:   #96d0ff;
+  --ws-xterm-bright-magenta:#eecdff;
+  --ws-xterm-bright-cyan:   #b3f0ff;
+  --ws-xterm-bright-white:  #cdd9e5;
 }
 
 /* ╔═══════════════════════════════════════════════════════════════════════╗

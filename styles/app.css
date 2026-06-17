@@ -333,20 +333,62 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
 }
 .pane-hero .hero-collapse:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
 
+/* Zone pane scroll container — make the view-content a flex column so the
+   hero stays pinned and only the object-list scrolls (fixes the list scrolling
+   up behind the header). padding:0 removes the default view-content inset so
+   the hero + its grid run full-bleed to the pane edges. */
+.workdesk-zone-pane.workdesk-zone-pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+}
+
 /* Workdesk zone hero — oversized glyph + zone name + per-zone management
    label. Replaces the wrap-prone single-line layout from the old design. */
 .workdesk-os-zone-hero {
+  flex: 0 0 auto;
   align-items: center;
   gap: var(--ws-space-4);
   padding: var(--ws-space-6) var(--ws-space-5) var(--ws-space-4);
+  position: relative;
+  overflow: hidden;
 }
+/* Scoped brand moment — a faint Ledger engineering grid that dissolves into
+   the surface behind the hero. Plugin-owned markup, neutral hairlines; never
+   touches native chrome and doesn't compete with the accent. */
+.workdesk-os-zone-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    /* Horizontal lines sit at 38px within each cell (not 0) so none lands on
+       the top edge next to the tab-header border — the only change vs the
+       original grid. Vertical lines and the mask are untouched. */
+    repeating-linear-gradient(0deg,  transparent 0 38px, color-mix(in srgb, var(--text-normal) 5%, transparent) 38px 39px, transparent 39px 46px),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--text-normal) 5%, transparent) 0 1px, transparent 1px 46px);
+  -webkit-mask-image: radial-gradient(150% 130% at 22% 40%, #000 0%, rgba(0,0,0,0.3) 48%, transparent 72%);
+          mask-image: radial-gradient(150% 130% at 22% 40%, #000 0%, rgba(0,0,0,0.3) 48%, transparent 72%);
+  pointer-events: none;
+  z-index: 0;
+}
+/* Variant C — zone-colored glyph in a tinted tile; title stays ink. The tile
+   tint/fg come from --zone-bg/--zone-fg set on the hero by ZoneView. */
 .workdesk-os-zone-hero-icon {
+  position: relative;
+  z-index: 1;
   flex-shrink: 0;
-  width: 44px; height: 44px;
+  width: 48px; height: 48px;
   display: grid; place-items: center;
-  color: var(--text-muted);
+  border-radius: 8px;
+  background: var(--zone-bg, var(--background-modifier-hover));
+  color: var(--zone-fg, var(--text-muted));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--zone-fg, var(--text-muted)) 14%, transparent);
 }
 .workdesk-os-zone-hero-meta {
+  position: relative;
+  z-index: 1;
   min-width: 0;
   display: flex; flex-direction: column;
 }
@@ -365,19 +407,17 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   letter-spacing: 0.01em;
 }
 
-/* Initial-letter chip on object cards — replaces the SVG icon. Pastel
-   surface uses the same --background-secondary so the cards keep their
-   calm tone. */
-.obj-initial {
-  width: 32px; height: 32px;
-  border-radius: 50%;
+/* Folder-row glyphs — a rotating chevron + a folder icon (file-explorer feel),
+   replacing the old initial-letter chip. */
+.obj-chev {
+  color: var(--text-faint);
   display: grid; place-items: center;
-  font-family: var(--ws-font-display);
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  transition: transform var(--ws-dur-fast) var(--ws-ease-out);
+}
+.obj:not(.collapsed) .obj-chev { transform: rotate(90deg); }
+.obj-folder {
   color: var(--text-muted);
-  background: var(--background-secondary);
+  display: grid; place-items: center;
 }
 
 /* Empty-folder placeholder — shown when an expanded card has zero children.
@@ -422,8 +462,11 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
   flex: 1;
 }
 .obj {
-  background: var(--background-primary);
-  border-radius: var(--ws-radius-card);
+  flex-shrink: 0;   /* the object-list is a flex column with a constrained
+                       height now (pinned hero + scrolling list); without this
+                       the cards shrink to fit and clip their rows. */
+  background: var(--background-secondary-alt);
+  border-radius: 6px;
   box-shadow: var(--ws-shadow-card);
   overflow: hidden;
   transition: box-shadow var(--ws-dur-base) var(--ws-ease-out);
@@ -431,21 +474,12 @@ body.focus-on .breadcrumb:hover { opacity: 1; }
 .obj:hover { box-shadow: var(--ws-shadow-hover); }
 .obj-row {
   display: grid;
-  grid-template-columns: 36px 1fr auto;
+  grid-template-columns: 16px 22px 1fr auto;
   align-items: center;
-  gap: var(--ws-space-3);
-  padding: 11px var(--ws-space-3);
+  gap: var(--ws-space-2);
+  padding: 9px var(--ws-space-3);
   cursor: pointer;
   user-select: none;
-}
-.obj-icon {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  display: grid; place-items: center;
-  font-size: var(--ws-fs-14);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  text-transform: uppercase;
 }
 .obj-text { min-width: 0; }
 .obj-title { font-size: var(--ws-fs-14); font-weight: 500; line-height: 1.25; color: var(--text-normal); }

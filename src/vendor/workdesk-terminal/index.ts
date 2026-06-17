@@ -113,12 +113,15 @@ function getObsidianTheme(): Record<string, string> {
   const get = (v: string) => s.getPropertyValue(v).trim();
   const isDark = document.body.classList.contains("theme-dark");
 
-  const bg = get("--background-primary") || (isDark ? "#1e1e1e" : "#ffffff");
-  const fg = get("--text-normal") || (isDark ? "#dcddde" : "#1a1a1a");
-  const accent = get("--interactive-accent") || (isDark ? "#7f6df2" : "#705dcf");
-  const muted = get("--text-muted") || (isDark ? "#999" : "#666");
+  // WorkDesk owns the terminal-content palette via --ws-xterm-* tokens
+  // (styles/tokens.css, light + dark) — deliberately independent of the
+  // WorkDesk *brand* palette: a terminal wants proven, well-separated,
+  // legible ANSI colors, not marketing colors. If a token is absent we fall
+  // back to the previous Obsidian-derived bg/fg + this built-in ANSI set.
+  const bgFallback = get("--background-primary") || (isDark ? "#1e1e1e" : "#ffffff");
+  const tok = (name: string, fallback: string): string => get(name) || fallback;
 
-  // ANSI palette: two variants for dark and light backgrounds
+  // ANSI palette: two variants for dark and light backgrounds (fallback only)
   const ansi = isDark
     ? {
         black:         "#1a1a2e",
@@ -158,13 +161,28 @@ function getObsidianTheme(): Record<string, string> {
       };
 
   return {
-    background: bg,
-    foreground: fg,
-    cursor: muted,
-    cursorAccent: bg,
-    selectionBackground: isDark ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.15)",
-    selectionForeground: isDark ? "#f0f0f0" : "#1a1a1a",
-    ...ansi,
+    background:          tok("--ws-xterm-bg", bgFallback),
+    foreground:          tok("--ws-xterm-fg", get("--text-normal") || (isDark ? "#dcddde" : "#1a1a1a")),
+    cursor:              tok("--ws-xterm-cursor", get("--text-muted") || (isDark ? "#999999" : "#666666")),
+    cursorAccent:        tok("--ws-xterm-cursor-fg", bgFallback),
+    selectionBackground: tok("--ws-xterm-sel", isDark ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.15)"),
+    selectionForeground: tok("--ws-xterm-sel-fg", isDark ? "#f0f0f0" : "#1a1a1a"),
+    black:         tok("--ws-xterm-black", ansi.black),
+    red:           tok("--ws-xterm-red", ansi.red),
+    green:         tok("--ws-xterm-green", ansi.green),
+    yellow:        tok("--ws-xterm-yellow", ansi.yellow),
+    blue:          tok("--ws-xterm-blue", ansi.blue),
+    magenta:       tok("--ws-xterm-magenta", ansi.magenta),
+    cyan:          tok("--ws-xterm-cyan", ansi.cyan),
+    white:         tok("--ws-xterm-white", ansi.white),
+    brightBlack:   tok("--ws-xterm-bright-black", ansi.brightBlack),
+    brightRed:     tok("--ws-xterm-bright-red", ansi.brightRed),
+    brightGreen:   tok("--ws-xterm-bright-green", ansi.brightGreen),
+    brightYellow:  tok("--ws-xterm-bright-yellow", ansi.brightYellow),
+    brightBlue:    tok("--ws-xterm-bright-blue", ansi.brightBlue),
+    brightMagenta: tok("--ws-xterm-bright-magenta", ansi.brightMagenta),
+    brightCyan:    tok("--ws-xterm-bright-cyan", ansi.brightCyan),
+    brightWhite:   tok("--ws-xterm-bright-white", ansi.brightWhite),
   };
 }
 
@@ -1086,6 +1104,10 @@ class TerminalSession {
 
   updateTheme() {
     this.terminal.options.theme = getObsidianTheme();
+    // xterm.js does not repaint already-rendered cells when options.theme is
+    // reassigned — without an explicit refresh, switching Obsidian light<->dark
+    // leaves the terminal stuck in the previous palette until it's reopened.
+    this.terminal.refresh(0, this.terminal.rows - 1);
   }
 
   addBookmark(label?: string) { this.bookmarkManager?.addBookmark(label); }

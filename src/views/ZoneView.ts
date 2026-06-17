@@ -129,11 +129,15 @@ export class ZoneView extends ItemView {
   private renderHero(icon: Zone['icon'] | undefined, name: string | undefined): HTMLElement {
     const hero = createDiv();
     hero.className = 'pane-hero workdesk-os-zone-hero';
+    // Variant C: feed the active zone's palette into the hero so the icon
+    // renders as a colored tile (consumed by .workdesk-os-zone-hero-icon).
+    hero.style.setProperty('--zone-bg', `var(--ws-zone-${this.activeZone}-bg)`);
+    hero.style.setProperty('--zone-fg', `var(--ws-zone-${this.activeZone}-fg)`);
 
     if (icon) {
       const glyph = createDiv();
       glyph.className = 'workdesk-os-zone-hero-icon';
-      glyph.appendChild(wsSvgEl(icon, 40));
+      glyph.appendChild(wsSvgEl(icon, 32));
       hero.appendChild(glyph);
     }
 
