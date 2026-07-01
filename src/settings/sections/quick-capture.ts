@@ -10,15 +10,15 @@
 // behavior is identical regardless of source — only the populate flow
 // differs.
 
-import { Setting, SecretComponent } from 'obsidian';
+import { Platform, Setting, SecretComponent } from 'obsidian';
 import type WorkdeskOSPlugin from '../../main';
-import { fetchInfisicalSecret } from '../../services/infisical-fetch';
 import { showToast } from '../../components/Toast';
 
 const STT_KEY_NAME = 'stt-groq';
 
 export async function mountQuickCaptureSection(containerEl: HTMLElement, plugin: WorkdeskOSPlugin): Promise<void> {
   new Setting(containerEl).setName('Quick capture').setHeading();
+  const showInfisicalControls = Platform.isDesktopApp;
 
   new Setting(containerEl)
     // eslint-disable-next-line obsidianmd/ui/sentence-case -- STT is an acronym.
@@ -62,21 +62,23 @@ export async function mountQuickCaptureSection(containerEl: HTMLElement, plugin:
         });
     });
 
-  new Setting(containerEl)
-    .setName('Key source')
-    // eslint-disable-next-line obsidianmd/ui/sentence-case -- STT, CLI are acronyms; Infisical is a proper noun.
-    .setDesc('Where the STT API key comes from. Direct = paste below. Infisical = pull from the CLI on demand and cache.')
-    .addDropdown((dropdown) => {
-      dropdown
-        .addOption('direct', 'Direct input')
-        .addOption('infisical', 'Infisical')
-        .setValue(plugin.settings.capture.keySource)
-        .onChange((value) => {
-          plugin.settings.capture.keySource = value as 'direct' | 'infisical';
-          void plugin.saveSettings();
-          applyKeySourceVisibility(containerEl, value as 'direct' | 'infisical');
-        });
-    });
+  if (showInfisicalControls) {
+    new Setting(containerEl)
+      .setName('Key source')
+      // eslint-disable-next-line obsidianmd/ui/sentence-case -- STT, CLI are acronyms; Infisical is a proper noun.
+      .setDesc('Where the STT API key comes from. Direct = paste below. Infisical = pull from the CLI on demand and cache.')
+      .addDropdown((dropdown) => {
+        dropdown
+          .addOption('direct', 'Direct input')
+          .addOption('infisical', 'Infisical')
+          .setValue(plugin.settings.capture.keySource)
+          .onChange((value) => {
+            plugin.settings.capture.keySource = value as 'direct' | 'infisical';
+            void plugin.saveSettings();
+            applyKeySourceVisibility(containerEl, value as 'direct' | 'infisical');
+          });
+      });
+  }
 
   const directRow = new Setting(containerEl)
     // eslint-disable-next-line obsidianmd/ui/sentence-case -- STT is an acronym.
@@ -95,6 +97,8 @@ export async function mountQuickCaptureSection(containerEl: HTMLElement, plugin:
         input.setAttribute('aria-label', 'STT API key');
       }
     });
+  if (!showInfisicalControls) return;
+
   directRow.settingEl.dataset.keySource = 'direct';
 
   const projectIdRow = new Setting(containerEl)
@@ -146,6 +150,7 @@ export async function mountQuickCaptureSection(containerEl: HTMLElement, plugin:
       btn.setButtonText('Pull now').onClick(async () => {
         btn.setDisabled(true);
         try {
+          const { fetchInfisicalSecret } = await import('../../services/infisical-fetch');
           const value = await fetchInfisicalSecret({
             projectId: plugin.settings.capture.infisical.projectId,
             secretName: plugin.settings.capture.infisical.secretName,

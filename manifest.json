@@ -6,5 +6,5 @@
   "description": "Curated visual surface for WorkdeskOS vaults — zones, command palette, quick capture, and a Claude Code terminal.",
   "author": "Benali",
   "authorUrl": "https://github.com/BenaliHQ/workdesk-os",
-  "isDesktopOnly": true
+  "isDesktopOnly": false
 }

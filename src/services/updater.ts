@@ -8,10 +8,10 @@
 // to bypass CORS (Electron main-process fetch) and to follow GitHub's
 // 302-to-S3 redirects on asset downloads.
 
-import { requestUrl, type Plugin } from 'obsidian';
+import { Platform, requestUrl, type Plugin } from 'obsidian';
 import { showToast } from '../components/Toast';
 import { UpdateReadyModal } from '../modals/UpdateReady';
-import { findRecentAiSessions, formatResumeNote } from './ai-sessions';
+import type { AiSession, ResumeNote } from './ai-sessions';
 import { VIEW_TYPE_WORKDESK_TERMINAL } from '../constants';
 
 const INBOX_DIR = 'gtd/inbox';
@@ -152,11 +152,19 @@ export async function checkAndUpdate(plugin: Plugin): Promise<void> {
   //    recent Claude Code sessions. If any sessions exist, write a resume
   //    note to gtd/inbox/ so the operator can paste the commands into
   //    fresh terminals after reload.
-  const terminalCount = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_WORKDESK_TERMINAL).length;
-  const sessions = findRecentAiSessions();
+  const terminalCount = Platform.isDesktopApp
+    ? plugin.app.workspace.getLeavesOfType(VIEW_TYPE_WORKDESK_TERMINAL).length
+    : 0;
+  let sessions: AiSession[] = [];
+  let formatResume: ((sessions: AiSession[], fromVersion: string, toVersion: string) => ResumeNote) | null = null;
+  if (Platform.isDesktopApp) {
+    const aiSessions = await import('./ai-sessions');
+    sessions = aiSessions.findRecentAiSessions();
+    formatResume = aiSessions.formatResumeNote;
+  }
   let resumeNotePath: string | null = null;
-  if (sessions.length > 0) {
-    const { filename, content } = formatResumeNote(sessions, currentVersion, latestVersion);
+  if (sessions.length > 0 && formatResume) {
+    const { filename, content } = formatResume(sessions, currentVersion, latestVersion);
     const adapter = plugin.app.vault.adapter;
     try {
       if (!(await adapter.exists(INBOX_DIR))) {

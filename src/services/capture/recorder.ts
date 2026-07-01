@@ -44,6 +44,17 @@ export interface RecordingResult {
   mimeType: string;
 }
 
+export function pickSupportedMimeType(preferred?: string): string | undefined {
+  const candidates = [preferred, 'audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/aac']
+    .filter((t): t is string => !!t);
+  // eslint-disable-next-line obsidianmd/prefer-active-doc -- MediaRecorder lives on globalThis; activeDocument does not expose constructors.
+  const MR = (globalThis as unknown as { MediaRecorder?: typeof MediaRecorder }).MediaRecorder;
+  const isSupported = MR && typeof MR.isTypeSupported === 'function' ? MR.isTypeSupported.bind(MR) : null;
+  if (!isSupported) return preferred;
+  for (const t of candidates) if (isSupported(t)) return t;
+  return undefined;
+}
+
 export class AudioRecorder {
   private factory: RecorderFactory;
   private permission: PermissionGate;
@@ -141,7 +152,8 @@ function defaultRecorderFactory(): RecorderFactory {
       // eslint-disable-next-line obsidianmd/prefer-active-doc -- MediaRecorder lives on globalThis; activeDocument does not expose constructors.
       const ctor = (globalThis as unknown as { MediaRecorder?: typeof MediaRecorder }).MediaRecorder;
       if (!ctor) throw new Error('MediaRecorder not available in this environment');
-      const r = new ctor(stream, mimeType ? { mimeType } : undefined);
+      const supportedMimeType = pickSupportedMimeType(mimeType);
+      const r = supportedMimeType ? new ctor(stream, { mimeType: supportedMimeType }) : new ctor(stream);
       return wrapMediaRecorder(r);
     },
   };

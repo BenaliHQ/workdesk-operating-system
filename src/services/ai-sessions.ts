@@ -13,17 +13,57 @@
 // already present — no per-file metadata read needed. `codex resume <UUID>`
 // is portable across cwds, so no `cd` prefix is required in the command.
 
-import { existsSync, openSync, readSync, closeSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { requireDesktopModule } from './desktop-node';
 
-const HOME = homedir();
-const CLAUDE_PROJECTS_DIR = join(HOME, '.claude', 'projects');
-const CODEX_SESSION_INDEX = join(HOME, '.codex', 'session_index.jsonl');
 const MAX_PER_AGENT = 8;
 const RECENT_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h
 const CLAUDE_HEADER_READ_BYTES = 256 * 1024; // 256KB — enough to reach `aiTitle` in typical sessions
 const LABEL_MAX_LEN = 80;
+
+interface NodeFs {
+  existsSync(path: string): boolean;
+  openSync(path: string, flags: 'r'): number;
+  readSync(fd: number, buffer: Uint8Array, offset: number, length: number, position: number): number;
+  closeSync(fd: number): void;
+  readdirSync(path: string): string[];
+  readFileSync(path: string, encoding: 'utf8'): string;
+  statSync(path: string): { isDirectory(): boolean; mtimeMs: number };
+}
+
+interface NodeOs {
+  homedir(): string;
+}
+
+interface NodePath {
+  join(...parts: string[]): string;
+}
+
+let fsMod: NodeFs | null = null;
+let osMod: NodeOs | null = null;
+let pathMod: NodePath | null = null;
+
+function nodeFs(): NodeFs {
+  fsMod ??= requireDesktopModule<NodeFs>('node:fs');
+  return fsMod;
+}
+
+function nodeOs(): NodeOs {
+  osMod ??= requireDesktopModule<NodeOs>('node:os');
+  return osMod;
+}
+
+function nodePath(): NodePath {
+  pathMod ??= requireDesktopModule<NodePath>('node:path');
+  return pathMod;
+}
+
+function claudeProjectsDir(): string {
+  return nodePath().join(nodeOs().homedir(), '.claude', 'projects');
+}
+
+function codexSessionIndex(): string {
+  return nodePath().join(nodeOs().homedir(), '.codex', 'session_index.jsonl');
+}
 
 export type AiAgent = 'claude' | 'codex';
 
@@ -78,15 +118,16 @@ function extractTextFromMessage(message: unknown): string | null {
 
 function readClaudeSessionMetadata(filePath: string): ClaudeSessionMeta {
   let fd: number;
+  const fs = nodeFs();
   try {
-    fd = openSync(filePath, 'r');
+    fd = fs.openSync(filePath, 'r');
   } catch {
     return { cwd: null, label: null };
   }
   try {
-    const buf = Buffer.alloc(CLAUDE_HEADER_READ_BYTES);
-    const n = readSync(fd, buf, 0, buf.length, 0);
-    const text = buf.subarray(0, n).toString('utf8');
+    const buf = new Uint8Array(CLAUDE_HEADER_READ_BYTES);
+    const n = fs.readSync(fd, buf, 0, buf.length, 0);
+    const text = new TextDecoder().decode(buf.subarray(0, n));
 
     let cwd: string | null = null;
     let aiTitle: string | null = null;
@@ -115,7 +156,7 @@ function readClaudeSessionMetadata(filePath: string): ClaudeSessionMeta {
     return { cwd, label: label ? cleanLabel(label) : null };
   } finally {
     try {
-      closeSync(fd);
+      fs.closeSync(fd);
     } catch {
       // best-effort close
     }
@@ -123,7 +164,10 @@ function readClaudeSessionMetadata(filePath: string): ClaudeSessionMeta {
 }
 
 function findRecentClaudeSessions(): AiSession[] {
-  if (!existsSync(CLAUDE_PROJECTS_DIR)) return [];
+  const fs = nodeFs();
+  const path = nodePath();
+  const projectsDir = claudeProjectsDir();
+  if (!fs.existsSync(projectsDir)) return [];
   const cutoff = Date.now() - RECENT_WINDOW_MS;
 
   interface Candidate {
@@ -135,38 +179,38 @@ function findRecentClaudeSessions(): AiSession[] {
 
   let projectDirs: string[];
   try {
-    projectDirs = readdirSync(CLAUDE_PROJECTS_DIR);
+    projectDirs = fs.readdirSync(projectsDir);
   } catch {
     return [];
   }
 
   for (const projectDir of projectDirs) {
-    const full = join(CLAUDE_PROJECTS_DIR, projectDir);
+    const full = path.join(projectsDir, projectDir);
     try {
-      if (!statSync(full).isDirectory()) continue;
+      if (!fs.statSync(full).isDirectory()) continue;
     } catch {
       continue;
     }
 
     let files: string[];
     try {
-      files = readdirSync(full);
+      files = fs.readdirSync(full);
     } catch {
       continue;
     }
 
     for (const file of files) {
       if (!file.endsWith('.jsonl')) continue;
-      const path = join(full, file);
+      const filePath = path.join(full, file);
       let fst;
       try {
-        fst = statSync(path);
+        fst = fs.statSync(filePath);
       } catch {
         continue;
       }
       if (fst.mtimeMs < cutoff) continue;
       candidates.push({
-        path,
+        path: filePath,
         sessionId: file.replace(/\.jsonl$/, ''),
         mtime: fst.mtimeMs,
       });
@@ -188,12 +232,14 @@ function findRecentClaudeSessions(): AiSession[] {
 // ──────── Codex discovery ────────
 
 function findRecentCodexSessions(): AiSession[] {
-  if (!existsSync(CODEX_SESSION_INDEX)) return [];
+  const fs = nodeFs();
+  const sessionIndex = codexSessionIndex();
+  if (!fs.existsSync(sessionIndex)) return [];
   const cutoff = Date.now() - RECENT_WINDOW_MS;
 
   let text: string;
   try {
-    text = readFileSync(CODEX_SESSION_INDEX, 'utf8');
+    text = fs.readFileSync(sessionIndex, 'utf8');
   } catch {
     return [];
   }

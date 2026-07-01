@@ -6,6 +6,13 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Mobile/iOS support.** The plugin can load on Obsidian mobile with voice
+  capture and the zones surface backed by the real vault tree, while
+  desktop-only features (terminal, Claude Code session discovery, and
+  Infisical pull) are gated off on mobile.
+
 ## [1.9.0] — 2026-06-17
 
 ### Added

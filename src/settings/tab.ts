@@ -3,7 +3,7 @@
 // with `new Setting(containerEl)` so spacing, alignment, and theme styling
 // come from Obsidian's stylesheet, not custom CSS.
 
-import { PluginSettingTab, type App } from 'obsidian';
+import { Platform, PluginSettingTab, type App } from 'obsidian';
 import type WorkdeskOSPlugin from '../main';
 import { mountGeneralSection } from './sections/general';
 import { mountZonesSection } from './sections/zones';
@@ -29,9 +29,9 @@ export class WorkdeskSettingTab extends PluginSettingTab {
 
     mountGeneralSection(containerEl, this.plugin);
     mountZonesSection(containerEl, this.plugin);
-    mountTerminalSection(containerEl, this.plugin);
+    if (Platform.isDesktopApp) mountTerminalSection(containerEl, this.plugin);
     void mountQuickCaptureSection(containerEl, this.plugin);
-    mountClaudeCodeSection(containerEl, this.plugin);
+    if (Platform.isDesktopApp) mountClaudeCodeSection(containerEl, this.plugin);
     mountTemplatesSection(containerEl, this.plugin);
     mountAppearanceSection(containerEl, this.plugin);
     mountAboutSection(containerEl, this.plugin);

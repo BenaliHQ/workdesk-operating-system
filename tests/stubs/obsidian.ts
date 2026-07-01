@@ -240,6 +240,10 @@ export class Vault {
 export class Notice { constructor(_msg: string, _ms?: number) {} }
 export function setIcon(_el: HTMLElement, _name: string): void {}
 
+export const Platform = {
+  isDesktopApp: true,
+};
+
 // FileSystemAdapter — desktop adapter type. Real Obsidian narrows
 // app.vault.adapter via `instanceof FileSystemAdapter`; the stub lets that
 // guard fall through to the test fallback path.
