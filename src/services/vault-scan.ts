@@ -34,7 +34,7 @@ export function obsidianFsAdapter(app: App, manifestCache?: Map<string, string>)
       const k = norm(path);
       if (k === '') return true;
       if (manifestCache?.has(k)) return true;
-      return app.vault.getAbstractFileByPath(k) != null;
+      return app.vault.getAbstractFileByPath(k) instanceof TFolder;
     },
     read(path) {
       const k = norm(path);

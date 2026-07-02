@@ -430,8 +430,8 @@ export default class WorkdeskOSPlugin extends Plugin {
 
       this.zones = scanZones(obsidianFsAdapter(this.app, await this.loadMobileManifestCache()), {
         vaultRoot: '',
-        manifestPath: this.settings.zones.manifestPath,
-        iconPath: this.settings.zones.iconManifestPath,
+        manifestPath: this.settings.zones.manifestPath || 'config/zones.yaml',
+        iconPath: this.settings.zones.iconManifestPath || 'config/object-icons.yaml',
         pluginRoot: '',
         zoneFolders: this.settings.zones.folders,
       }) as unknown as Record<string, Zone>;
@@ -641,7 +641,12 @@ export default class WorkdeskOSPlugin extends Plugin {
 
   async triageCaptureInbox(): Promise<void> {
     await this.revealZone('gtd');
-    showToast('Switched to gtd · run /triage in terminal to process inbox', 'info');
+    showToast(
+      Platform.isDesktopApp
+        ? 'Switched to gtd · run /triage in terminal to process inbox'
+        : 'Switched to gtd · process the inbox from a desktop session',
+      'info',
+    );
   }
 
   async toggleVoiceMemo(): Promise<void> {

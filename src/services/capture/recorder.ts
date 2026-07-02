@@ -50,7 +50,7 @@ export function pickSupportedMimeType(preferred?: string): string | undefined {
   // eslint-disable-next-line obsidianmd/prefer-active-doc -- MediaRecorder lives on globalThis; activeDocument does not expose constructors.
   const MR = (globalThis as unknown as { MediaRecorder?: typeof MediaRecorder }).MediaRecorder;
   const isSupported = MR && typeof MR.isTypeSupported === 'function' ? MR.isTypeSupported.bind(MR) : null;
-  if (!isSupported) return preferred;
+  if (!isSupported) return undefined;
   for (const t of candidates) if (isSupported(t)) return t;
   return undefined;
 }
@@ -153,7 +153,16 @@ function defaultRecorderFactory(): RecorderFactory {
       const ctor = (globalThis as unknown as { MediaRecorder?: typeof MediaRecorder }).MediaRecorder;
       if (!ctor) throw new Error('MediaRecorder not available in this environment');
       const supportedMimeType = pickSupportedMimeType(mimeType);
-      const r = supportedMimeType ? new ctor(stream, { mimeType: supportedMimeType }) : new ctor(stream);
+      let r: MediaRecorder;
+      if (supportedMimeType) {
+        try {
+          r = new ctor(stream, { mimeType: supportedMimeType });
+        } catch {
+          r = new ctor(stream);
+        }
+      } else {
+        r = new ctor(stream);
+      }
       return wrapMediaRecorder(r);
     },
   };

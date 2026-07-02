@@ -243,6 +243,9 @@ export function setIcon(_el: HTMLElement, _name: string): void {}
 export const Platform = {
   isDesktopApp: true,
 };
+export function __setPlatformDesktop(isDesktopApp: boolean): void {
+  Platform.isDesktopApp = isDesktopApp;
+}
 
 // FileSystemAdapter — desktop adapter type. Real Obsidian narrows
 // app.vault.adapter via `instanceof FileSystemAdapter`; the stub lets that
