@@ -1,5 +1,6 @@
-// Zone card redesign — covers the post-task-1-through-6 contract:
-//   • Card shows initial letter (first char of title, uppercased) — no SVG icon
+// Zone card redesign — covers the current folder-style row contract:
+//   • Card shows a folder glyph in .obj-folder + a rotating chevron in .obj-chev
+//     (the June 2026 "folder-style zone rows" design; no initial-letter chip)
 //   • Card has no sub/preview text
 //   • Card has no plus buttons
 //   • Right-click on a card builds a Menu with "New note" + "New folder"
@@ -27,17 +28,21 @@ function makeObj(over: Partial<ZoneObject> = {}): ZoneObject {
 }
 
 describe('ZoneCard · minimal layout', () => {
-  it('renders the first-letter initial in .obj-initial, uppercased', () => {
+  it('renders a folder glyph in .obj-folder, not an initial-letter chip', () => {
     const card = renderZoneCard({ zoneId: 'atlas', obj: makeObj({ title: 'people' }) });
     document.body.appendChild(card);
-    const initial = card.querySelector('.obj-initial') as HTMLElement;
-    expect(initial).not.toBeNull();
-    expect(initial.textContent).toBe('P');
+    const folder = card.querySelector('.obj-folder') as HTMLElement;
+    expect(folder).not.toBeNull();
+    expect(folder.firstElementChild).not.toBeNull(); // the folder SVG glyph
+    expect(card.querySelector('.obj-initial')).toBeNull();
   });
 
-  it('uses · when the title is empty', () => {
+  it('renders a rotating chevron in .obj-chev regardless of title', () => {
     const card = renderZoneCard({ zoneId: 'atlas', obj: makeObj({ title: '' }) });
-    expect(card.querySelector('.obj-initial')?.textContent).toBe('·');
+    const chev = card.querySelector('.obj-chev') as HTMLElement;
+    expect(chev).not.toBeNull();
+    expect(chev.firstElementChild).not.toBeNull(); // the chevron SVG glyph
+    expect(card.querySelector('.obj-folder')).not.toBeNull();
   });
 
   it('does not render an obj-sub element', () => {

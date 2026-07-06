@@ -7,9 +7,9 @@
 // Production runs on Obsidian's Vault adapter; unit tests pass a Node fs
 // adapter so the scanner is testable without a live workspace.
 
-import * as fsNs from 'node:fs';
-import { parseYaml } from 'obsidian';
+import { parseYaml, TFolder, type App } from 'obsidian';
 import type { Zone, ZoneId, ZoneObject, TreeNode, IconName } from '../types';
+import { requireDesktopModule } from './desktop-node';
 
 // Fixture YAML is inlined into main.js at build time via esbuild's text
 // loader (see esbuild.config.mjs `loader: { '.yaml': 'text' }`). The
@@ -25,6 +25,30 @@ export interface FsAdapter {
   exists(path: string): boolean;
   read(path: string): string;
   list(path: string): Array<{ name: string; isDir: boolean }>;
+}
+
+export function obsidianFsAdapter(app: App, manifestCache?: Map<string, string>): FsAdapter {
+  const norm = (p: string): string => p.replace(/^\/+/, '');
+  return {
+    exists(path) {
+      const k = norm(path);
+      if (k === '') return true;
+      if (manifestCache?.has(k)) return true;
+      return app.vault.getAbstractFileByPath(k) instanceof TFolder;
+    },
+    read(path) {
+      const k = norm(path);
+      const cached = manifestCache?.get(k);
+      if (cached != null) return cached;
+      throw new Error(`obsidianFsAdapter.read: ${k} not pre-cached`);
+    },
+    list(path) {
+      const k = norm(path);
+      const f = k === '' ? app.vault.getRoot() : app.vault.getAbstractFileByPath(k);
+      if (!(f instanceof TFolder)) return [];
+      return f.children.map((c) => ({ name: c.name, isDir: c instanceof TFolder }));
+    },
+  };
 }
 
 export interface ZoneManifest {
@@ -280,6 +304,11 @@ export function scanFilesView(fs: FsAdapter, opts: { vaultRoot: string }): TreeN
 // ───────── Node fs adapter (tests + dev) ─────────
 
 export function nodeFsAdapter(): FsAdapter {
+  const fsNs = requireDesktopModule<{
+    existsSync(path: string): boolean;
+    readFileSync(path: string, encoding: 'utf8'): string;
+    readdirSync(path: string, options: { withFileTypes: true }): Array<{ name: string; isDirectory(): boolean }>;
+  }>('node:fs');
   return {
     exists: (p) => fsNs.existsSync(p),
     read: (p) => fsNs.readFileSync(p, 'utf8'),

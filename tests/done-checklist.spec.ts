@@ -157,7 +157,7 @@ const CLASSIFICATIONS: Record<string, Classification> = {
     assert: () => {
       if (!exists('src/components/ZoneCard.ts')) return 'ZoneCard missing';
       const css = readFile('styles/app.css');
-      if (!css.includes('.obj-icon')) return 'app.css missing .obj-icon';
+      if (!css.includes('.obj-folder')) return 'app.css missing .obj-folder';
       return null;
     },
   },

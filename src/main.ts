@@ -1,4 +1,4 @@
-import { Plugin, TFile, TFolder, addIcon } from 'obsidian';
+import { Plugin, TFile, TFolder, addIcon, Platform } from 'obsidian';
 import { FileSystemAdapter } from 'obsidian';
 import {
   COMMAND_ID_PREFIX,
@@ -34,7 +34,7 @@ import { getProvider } from './services/stt/provider';
 import { installStatusObserver } from './services/terminal-status';
 import { installGlobalToast, showToast, clearToast } from './components/Toast';
 import { wsSvg } from './icons';
-import { scanZones, scanFilesView, nodeFsAdapter } from './services/vault-scan';
+import { scanZones, scanFilesView, nodeFsAdapter, obsidianFsAdapter } from './services/vault-scan';
 import type { IconName, Zone, ZoneId } from './types';
 
 // 12 plugin surfaces in spec order — 7 zone icons + Today + Terminal + Focus
@@ -97,15 +97,17 @@ export default class WorkdeskOSPlugin extends Plugin {
     this.registerView(VIEW_TYPE_WORKDESK_ZONE, (leaf) => new ZoneView(leaf, this));
     this.registerView(VIEW_TYPE_WORKDESK_HTML, (leaf) => new HtmlView(leaf, this));
     this.registerExtensions(['html', 'htm'], VIEW_TYPE_WORKDESK_HTML);
-    // Vendored vin TerminalView (see src/vendor/workdesk-terminal/NOTICE.md).
-    // Writes the PTY helper script next to the plugin folder before any
-    // session can spawn — BRAT ships main.js / styles.css / manifest.json
-    // only, so the python helper has to be materialized at runtime.
-    const vaultAdapter = this.app.vault.adapter;
-    if (vaultAdapter instanceof FileSystemAdapter && this.manifest.dir) {
-      writePtyHelper(vaultAdapter.getBasePath(), this.manifest.dir);
+    if (Platform.isDesktopApp) {
+      // Vendored vin TerminalView (see src/vendor/workdesk-terminal/NOTICE.md).
+      // Writes the PTY helper script next to the plugin folder before any
+      // session can spawn — BRAT ships main.js / styles.css / manifest.json
+      // only, so the python helper has to be materialized at runtime.
+      const vaultAdapter = this.app.vault.adapter;
+      if (vaultAdapter instanceof FileSystemAdapter && this.manifest.dir) {
+        writePtyHelper(vaultAdapter.getBasePath(), this.manifest.dir);
+      }
+      this.registerView(VIEW_TYPE_WORKDESK_TERMINAL, (leaf) => new TerminalView(leaf));
     }
-    this.registerView(VIEW_TYPE_WORKDESK_TERMINAL, (leaf) => new TerminalView(leaf));
 
     this.registerEditorExtension(wikilinkAndTagDecorations);
 
@@ -132,67 +134,69 @@ export default class WorkdeskOSPlugin extends Plugin {
       },
     });
 
-    this.addCommand({
-      id: `${COMMAND_ID_PREFIX}:terminal:toggle`,
-      name: 'Toggle terminal pane',
-      callback: () => this.toggleTerminalPane(),
-    });
+    if (Platform.isDesktopApp) {
+      this.addCommand({
+        id: `${COMMAND_ID_PREFIX}:terminal:toggle`,
+        name: 'Toggle terminal pane',
+        callback: () => this.toggleTerminalPane(),
+      });
 
-    this.addCommand({
-      id: `${COMMAND_ID_PREFIX}:terminal:new-tab`,
-      name: 'New terminal tab',
-      callback: () => this.openNewTerminalTab(),
-    });
+      this.addCommand({
+        id: `${COMMAND_ID_PREFIX}:terminal:new-tab`,
+        name: 'New terminal tab',
+        callback: () => this.openNewTerminalTab(),
+      });
 
-    // Vendored vin commands — upstream registers these from inside its
-    // stripped `TerminalPlugin.onload`. Re-register them under our command
-    // prefix so the bookmark / capture / shortcuts workflows are reachable
-    // from Obsidian's command palette and rebindable via Settings → Hotkeys.
-    this.addCommand({
-      id: `${COMMAND_ID_PREFIX}:terminal:toggle-fullscreen`,
-      name: 'Toggle fullscreen terminal',
-      callback: () => {
-        const view = this.firstTerminalView();
-        view?.fullscreenManager?.toggle();
-      },
-    });
-    this.addCommand({
-      id: `${COMMAND_ID_PREFIX}:terminal:capture-output`,
-      name: 'Capture terminal output to note',
-      callback: () => {
-        const view = this.firstTerminalView();
-        const session = view?.activeSession;
-        if (!session) return;
-        const text = session.captureOutput();
-        if (!text.trim()) return;
-        new OutputCaptureModal(this.app, text).open();
-      },
-    });
-    this.addCommand({
-      id: `${COMMAND_ID_PREFIX}:terminal:add-bookmark`,
-      name: 'Add terminal bookmark',
-      callback: () => this.firstTerminalView()?.activeSession?.addBookmark(),
-    });
-    this.addCommand({
-      id: `${COMMAND_ID_PREFIX}:terminal:next-bookmark`,
-      name: 'Next terminal bookmark',
-      callback: () => this.firstTerminalView()?.activeSession?.nextBookmark(),
-    });
-    this.addCommand({
-      id: `${COMMAND_ID_PREFIX}:terminal:prev-bookmark`,
-      name: 'Previous terminal bookmark',
-      callback: () => this.firstTerminalView()?.activeSession?.prevBookmark(),
-    });
-    this.addCommand({
-      id: `${COMMAND_ID_PREFIX}:terminal:clear-bookmarks`,
-      name: 'Clear terminal bookmarks',
-      callback: () => this.firstTerminalView()?.activeSession?.clearBookmarks(),
-    });
-    this.addCommand({
-      id: `${COMMAND_ID_PREFIX}:terminal:show-shortcuts`,
-      name: 'Show terminal shortcuts',
-      callback: () => new ShortcutsModal(this.app).open(),
-    });
+      // Vendored vin commands — upstream registers these from inside its
+      // stripped `TerminalPlugin.onload`. Re-register them under our command
+      // prefix so the bookmark / capture / shortcuts workflows are reachable
+      // from Obsidian's command palette and rebindable via Settings → Hotkeys.
+      this.addCommand({
+        id: `${COMMAND_ID_PREFIX}:terminal:toggle-fullscreen`,
+        name: 'Toggle fullscreen terminal',
+        callback: () => {
+          const view = this.firstTerminalView();
+          view?.fullscreenManager?.toggle();
+        },
+      });
+      this.addCommand({
+        id: `${COMMAND_ID_PREFIX}:terminal:capture-output`,
+        name: 'Capture terminal output to note',
+        callback: () => {
+          const view = this.firstTerminalView();
+          const session = view?.activeSession;
+          if (!session) return;
+          const text = session.captureOutput();
+          if (!text.trim()) return;
+          new OutputCaptureModal(this.app, text).open();
+        },
+      });
+      this.addCommand({
+        id: `${COMMAND_ID_PREFIX}:terminal:add-bookmark`,
+        name: 'Add terminal bookmark',
+        callback: () => this.firstTerminalView()?.activeSession?.addBookmark(),
+      });
+      this.addCommand({
+        id: `${COMMAND_ID_PREFIX}:terminal:next-bookmark`,
+        name: 'Next terminal bookmark',
+        callback: () => this.firstTerminalView()?.activeSession?.nextBookmark(),
+      });
+      this.addCommand({
+        id: `${COMMAND_ID_PREFIX}:terminal:prev-bookmark`,
+        name: 'Previous terminal bookmark',
+        callback: () => this.firstTerminalView()?.activeSession?.prevBookmark(),
+      });
+      this.addCommand({
+        id: `${COMMAND_ID_PREFIX}:terminal:clear-bookmarks`,
+        name: 'Clear terminal bookmarks',
+        callback: () => this.firstTerminalView()?.activeSession?.clearBookmarks(),
+      });
+      this.addCommand({
+        id: `${COMMAND_ID_PREFIX}:terminal:show-shortcuts`,
+        name: 'Show terminal shortcuts',
+        callback: () => new ShortcutsModal(this.app).open(),
+      });
+    }
 
     this.addCommand({
       id: `${COMMAND_ID_PREFIX}:capture:triage`,
@@ -252,10 +256,12 @@ export default class WorkdeskOSPlugin extends Plugin {
     // that re-applies `.has-activity` on tab-strip rebuilds. Fullscreen
     // overlay tabs already get the same class from vin's vendored
     // FullscreenManager; no separate wiring needed here.
-    this.app.workspace.onLayoutReady(() => this.installTerminalStatusObservers());
-    this.registerEvent(
-      this.app.workspace.on('layout-change', () => this.installTerminalStatusObservers()),
-    );
+    if (Platform.isDesktopApp) {
+      this.app.workspace.onLayoutReady(() => this.installTerminalStatusObservers());
+      this.registerEvent(
+        this.app.workspace.on('layout-change', () => this.installTerminalStatusObservers()),
+      );
+    }
 
     this.registerDomEvent(activeDocument, 'keydown', (evt: KeyboardEvent) => {
       if (evt.key !== 'Escape') return;
@@ -408,20 +414,53 @@ export default class WorkdeskOSPlugin extends Plugin {
 
   private async loadZones(): Promise<void> {
     try {
-      const vaultRoot = this.getVaultRoot();
-      const manifestDir = (this.manifest as unknown as { dir?: string }).dir ?? '';
-      const pluginRoot = manifestDir ? `${vaultRoot}/${manifestDir}` : vaultRoot;
-      this.zones = scanZones(nodeFsAdapter(), {
-        vaultRoot,
-        manifestPath: this.settings.zones.manifestPath,
-        iconPath: this.settings.zones.iconManifestPath,
-        pluginRoot,
+      if (Platform.isDesktopApp) {
+        const vaultRoot = this.getVaultRoot();
+        const manifestDir = (this.manifest as unknown as { dir?: string }).dir ?? '';
+        const pluginRoot = manifestDir ? `${vaultRoot}/${manifestDir}` : vaultRoot;
+        this.zones = scanZones(nodeFsAdapter(), {
+          vaultRoot,
+          manifestPath: this.settings.zones.manifestPath,
+          iconPath: this.settings.zones.iconManifestPath,
+          pluginRoot,
+          zoneFolders: this.settings.zones.folders,
+        }) as unknown as Record<string, Zone>;
+        return;
+      }
+
+      this.zones = scanZones(obsidianFsAdapter(this.app, await this.loadMobileManifestCache()), {
+        vaultRoot: '',
+        manifestPath: this.settings.zones.manifestPath || 'config/zones.yaml',
+        iconPath: this.settings.zones.iconManifestPath || 'config/object-icons.yaml',
+        pluginRoot: '',
         zoneFolders: this.settings.zones.folders,
       }) as unknown as Record<string, Zone>;
     } catch (err) {
       console.warn(`[${PLUGIN_ID}] zone scan failed; continuing with empty state`, err);
       this.zones = {};
     }
+  }
+
+  private async loadMobileManifestCache(): Promise<Map<string, string>> {
+    const rels = new Set([
+      'config/zones.yaml',
+      'config/object-icons.yaml',
+      this.settings.zones.manifestPath || 'config/zones.yaml',
+      this.settings.zones.iconManifestPath || 'config/object-icons.yaml',
+    ]);
+    const cache = new Map<string, string>();
+    for (const rel of rels) {
+      const normalizedRel = rel.replace(/^\/+/, '');
+      try {
+        if (await this.app.vault.adapter.exists(normalizedRel)) {
+          cache.set(normalizedRel, await this.app.vault.adapter.read(normalizedRel));
+        }
+      } catch {
+        // Missing or unreadable manifests fall through to the scanner's
+        // inlined defaults, matching the desktop fallback behavior.
+      }
+    }
+    return cache;
   }
 
   private registerRibbonIcons(): void {
@@ -438,14 +477,23 @@ export default class WorkdeskOSPlugin extends Plugin {
     }
     const utilityIcons: Array<{ name: string; title: string; handler: () => void | Promise<void> }> = [
       { name: 'workdesk-today', title: "WorkDesk: Today's daily note", handler: () => this.openDaily() },
-      { name: 'workdesk-terminal', title: 'WorkDesk: Toggle terminal pane', handler: () => this.toggleTerminalPane() },
+    ];
+    if (Platform.isDesktopApp) {
+      utilityIcons.push({
+        name: 'workdesk-terminal',
+        title: 'WorkDesk: Toggle terminal pane',
+        handler: () => this.toggleTerminalPane(),
+      });
+    }
+    utilityIcons.push(
       { name: 'workdesk-focus', title: 'WorkDesk: Toggle focus mode', handler: () => { this.toggleFocus(); } },
       { name: 'workdesk-mic', title: 'WorkDesk: Capture voice memo', handler: () => this.toggleVoiceMemo() },
       { name: 'workdesk-settings', title: 'WorkDesk: Open WorkDesk settings', handler: () => this.openWorkdeskSettings() },
-    ];
+    );
     for (const util of utilityIcons) {
       const el = this.addRibbonIcon(util.name, util.title, () => { void util.handler(); });
       el.classList.add('workdesk-icon');
+      el.dataset.workdeskIcon = util.name;
       this.ribbonElements.push(el);
       if (util.name === 'workdesk-mic') this.micRibbonEl = el;
     }
@@ -466,7 +514,12 @@ export default class WorkdeskOSPlugin extends Plugin {
     const view = leaf.view as ZoneView | undefined;
     if (!view) return;
     if (zoneId === 'files') {
-      const tree = scanFilesView(nodeFsAdapter(), { vaultRoot: this.getVaultRoot() });
+      let tree: ReturnType<typeof scanFilesView>;
+      if (Platform.isDesktopApp) {
+        tree = scanFilesView(nodeFsAdapter(), { vaultRoot: this.getVaultRoot() });
+      } else {
+        tree = scanFilesView(obsidianFsAdapter(this.app), { vaultRoot: '' });
+      }
       // Wrapper zone-object with id: '' so ZoneView passes an empty pathPrefix
       // to renderTree. Combined with the TreeRow patch (empty pathPrefix uses
       // node.name as the path root), this makes tree-row file paths
@@ -502,9 +555,7 @@ export default class WorkdeskOSPlugin extends Plugin {
   }
 
   private refreshFocusIconActive(on: boolean): void {
-    // Focus icon is index 9 in the ribbonElements array (after 7 zones + today
-    // + terminal). Defensive: no-op if not yet registered.
-    const focusEl = this.ribbonElements[9];
+    const focusEl = this.ribbonElements.find((el) => el.dataset.workdeskIcon === 'workdesk-focus');
     if (!focusEl) return;
     focusEl.classList.toggle('workdesk-focus-active', on);
   }
@@ -523,6 +574,7 @@ export default class WorkdeskOSPlugin extends Plugin {
   }
 
   private async toggleTerminalPane(): Promise<void> {
+    if (!Platform.isDesktopApp) return;
     const workspace = this.app.workspace;
     const leaves = workspace.getLeavesOfType(VIEW_TYPE_WORKDESK_TERMINAL);
     if (leaves.length === 0) {
@@ -554,6 +606,7 @@ export default class WorkdeskOSPlugin extends Plugin {
   }
 
   async openNewTerminalTab(): Promise<void> {
+    if (!Platform.isDesktopApp) return;
     const workspace = this.app.workspace;
     const leaves = workspace.getLeavesOfType(VIEW_TYPE_WORKDESK_TERMINAL);
     if (leaves.length === 0) {
@@ -570,6 +623,7 @@ export default class WorkdeskOSPlugin extends Plugin {
   }
 
   private installTerminalStatusObservers(): void {
+    if (!Platform.isDesktopApp) return;
     for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKDESK_TERMINAL)) {
       if (!(leaf.view instanceof TerminalView)) continue;
       installStatusObserver(leaf.view);
@@ -578,6 +632,7 @@ export default class WorkdeskOSPlugin extends Plugin {
 
   /** First terminal leaf's view, or null if no terminal has been opened yet. */
   private firstTerminalView(): TerminalView | null {
+    if (!Platform.isDesktopApp) return null;
     const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_WORKDESK_TERMINAL);
     if (leaves.length === 0) return null;
     const view = leaves[0].view;
@@ -586,7 +641,12 @@ export default class WorkdeskOSPlugin extends Plugin {
 
   async triageCaptureInbox(): Promise<void> {
     await this.revealZone('gtd');
-    showToast('Switched to gtd · run /triage in terminal to process inbox', 'info');
+    showToast(
+      Platform.isDesktopApp
+        ? 'Switched to gtd · run /triage in terminal to process inbox'
+        : 'Switched to gtd · process the inbox from a desktop session',
+      'info',
+    );
   }
 
   async toggleVoiceMemo(): Promise<void> {

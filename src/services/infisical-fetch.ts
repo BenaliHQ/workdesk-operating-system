@@ -10,10 +10,30 @@
 // (binary missing, auth expired, secret not found, env not present) with
 // a message suitable for surfacing in a toast.
 
-import { spawn } from 'child_process';
+import { requireDesktopModule } from './desktop-node';
 
 const DEFAULT_BIN = '/opt/homebrew/bin/infisical';
 const DEFAULT_TIMEOUT_MS = 10_000;
+
+type CliChunk = string | { toString(): string };
+
+interface ChildStream {
+  on(event: 'data', cb: (chunk: CliChunk) => void): unknown;
+}
+
+interface ChildProcessLike {
+  stdout?: ChildStream;
+  stderr?: ChildStream;
+  kill(signal: string): unknown;
+  on(event: 'error', cb: (err: Error) => void): unknown;
+  on(event: 'close', cb: (code: number | null) => void): unknown;
+}
+
+type SpawnFn = (
+  bin: string,
+  args: readonly string[],
+  options: { stdio: readonly ['ignore', 'pipe', 'pipe'] },
+) => ChildProcessLike;
 
 export interface InfisicalFetchOptions {
   projectId: string;
@@ -22,9 +42,13 @@ export interface InfisicalFetchOptions {
   /** Override the binary path. Defaults to Homebrew location. */
   binary?: string;
   /** Override the spawn function (test injection). */
-  spawnFn?: typeof spawn;
+  spawnFn?: SpawnFn;
   /** Override the kill-after timeout. */
   timeoutMs?: number;
+}
+
+function defaultSpawn(): SpawnFn {
+  return requireDesktopModule<{ spawn: SpawnFn }>('child_process').spawn;
 }
 
 export async function fetchInfisicalSecret(opts: InfisicalFetchOptions): Promise<string> {
@@ -33,7 +57,7 @@ export async function fetchInfisicalSecret(opts: InfisicalFetchOptions): Promise
   if (!opts.environment.trim()) throw new Error('Infisical environment is not set.');
 
   const bin = opts.binary ?? DEFAULT_BIN;
-  const spawnImpl = opts.spawnFn ?? spawn;
+  const spawnImpl = opts.spawnFn ?? defaultSpawn();
   const args = [
     'secrets',
     'get',
@@ -53,8 +77,8 @@ export async function fetchInfisicalSecret(opts: InfisicalFetchOptions): Promise
       reject(new Error(`Infisical CLI timed out after ${opts.timeoutMs ?? DEFAULT_TIMEOUT_MS}ms.`));
     }, opts.timeoutMs ?? DEFAULT_TIMEOUT_MS);
 
-    child.stdout?.on('data', (chunk: Buffer | string) => { stdout += chunk.toString(); });
-    child.stderr?.on('data', (chunk: Buffer | string) => { stderr += chunk.toString(); });
+    child.stdout?.on('data', (chunk) => { stdout += chunk.toString(); });
+    child.stderr?.on('data', (chunk) => { stderr += chunk.toString(); });
     child.on('error', (err: Error) => {
       // eslint-disable-next-line obsidianmd/prefer-active-window-timers -- pairs with setTimeout above.
       clearTimeout(timer);

@@ -5,16 +5,17 @@
 // in settings adds `allow-scripts`. Both are gated through the settings
 // schema; this view reads the resolved settings from the plugin instance.
 
-import { FileSystemAdapter, FileView, TFile, WorkspaceLeaf } from 'obsidian';
-import { pathToFileURL } from 'node:url';
+import { FileSystemAdapter, FileView, Platform, TFile, WorkspaceLeaf } from 'obsidian';
 import type WorkdeskOSPlugin from '../main';
 import { VIEW_TYPE_WORKDESK_HTML } from '../constants';
+import { requireDesktopModule } from '../services/desktop-node';
 
 /** Absolute, percent-encoded file:// URL for a vault file, or null when the
  *  adapter isn't the desktop FileSystemAdapter (e.g. tests, mobile). */
 export function fileUrlForVaultFile(adapter: unknown, vaultRelativePath: string): string | null {
-  if (!(adapter instanceof FileSystemAdapter)) return null;
-  return pathToFileURL(adapter.getFullPath(vaultRelativePath)).href;
+  if (!Platform.isDesktopApp || !(adapter instanceof FileSystemAdapter)) return null;
+  const nodeUrl = requireDesktopModule<{ pathToFileURL: (path: string) => URL }>('node:url');
+  return nodeUrl.pathToFileURL(adapter.getFullPath(vaultRelativePath)).href;
 }
 
 export class HtmlView extends FileView {
