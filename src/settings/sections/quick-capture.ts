@@ -62,6 +62,21 @@ export async function mountQuickCaptureSection(containerEl: HTMLElement, plugin:
         });
     });
 
+  if (!Platform.isDesktopApp) {
+    new Setting(containerEl)
+      .setName('Show floating mic button')
+      .setDesc('Mobile only — a floating one-tap voice capture button.')
+      .addToggle((toggle) => {
+        toggle
+          .setValue(plugin.settings.capture.showMobileFab)
+          .onChange((value) => {
+            plugin.settings.capture.showMobileFab = value;
+            void plugin.saveSettings();
+            plugin.refreshVoiceFab();
+          });
+      });
+  }
+
   if (showInfisicalControls) {
     new Setting(containerEl)
       .setName('Key source')

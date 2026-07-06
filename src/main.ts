@@ -33,6 +33,7 @@ import {
 import { getProvider } from './services/stt/provider';
 import { installStatusObserver } from './services/terminal-status';
 import { installGlobalToast, showToast, clearToast } from './components/Toast';
+import { VoiceFab } from './components/VoiceFab';
 import { wsSvg } from './icons';
 import { scanZones, scanFilesView, nodeFsAdapter, obsidianFsAdapter } from './services/vault-scan';
 import type { IconName, Zone, ZoneId } from './types';
@@ -67,6 +68,7 @@ export default class WorkdeskOSPlugin extends Plugin {
   activeZone: ZoneId = 'atlas';
   focus: FocusController | null = null;
   private voiceMemo: VoiceMemoController | null = null;
+  private voiceFab: VoiceFab | null = null;
   private micRibbonEl: HTMLElement | null = null;
   private recordingStartedAt: number | null = null;
   private recordingTickTimer: number | null = null;
@@ -116,12 +118,14 @@ export default class WorkdeskOSPlugin extends Plugin {
     this.addCommand({
       id: `${COMMAND_ID_PREFIX}:open-palette`,
       name: 'Open palette',
+      icon: 'search',
       callback: () => new CommandPalette(this.app).open(),
     });
 
     this.addCommand({
       id: `${COMMAND_ID_PREFIX}:templates:insert`,
       name: 'Insert template',
+      icon: 'file-plus',
       editorCallback: (editor, view) => {
         const title = view.file?.basename ?? '';
         new InsertTemplateModal(this.app, {
@@ -138,12 +142,14 @@ export default class WorkdeskOSPlugin extends Plugin {
       this.addCommand({
         id: `${COMMAND_ID_PREFIX}:terminal:toggle`,
         name: 'Toggle terminal pane',
+        icon: 'workdesk-terminal',
         callback: () => this.toggleTerminalPane(),
       });
 
       this.addCommand({
         id: `${COMMAND_ID_PREFIX}:terminal:new-tab`,
         name: 'New terminal tab',
+        icon: 'workdesk-terminal',
         callback: () => this.openNewTerminalTab(),
       });
 
@@ -154,6 +160,7 @@ export default class WorkdeskOSPlugin extends Plugin {
       this.addCommand({
         id: `${COMMAND_ID_PREFIX}:terminal:toggle-fullscreen`,
         name: 'Toggle fullscreen terminal',
+        icon: 'expand',
         callback: () => {
           const view = this.firstTerminalView();
           view?.fullscreenManager?.toggle();
@@ -162,6 +169,7 @@ export default class WorkdeskOSPlugin extends Plugin {
       this.addCommand({
         id: `${COMMAND_ID_PREFIX}:terminal:capture-output`,
         name: 'Capture terminal output to note',
+        icon: 'copy',
         callback: () => {
           const view = this.firstTerminalView();
           const session = view?.activeSession;
@@ -174,26 +182,31 @@ export default class WorkdeskOSPlugin extends Plugin {
       this.addCommand({
         id: `${COMMAND_ID_PREFIX}:terminal:add-bookmark`,
         name: 'Add terminal bookmark',
+        icon: 'bookmark',
         callback: () => this.firstTerminalView()?.activeSession?.addBookmark(),
       });
       this.addCommand({
         id: `${COMMAND_ID_PREFIX}:terminal:next-bookmark`,
         name: 'Next terminal bookmark',
+        icon: 'bookmark',
         callback: () => this.firstTerminalView()?.activeSession?.nextBookmark(),
       });
       this.addCommand({
         id: `${COMMAND_ID_PREFIX}:terminal:prev-bookmark`,
         name: 'Previous terminal bookmark',
+        icon: 'bookmark',
         callback: () => this.firstTerminalView()?.activeSession?.prevBookmark(),
       });
       this.addCommand({
         id: `${COMMAND_ID_PREFIX}:terminal:clear-bookmarks`,
         name: 'Clear terminal bookmarks',
+        icon: 'bookmark-x',
         callback: () => this.firstTerminalView()?.activeSession?.clearBookmarks(),
       });
       this.addCommand({
         id: `${COMMAND_ID_PREFIX}:terminal:show-shortcuts`,
         name: 'Show terminal shortcuts',
+        icon: 'keyboard',
         callback: () => new ShortcutsModal(this.app).open(),
       });
     }
@@ -201,24 +214,28 @@ export default class WorkdeskOSPlugin extends Plugin {
     this.addCommand({
       id: `${COMMAND_ID_PREFIX}:capture:triage`,
       name: 'Triage capture inbox',
+      icon: 'workdesk-gtd',
       callback: () => this.triageCaptureInbox(),
     });
 
     this.addCommand({
       id: `${COMMAND_ID_PREFIX}:capture:voice-memo`,
       name: 'Capture voice memo',
+      icon: 'workdesk-mic',
       callback: () => { void this.toggleVoiceMemo(); },
     });
 
     this.addCommand({
       id: `${COMMAND_ID_PREFIX}:focus:toggle`,
       name: 'Toggle focus mode',
+      icon: 'workdesk-focus',
       callback: () => this.toggleFocus(),
     });
 
     this.addCommand({
       id: `${COMMAND_ID_PREFIX}:update`,
       name: 'Check for plugin updates',
+      icon: 'refresh-cw',
       callback: () => { void checkAndUpdate(this); },
     });
 
@@ -229,6 +246,7 @@ export default class WorkdeskOSPlugin extends Plugin {
       autoLogToSystem: this.settings.capture.autoLogToSystem,
       onTransition: (event) => this.renderVoiceMemoState(event),
     });
+    this.refreshVoiceFab();
 
     this.registerRibbonIcons();
 
@@ -276,6 +294,8 @@ export default class WorkdeskOSPlugin extends Plugin {
 
   onunload(): void {
     this.stopRecordingTicker();
+    this.voiceFab?.destroy();
+    this.voiceFab = null;
     this.voiceMemo?.cancel();
     clearToast(VOICE_MEMO_TOAST_ID);
     activeDocument.body.classList.remove('workdesk-hide-native-ribbon-icons');
@@ -335,6 +355,26 @@ export default class WorkdeskOSPlugin extends Plugin {
       view.setZones(this.zones);
       view.setActiveZone(this.activeZone);
     }
+  }
+
+  refreshVoiceFab(): void {
+    const shouldMount = !Platform.isDesktopApp
+      && this.settings.capture.showMobileFab
+      && this.voiceMemo !== null;
+
+    if (!shouldMount) {
+      this.voiceFab?.destroy();
+      this.voiceFab = null;
+      return;
+    }
+
+    const voiceMemo = this.voiceMemo;
+    if (!voiceMemo || this.voiceFab) return;
+    this.voiceFab = new VoiceFab({
+      onPress: () => this.toggleVoiceMemo(),
+      onCancel: () => this.voiceMemo?.cancel(),
+    });
+    this.voiceFab.setState({ state: voiceMemo.state() });
   }
 
   private zoneRefreshTimer: number | null = null;
@@ -661,6 +701,8 @@ export default class WorkdeskOSPlugin extends Plugin {
   }
 
   private renderVoiceMemoState(event: VoiceMemoEvent): void {
+    this.voiceFab?.setState(event);
+
     const mic = this.micRibbonEl;
     const recording = event.state === 'recording' || event.state === 'requesting-permission';
     mic?.classList.toggle('workdesk-recording', recording);
