@@ -6,6 +6,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.11.0] — 2026-07-06
+
 ### Added
 
 - **Floating mic button on mobile.** One-tap voice capture from anywhere:
