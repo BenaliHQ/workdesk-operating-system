@@ -6,6 +6,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.10.0] — 2026-07-06
+
 ### Added
 
 - **Mobile/iOS support.** The plugin can load on Obsidian mobile with voice
