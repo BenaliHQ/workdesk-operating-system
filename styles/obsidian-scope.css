@@ -235,6 +235,161 @@ body.focus-on .status-bar:hover { opacity: 1; }
   }
 }
 
+/* Mobile voice memo FAB — body-mounted by VoiceFab.ts, mobile only. */
+.workdesk-voice-fab {
+  position: fixed;
+  right: 16px;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+  width: 56px;
+  height: 56px;
+  z-index: calc(var(--ws-z-toast, 200) - 1);
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+.workdesk-voice-fab.is-keyboard-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.workdesk-voice-fab__button-shell {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.workdesk-voice-fab__button {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--interactive-accent);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 120ms ease,
+    background 150ms ease,
+    opacity 150ms ease;
+}
+.workdesk-voice-fab__button:active {
+  transform: scale(0.94);
+}
+.workdesk-voice-fab__button:focus-visible,
+.workdesk-voice-fab__cancel:focus-visible {
+  outline: 2px solid var(--background-modifier-border-focus);
+  outline-offset: 3px;
+}
+.workdesk-voice-fab[data-state="requesting-permission"] .workdesk-voice-fab__button {
+  opacity: 0.7;
+}
+.workdesk-voice-fab[data-state="recording"] .workdesk-voice-fab__button {
+  background: var(--color-red, #d33a3a);
+}
+.workdesk-voice-fab[data-state="transcribing"] .workdesk-voice-fab__button {
+  pointer-events: none;
+}
+.workdesk-voice-fab[data-state="success"] .workdesk-voice-fab__button {
+  background: var(--ws-term-success, var(--text-success, #4f7a52));
+}
+.workdesk-voice-fab[data-state="error"] .workdesk-voice-fab__button {
+  animation: workdesk-voice-fab-shake 300ms ease-in-out;
+}
+.workdesk-voice-fab__pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-red, #d33a3a) 38%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+.workdesk-voice-fab[data-state="recording"] .workdesk-voice-fab__pulse {
+  animation: workdesk-voice-fab-pulse 2s ease-out infinite;
+}
+.workdesk-voice-fab__elapsed {
+  position: absolute;
+  top: 50%;
+  right: 64px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 999px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  font-family: ui-monospace, 'Geist Mono', 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  line-height: 1;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.workdesk-voice-fab__cancel {
+  position: absolute;
+  right: 14px;
+  bottom: 64px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 50%;
+  background: var(--background-primary);
+  color: var(--text-muted);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  pointer-events: auto;
+}
+.workdesk-voice-fab__cancel:hover {
+  color: var(--text-normal);
+  border-color: var(--background-modifier-border-hover, var(--background-modifier-border));
+}
+.workdesk-voice-fab__spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: workdesk-voice-fab-spin 800ms linear infinite;
+}
+@keyframes workdesk-voice-fab-pulse {
+  0% {
+    opacity: 0.36;
+    transform: scale(1);
+  }
+  70%, 100% {
+    opacity: 0;
+    transform: scale(1.65);
+  }
+}
+@keyframes workdesk-voice-fab-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes workdesk-voice-fab-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-3px); }
+  40% { transform: translateX(3px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+}
+
 /* HtmlView iframe — sized to fit pane via class rather than inline styles. */
 .workdesk-html-view .wd-html-iframe {
   width: 100%;

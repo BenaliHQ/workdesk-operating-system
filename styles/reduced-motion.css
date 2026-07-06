@@ -12,4 +12,13 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  .workdesk-voice-fab[data-state="recording"] .workdesk-voice-fab__pulse,
+  .workdesk-voice-fab[data-state="error"] .workdesk-voice-fab__button {
+    animation: none !important;
+  }
+
+  .workdesk-voice-fab__pulse {
+    display: none !important;
+  }
 }

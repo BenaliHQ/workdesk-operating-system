@@ -53,6 +53,7 @@ export interface WorkdeskSettings {
     defaultDest: string;
     filenamePattern: string;
     autoLogToSystem: boolean;
+    showMobileFab: boolean;
     inputDevice?: string;
     /** Where the STT API key comes from. `direct` = operator pasted it into
      *  Obsidian's SecretComponent. `infisical` = pulled on-demand from the
@@ -152,6 +153,7 @@ export const DEFAULT_SETTINGS: WorkdeskSettings = {
     defaultDest: 'personal/captures',
     filenamePattern: '{{date}} Capture - {{title}}',
     autoLogToSystem: true,
+    showMobileFab: true,
     keySource: 'direct',
     infisical: {
       projectId: '',
