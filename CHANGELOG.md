@@ -6,6 +6,17 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Floating mic button on mobile.** One-tap voice capture from anywhere:
+  a floating button (bottom-right, safe-area aware) that shows recording,
+  elapsed time, cancel, transcribing, and success states. Hides while the
+  keyboard is open; honors reduced motion. Toggle under Settings → Quick
+  capture (mobile only).
+- **Command icons.** All WorkDesk commands now carry icons, so mobile
+  toolbar and Open-menu entries render proper glyphs (mic on voice
+  capture, zone glyphs elsewhere).
+
 ## [1.10.0] — 2026-07-06
 
 ### Added
