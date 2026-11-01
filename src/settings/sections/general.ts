@@ -1,22 +1,26 @@
 // General section — vault, auto-open daily, reduce motion.
 
-import { Setting } from 'obsidian';
+import { Platform, Setting } from 'obsidian';
 import type WorkdeskOSPlugin from '../../main';
 
 export function mountGeneralSection(containerEl: HTMLElement, plugin: WorkdeskOSPlugin): void {
   new Setting(containerEl).setName('General').setHeading();
 
-  new Setting(containerEl)
-    .setName('Vault path')
-    .setDesc('Defaults to the current Obsidian vault.')
-    .addText((text) => {
-      text
-        .setValue(plugin.settings.vault.path)
-        .onChange((value) => {
-          plugin.settings.vault.path = value;
-          void plugin.saveSettings();
-        });
-    });
+  // Absolute filesystem fallback, only read by the desktop scanner. Mobile
+  // always scans the open vault through Obsidian's index.
+  if (Platform.isDesktopApp) {
+    new Setting(containerEl)
+      .setName('Vault path')
+      .setDesc('Defaults to the current Obsidian vault.')
+      .addText((text) => {
+        text
+          .setValue(plugin.settings.vault.path)
+          .onChange((value) => {
+            plugin.settings.vault.path = value;
+            void plugin.saveSettings();
+          });
+      });
+  }
 
   new Setting(containerEl)
     .setName('Auto-open daily note')

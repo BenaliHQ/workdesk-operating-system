@@ -3,13 +3,14 @@
 // Layout: .pane-hero + .object-list. Each object renders as a .obj card
 // that expands into its child tree. Files mode renders a flat tree at root.
 //
-// Creation flows (new note, new folder) are right-click-only — there are no
-// + buttons. The zone hero context menu targets the zone root; each card's
-// context menu targets that object's folder.
+// Creation flows (new note, new folder) are right-click-only (long-press on
+// mobile) — there are no + buttons. The zone hero context menu targets the
+// zone root; each card's context menu targets that object's folder.
 
-import { ItemView, Menu, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
+import { ItemView, Menu, Platform, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
 import type WorkdeskOSPlugin from '../main';
 import { VIEW_TYPE_WORKDESK_ZONE } from '../constants';
+import { onContextMenuOrLongPress } from '../components/long-press';
 import { renderZoneCard } from '../components/ZoneCard';
 import { renderTree } from '../components/TreeRow';
 import { renderZoneEmpty, renderCaughtUpRow } from '../components/EmptyStates';
@@ -72,7 +73,9 @@ export class ZoneView extends ItemView {
         renderZoneEmpty({
           icon: 'inbox',
           title: 'Nothing in this zone yet',
-          body: 'Right-click to add a folder or note, or drop one in your vault.',
+          body: Platform.isMobile
+            ? 'Long-press to add a folder or note, or create one in your vault.'
+            : 'Right-click to add a folder or note, or drop one in your vault.',
         }),
       );
       return;
@@ -153,7 +156,7 @@ export class ZoneView extends ItemView {
     hero.appendChild(meta);
 
     const zoneRoot = this.zoneRoot();
-    hero.addEventListener('contextmenu', (evt) => this.openCreateMenu(evt, zoneRoot, name ?? this.activeZone));
+    onContextMenuOrLongPress(hero, (evt) => this.openCreateMenu(evt, zoneRoot, name ?? this.activeZone));
     return hero;
   }
 
@@ -208,7 +211,7 @@ export class ZoneView extends ItemView {
 
   private handleActivate(node: { type: string; name: string }, path: string): void {
     if (node.type === 'file') {
-      void this.plugin.app.workspace.openLinkText(path, '', false);
+      void this.plugin.openVaultPath(path);
     }
   }
 
