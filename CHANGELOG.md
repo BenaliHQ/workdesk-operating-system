@@ -6,6 +6,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.11.1] — 2026-11-01
+
 ### Fixed
 
 - **Mobile plugin load error from the voice-capture button.** In 1.11.0 the
