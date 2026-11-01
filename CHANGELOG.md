@@ -6,6 +6,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **"Hide non-Workdesk ribbon icons" now works on iPad.** On mobile,
+  Obsidian moves the left ribbon into the sidebar drawer and renames
+  its `workspace-ribbon` class to `workspace-drawer-ribbon`, so the filter
+  only ever matched the desktop ribbon. The rule now covers both, and
+  turning the setting off still shows every icon again. Checked against the
+  Obsidian 1.14.5 app code and a simulated preview; not yet confirmed on a
+  device.
+
 ## [1.11.1] — 2026-11-01
 
 ### Fixed
