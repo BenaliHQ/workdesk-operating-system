@@ -164,8 +164,10 @@
 }
 
 /* Opt-in: hide non-WorkDesk ribbon icons. Body class toggled by the plugin
- * when settings.appearance.hideNonWorkdeskRibbonIcons is true. */
-body.workdesk-hide-native-ribbon-icons .workspace-ribbon .side-dock-ribbon-action:not(.workdesk-icon) {
+ * when settings.appearance.hideNonWorkdeskRibbonIcons is true. On mobile
+ * (phone and iPad) Obsidian moves the left ribbon into the drawer and swaps
+ * its `workspace-ribbon` class for `workspace-drawer-ribbon`, so match both. */
+body.workdesk-hide-native-ribbon-icons :is(.workspace-ribbon, .workspace-drawer-ribbon) .side-dock-ribbon-action:not(.workdesk-icon) {
   display: none;
 }
 
