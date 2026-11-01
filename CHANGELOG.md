@@ -6,6 +6,41 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Mobile plugin load error from the voice-capture button.** In 1.11.0 the
+  mobile floating mic button created its buttons with
+  `activeDocument.createEl`. Obsidian's `createEl` appends to the element it
+  is called on, and appending to the document throws `HierarchyRequestError`.
+  That code runs during plugin load on mobile when the button is enabled
+  (the default). A stubbed mobile test that matches Obsidian 1.14.5's
+  `createEl` reproduces the error with the published 1.11.0 `main.js`; the
+  fix has not yet been confirmed on a device.
+- **Long-press no longer also taps.** Holding a long-press past the menu no
+  longer triggers the row's tap action when the finger lifts.
+- **Zone menus now open on iPhone and iPad.** Creating, deleting and other
+  zone-pane actions were right-click only, and iOS does not fire a
+  right-click event on long-press, so they could not be reached on mobile.
+  Long-press a zone header, folder or file to open the same menu. Desktop
+  still uses right-click.
+- **Opening a note from the zone pane on iPhone now shows the note.** The
+  zone pane lives in the left drawer, which covers the editor on a phone;
+  the drawer now closes after a file, daily note or new note opens, like the
+  core file explorer.
+- **Faster, complete zone scan at startup.** The first scan and the vault
+  change listeners now wait until Obsidian finishes loading the workspace.
+  Before, mobile scanned a partly loaded vault index during plugin load and
+  received a change event for every file in the vault.
+- **Desktop-only adapter checks are safe on mobile.** Checks against the
+  desktop file-system adapter now check the platform and that the class
+  exists before using it.
+
+### Changed
+
+- On mobile, settings and HTML preview hide the desktop-only vault path row
+  and the "Open in browser" button. The README now lists what works on
+  mobile and what stays desktop only.
+
 ## [1.11.0] — 2026-07-06
 
 ### Added

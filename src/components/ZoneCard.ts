@@ -1,8 +1,10 @@
 // .obj zone-card — minimal row: initial letter + title + count.
-// No preview text. No + buttons. Creation flows through right-click only,
-// surfaced by the host (ZoneView) via the onContextMenu callback.
+// No preview text. No + buttons. Creation flows through right-click (or
+// long-press on mobile) only, surfaced by the host (ZoneView) via the
+// onContextMenu callback.
 
 import { wsSvgEl } from '../icons';
+import { onContextMenuOrLongPress } from './long-press';
 import type { ZoneObject } from '../types';
 
 export interface ZoneCardOpts {
@@ -56,15 +58,16 @@ export function renderZoneCard(opts: ZoneCardOpts): HTMLElement {
   }
   row.appendChild(meta);
 
+  // Bound before the click listener so a long-press can swallow the click
+  // that ends the touch.
+  const onContextMenu = opts.onContextMenu;
+  if (onContextMenu) onContextMenuOrLongPress(row, onContextMenu);
+
   row.addEventListener('click', () => {
     opts.obj.expanded = !opts.obj.expanded;
     card.classList.toggle('collapsed', !opts.obj.expanded);
     opts.onToggle?.(opts.obj.id);
   });
-
-  if (opts.onContextMenu) {
-    row.addEventListener('contextmenu', (evt) => opts.onContextMenu?.(evt));
-  }
 
   card.appendChild(row);
   return card;

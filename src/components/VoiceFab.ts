@@ -80,7 +80,10 @@ export class VoiceFab {
       this.elapsedEl = elapsed;
       this.root.appendChild(elapsed);
 
-      const cancel = activeDocument.createEl('button');
+      // Global createEl, not `activeDocument.createEl`: Obsidian's
+      // Node.createEl appends to the receiver, and appending to a Document
+      // throws HierarchyRequestError.
+      const cancel = createEl('button');
       cancel.className = 'workdesk-voice-fab__cancel';
       cancel.type = 'button';
       cancel.setAttribute('aria-label', 'Cancel voice memo');
@@ -101,7 +104,7 @@ export class VoiceFab {
     pulse.setAttribute('aria-hidden', 'true');
     shell.appendChild(pulse);
 
-    const button = activeDocument.createEl('button');
+    const button = createEl('button');
     button.className = 'workdesk-voice-fab__button';
     button.type = 'button';
     button.disabled = this.state === 'transcribing';

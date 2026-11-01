@@ -242,9 +242,16 @@ export function setIcon(_el: HTMLElement, _name: string): void {}
 
 export const Platform = {
   isDesktopApp: true,
+  isMobile: false,
+  isMobileApp: false,
+  isPhone: false,
 };
-export function __setPlatformDesktop(isDesktopApp: boolean): void {
+/** `false` simulates the iOS/Android app; `isPhone` picks iPhone vs iPad. */
+export function __setPlatformDesktop(isDesktopApp: boolean, opts: { isPhone?: boolean } = {}): void {
   Platform.isDesktopApp = isDesktopApp;
+  Platform.isMobile = !isDesktopApp;
+  Platform.isMobileApp = !isDesktopApp;
+  Platform.isPhone = !isDesktopApp && (opts.isPhone ?? false);
 }
 
 // FileSystemAdapter — desktop adapter type. Real Obsidian narrows

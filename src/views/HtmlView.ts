@@ -5,17 +5,18 @@
 // in settings adds `allow-scripts`. Both are gated through the settings
 // schema; this view reads the resolved settings from the plugin instance.
 
-import { FileSystemAdapter, FileView, Platform, TFile, WorkspaceLeaf } from 'obsidian';
+import { FileView, Platform, TFile, WorkspaceLeaf } from 'obsidian';
 import type WorkdeskOSPlugin from '../main';
 import { VIEW_TYPE_WORKDESK_HTML } from '../constants';
-import { requireDesktopModule } from '../services/desktop-node';
+import { desktopFileSystemAdapter, requireDesktopModule } from '../services/desktop-node';
 
 /** Absolute, percent-encoded file:// URL for a vault file, or null when the
  *  adapter isn't the desktop FileSystemAdapter (e.g. tests, mobile). */
 export function fileUrlForVaultFile(adapter: unknown, vaultRelativePath: string): string | null {
-  if (!Platform.isDesktopApp || !(adapter instanceof FileSystemAdapter)) return null;
+  const fsAdapter = desktopFileSystemAdapter(adapter);
+  if (!fsAdapter) return null;
   const nodeUrl = requireDesktopModule<{ pathToFileURL: (path: string) => URL }>('node:url');
-  return nodeUrl.pathToFileURL(adapter.getFullPath(vaultRelativePath)).href;
+  return nodeUrl.pathToFileURL(fsAdapter.getFullPath(vaultRelativePath)).href;
 }
 
 export class HtmlView extends FileView {
@@ -62,6 +63,11 @@ export class HtmlView extends FileView {
     sub.className = 'sub';
     sub.textContent = 'Rendered inline · workdesk-HTML-view';
     chip.appendChild(sub);
+    // file:// URLs only resolve on desktop; mobile keeps the inline render.
+    if (!Platform.isDesktopApp) {
+      this.contentEl.appendChild(chip);
+      return;
+    }
     const btn = createEl('button');
     btn.className = 'btn ghost';
     btn.type = 'button';

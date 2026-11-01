@@ -1,5 +1,5 @@
 import { Plugin, TFile, TFolder, addIcon, Platform } from 'obsidian';
-import { FileSystemAdapter } from 'obsidian';
+import { desktopFileSystemAdapter } from './services/desktop-node';
 import {
   COMMAND_ID_PREFIX,
   PLUGIN_ID,
@@ -94,7 +94,6 @@ export default class WorkdeskOSPlugin extends Plugin {
     );
 
     this.registerIcons();
-    await this.loadZones();
 
     this.registerView(VIEW_TYPE_WORKDESK_ZONE, (leaf) => new ZoneView(leaf, this));
     this.registerView(VIEW_TYPE_WORKDESK_HTML, (leaf) => new HtmlView(leaf, this));
@@ -104,8 +103,8 @@ export default class WorkdeskOSPlugin extends Plugin {
       // Writes the PTY helper script next to the plugin folder before any
       // session can spawn — BRAT ships main.js / styles.css / manifest.json
       // only, so the python helper has to be materialized at runtime.
-      const vaultAdapter = this.app.vault.adapter;
-      if (vaultAdapter instanceof FileSystemAdapter && this.manifest.dir) {
+      const vaultAdapter = desktopFileSystemAdapter(this.app.vault.adapter);
+      if (vaultAdapter && this.manifest.dir) {
         writePtyHelper(vaultAdapter.getBasePath(), this.manifest.dir);
       }
       this.registerView(VIEW_TYPE_WORKDESK_TERMINAL, (leaf) => new TerminalView(leaf));
@@ -266,9 +265,20 @@ export default class WorkdeskOSPlugin extends Plugin {
     // Obsidian's file explorer and the zone pane shows stale state until
     // a manual reload. Debounce coalesces bulk ops (e.g. moving 50 files
     // into a folder) into a single refresh.
-    this.registerEvent(this.app.vault.on('create', () => this.scheduleZoneRefresh()));
-    this.registerEvent(this.app.vault.on('delete', () => this.scheduleZoneRefresh()));
-    this.registerEvent(this.app.vault.on('rename', () => this.scheduleZoneRefresh()));
+    //
+    // The initial scan and the listeners wait for layout-ready: during
+    // startup the vault index is still filling (it emits `create` for every
+    // file), and on mobile the scanner reads that index. Scanning in onload
+    // would see a partial tree and delay plugin load.
+    // The plugin can be disabled before layout-ready fires; listeners
+    // registered after unload would never be detached.
+    this.app.workspace.onLayoutReady(() => {
+      if (this.unloaded) return;
+      void this.refreshZones();
+      this.registerEvent(this.app.vault.on('create', () => this.scheduleZoneRefresh()));
+      this.registerEvent(this.app.vault.on('delete', () => this.scheduleZoneRefresh()));
+      this.registerEvent(this.app.vault.on('rename', () => this.scheduleZoneRefresh()));
+    });
 
     // Sidebar tab activity pulse — per-view MutationObserver on tabBarEl
     // that re-applies `.has-activity` on tab-strip rebuilds. Fullscreen
@@ -293,6 +303,9 @@ export default class WorkdeskOSPlugin extends Plugin {
   }
 
   onunload(): void {
+    this.unloaded = true;
+    if (this.zoneRefreshTimer !== null) activeWindow.clearTimeout(this.zoneRefreshTimer);
+    this.zoneRefreshTimer = null;
     this.stopRecordingTicker();
     this.voiceFab?.destroy();
     this.voiceFab = null;
@@ -378,6 +391,7 @@ export default class WorkdeskOSPlugin extends Plugin {
   }
 
   private zoneRefreshTimer: number | null = null;
+  private unloaded = false;
 
   /** Coalesces a burst of vault filesystem events into a single refresh
    *  on the trailing edge. 250ms is short enough to feel instant after a
@@ -405,7 +419,7 @@ export default class WorkdeskOSPlugin extends Plugin {
     try {
       const file = await this.app.vault.create(path, '');
       if (file instanceof TFile) {
-        await this.app.workspace.openLinkText(file.path, '', false);
+        await this.openVaultPath(file.path);
         new RenameItemModal(this.app, { target: file, heading: 'Rename note' }).open();
       }
       return path;
@@ -608,9 +622,17 @@ export default class WorkdeskOSPlugin extends Plugin {
   }
 
   private getVaultRoot(): string {
-    const adapter = this.app.vault.adapter;
-    if (adapter instanceof FileSystemAdapter) return adapter.getBasePath();
+    const adapter = desktopFileSystemAdapter(this.app.vault.adapter);
+    if (adapter) return adapter.getBasePath();
     return this.settings.vault.path;
+  }
+
+  /** Opens a vault file. On phones the zone pane lives in the left drawer,
+   *  which covers the editor — close it so the note is actually visible,
+   *  matching the core file explorer. */
+  async openVaultPath(path: string): Promise<void> {
+    await this.app.workspace.openLinkText(path, '', false);
+    if (Platform.isPhone) this.app.workspace.leftSplit?.collapse();
   }
 
   private async toggleTerminalPane(): Promise<void> {
@@ -796,7 +818,7 @@ export default class WorkdeskOSPlugin extends Plugin {
 
     const existing = this.app.vault.getAbstractFileByPath(path);
     if (existing instanceof TFile) {
-      await this.app.workspace.openLinkText(path, '', false);
+      await this.openVaultPath(path);
       return;
     }
 
@@ -815,7 +837,7 @@ export default class WorkdeskOSPlugin extends Plugin {
       showToast(`Could not create daily note at ${path}: ${String(err)}`, 'error');
       return;
     }
-    await this.app.workspace.openLinkText(path, '', false);
+    await this.openVaultPath(path);
   }
 
   private async resolveDailyTemplate(now: Date, dateStr: string): Promise<string> {

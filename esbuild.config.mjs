@@ -7,13 +7,14 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
+import { mainBundleOptions } from './scripts/bundle-options.mjs';
 
 // Obsidian loads `styles.css` by inlining it into a <style> element, which
 // means relative `url(...)` references in @font-face resolve against the
 // document URL (`app://obsidian.md/...`) instead of the plugin folder, so
 // the woff2 files 404. Inlining the fonts as base64 data URIs at build
 // time sidesteps the path-resolution problem entirely. ~330KB stylesheet
-// hit is acceptable for a desktop-only plugin.
+// hit is acceptable (mobile included).
 function inlineFontUrls(css, baseDir) {
   return css.replace(/url\(['"]?(fonts\/[^'")]+\.woff2)['"]?\)/g, (match, relPath) => {
     const fontPath = resolve(baseDir, relPath);
@@ -67,31 +68,4 @@ const concatenated = cssOrder
 const inlined = inlineFontUrls(concatenated, __dirname);
 writeFileSync(resolve(__dirname, 'styles.css'), inlined, 'utf8');
 
-await esbuild.build({
-  entryPoints: ['src/main.ts'],
-  outfile: 'main.js',
-  bundle: true,
-  format: 'cjs',
-  platform: 'browser',
-  target: 'ES2022',
-  loader: { '.yaml': 'text' },
-  external: [
-    'obsidian',
-    'electron',
-    '@codemirror/*',
-    '@lezer/*',
-    'fs',
-    'os',
-    'path',
-    'child_process',
-    'node:fs',
-    'node:os',
-    'node:path',
-    'node:child_process',
-    'node:url',
-    'url',
-  ],
-  sourcemap: dev,
-  minify: !dev,
-  logLevel: 'info',
-});
+await esbuild.build(mainBundleOptions({ dev }));

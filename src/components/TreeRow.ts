@@ -2,6 +2,7 @@
 
 import { wsSvgEl } from '../icons';
 import { showContextMenu, fileMenuItems, folderMenuItems } from './ContextMenu';
+import { onContextMenuOrLongPress } from './long-press';
 import type { TreeNode } from '../types';
 
 export interface TreeRowOpts {
@@ -53,6 +54,36 @@ export function renderTreeRow(opts: TreeRowOpts): HTMLElement {
     row.appendChild(count);
   }
 
+  // Bound before the click listener so a long-press can swallow the click
+  // that ends the touch.
+  onContextMenuOrLongPress(row, (evt) => {
+    evt.preventDefault();
+    const path = opts.pathPrefix ? `${opts.pathPrefix}/${node.name}` : node.name;
+    if (opts.onContextMenu) {
+      opts.onContextMenu(evt, node, path);
+      return;
+    }
+    const fire = (action: string) => () => opts.onContextAction?.(action, node, path);
+    const items =
+      node.type === 'folder'
+        ? folderMenuItems({
+            newNote: fire('new-note'),
+            newFolder: fire('new-folder'),
+            rename: fire('rename'),
+            reveal: fire('reveal'),
+            delete: fire('delete'),
+          })
+        : fileMenuItems({ filePath: path, fileBasename: node.name }, {
+            rename: fire('rename'),
+            duplicate: fire('duplicate'),
+            reveal: fire('reveal'),
+            copyWikilink: fire('copy-wikilink'),
+            copyMarkdownLink: fire('copy-markdown-link'),
+            delete: fire('delete'),
+          });
+    showContextMenu(evt.clientX, evt.clientY, items);
+  });
+
   row.addEventListener('click', () => {
     const path = opts.pathPrefix ? `${opts.pathPrefix}/${node.name}` : node.name;
     if (node.type === 'folder') {
@@ -81,34 +112,6 @@ export function renderTreeRow(opts: TreeRowOpts): HTMLElement {
       }
     }
     opts.onActivate?.(node, path);
-  });
-
-  row.addEventListener('contextmenu', (evt) => {
-    evt.preventDefault();
-    const path = opts.pathPrefix ? `${opts.pathPrefix}/${node.name}` : node.name;
-    if (opts.onContextMenu) {
-      opts.onContextMenu(evt, node, path);
-      return;
-    }
-    const fire = (action: string) => () => opts.onContextAction?.(action, node, path);
-    const items =
-      node.type === 'folder'
-        ? folderMenuItems({
-            newNote: fire('new-note'),
-            newFolder: fire('new-folder'),
-            rename: fire('rename'),
-            reveal: fire('reveal'),
-            delete: fire('delete'),
-          })
-        : fileMenuItems({ filePath: path, fileBasename: node.name }, {
-            rename: fire('rename'),
-            duplicate: fire('duplicate'),
-            reveal: fire('reveal'),
-            copyWikilink: fire('copy-wikilink'),
-            copyMarkdownLink: fire('copy-markdown-link'),
-            delete: fire('delete'),
-          });
-    showContextMenu(evt.clientX, evt.clientY, items);
   });
 
   return row;

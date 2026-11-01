@@ -1,4 +1,6 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { LONG_PRESS_MS, onContextMenuOrLongPress } from '../src/components/long-press';
+import { mountGeneralSection } from '../src/settings/sections/general';
 import { App, FileSystemAdapter, Platform, Plugin, TFile, TFolder, type App as ObsidianApp } from 'obsidian';
 import { __setPlatformDesktop } from './stubs/obsidian';
 import WorkdeskOSPlugin from '../src/main';
@@ -315,5 +317,192 @@ describe('mobile platform gates', () => {
     expect(revealed).toEqual(['gtd']);
     expect(document.body.textContent).toContain('Switched to gtd · process the inbox from a desktop session');
     expect(document.body.textContent).not.toContain('/triage');
+  });
+});
+
+function touchEvent(type: string, x: number, y: number): Event {
+  const evt = new Event(type, { bubbles: true, cancelable: true });
+  const touches = type === 'touchend' ? [] : [{ clientX: x, clientY: y }];
+  Object.defineProperty(evt, 'touches', { value: touches });
+  return evt;
+}
+
+describe('long-press context menus', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('opens the context menu after a long-press on mobile and swallows the trailing tap', () => {
+    vi.useFakeTimers();
+    __setPlatformDesktop(false, { isPhone: true });
+    const el = document.createElement('div');
+    const menus: Array<{ x: number; y: number }> = [];
+    const clicks: number[] = [];
+    onContextMenuOrLongPress(el, (evt) => menus.push({ x: evt.clientX, y: evt.clientY }));
+    el.addEventListener('click', () => clicks.push(1));
+
+    el.dispatchEvent(touchEvent('touchstart', 40, 60));
+    vi.advanceTimersByTime(LONG_PRESS_MS);
+    el.dispatchEvent(touchEvent('touchend', 40, 60));
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+
+    expect(menus).toEqual([{ x: 40, y: 60 }]);
+    expect(clicks).toEqual([]);
+  });
+
+  it('swallows the release click even when the finger is held long after the menu opens', () => {
+    vi.useFakeTimers();
+    __setPlatformDesktop(false, { isPhone: false });
+    const el = document.createElement('div');
+    const menus: number[] = [];
+    const clicks: number[] = [];
+    onContextMenuOrLongPress(el, () => menus.push(1));
+    el.addEventListener('click', () => clicks.push(1));
+
+    el.dispatchEvent(touchEvent('touchstart', 40, 60));
+    vi.advanceTimersByTime(LONG_PRESS_MS);
+    vi.advanceTimersByTime(5_000);
+    el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+    el.dispatchEvent(touchEvent('touchend', 40, 60));
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    expect(menus).toEqual([1]);
+    expect(clicks).toEqual([]);
+
+    // The next, separate tap goes through immediately.
+    el.dispatchEvent(touchEvent('touchstart', 40, 60));
+    el.dispatchEvent(touchEvent('touchend', 40, 60));
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(clicks).toEqual([1]);
+  });
+
+  it('treats a short tap or a scroll as a normal interaction', () => {
+    vi.useFakeTimers();
+    __setPlatformDesktop(false, { isPhone: true });
+    const el = document.createElement('div');
+    const menus: number[] = [];
+    const clicks: number[] = [];
+    onContextMenuOrLongPress(el, () => menus.push(1));
+    el.addEventListener('click', () => clicks.push(1));
+
+    el.dispatchEvent(touchEvent('touchstart', 10, 10));
+    vi.advanceTimersByTime(100);
+    el.dispatchEvent(touchEvent('touchend', 10, 10));
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    el.dispatchEvent(touchEvent('touchstart', 10, 10));
+    el.dispatchEvent(touchEvent('touchmove', 10, 60));
+    vi.advanceTimersByTime(LONG_PRESS_MS * 2);
+
+    expect(menus).toEqual([]);
+    expect(clicks).toEqual([1]);
+  });
+
+  it('keeps desktop on right-click only', () => {
+    vi.useFakeTimers();
+    const el = document.createElement('div');
+    const menus: number[] = [];
+    onContextMenuOrLongPress(el, () => menus.push(1));
+
+    el.dispatchEvent(touchEvent('touchstart', 10, 10));
+    vi.advanceTimersByTime(LONG_PRESS_MS * 2);
+    expect(menus).toEqual([]);
+
+    el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+    expect(menus).toEqual([1]);
+  });
+});
+
+describe('mobile startup and navigation', () => {
+  it('defers the initial zone scan and vault listeners until layout is ready', async () => {
+    __setPlatformDesktop(false);
+    const plugin = new WorkdeskOSPlugin();
+    plugin.app = makeApp(makeVaultTree(), { 'config/zones.yaml': customZonesYaml });
+    const queued: Array<() => void> = [];
+    plugin.app.workspace.onLayoutReady = (cb: () => void) => { queued.push(cb); };
+    const vaultEvents: string[] = [];
+    (plugin.app.vault as unknown as { on: (name: string) => unknown }).on = (name: string) => {
+      vaultEvents.push(name);
+      return {};
+    };
+
+    await plugin.onload();
+    const zonesOf = (): Record<string, { name: string }> =>
+      (plugin as unknown as { zones: Record<string, { name: string }> }).zones;
+
+    expect(zonesOf()).toEqual({});
+    expect(vaultEvents).toEqual([]);
+
+    for (const cb of queued) cb();
+    await vi.waitFor(() => expect(zonesOf().atlas?.name).toBe('custom atlas'));
+    expect(vaultEvents).toEqual(expect.arrayContaining(['create', 'delete', 'rename']));
+  });
+
+  it('does nothing when layout-ready fires after the plugin was unloaded', async () => {
+    __setPlatformDesktop(false);
+    const plugin = new WorkdeskOSPlugin();
+    plugin.app = makeApp(makeVaultTree(), { 'config/zones.yaml': customZonesYaml });
+    const queued: Array<() => void> = [];
+    plugin.app.workspace.onLayoutReady = (cb: () => void) => { queued.push(cb); };
+    const vaultEvents: string[] = [];
+    (plugin.app.vault as unknown as { on: (name: string) => unknown }).on = (name: string) => {
+      vaultEvents.push(name);
+      return {};
+    };
+
+    await plugin.onload();
+    plugin.onunload();
+    for (const cb of queued) cb();
+    await Promise.resolve();
+
+    expect(vaultEvents).toEqual([]);
+    expect((plugin as unknown as { zones: Record<string, unknown> }).zones).toEqual({});
+  });
+
+  it('cancels a pending zone refresh on unload', async () => {
+    vi.useFakeTimers();
+    try {
+      const plugin = new WorkdeskOSPlugin();
+      plugin.app = new App();
+      const refresh = vi.fn(async () => {});
+      plugin.refreshZones = refresh;
+      plugin.scheduleZoneRefresh();
+      plugin.onunload();
+      vi.advanceTimersByTime(1_000);
+      expect(refresh).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('collapses the left drawer after opening a file on iPhone only', async () => {
+    for (const [isPhone, expected] of [[true, true], [false, false]] as const) {
+      __setPlatformDesktop(false, { isPhone });
+      const plugin = new WorkdeskOSPlugin();
+      plugin.app = new App();
+      await plugin.openVaultPath('atlas/people/jane-doe.md');
+      expect(plugin.app.workspace._openLinkTextCalls).toHaveLength(1);
+      expect(plugin.app.workspace.leftSplit.collapsed).toBe(expected);
+    }
+  });
+
+  it('leaves the left sidebar alone on desktop', async () => {
+    const plugin = new WorkdeskOSPlugin();
+    plugin.app = new App();
+    await plugin.openVaultPath('atlas/people/jane-doe.md');
+    expect(plugin.app.workspace.leftSplit.collapsed).toBe(false);
+  });
+
+  it('hides the desktop-only vault path setting on mobile', () => {
+    const rowNames = (): string[] => {
+      const host = document.createElement('div');
+      mountGeneralSection(host, makeSettingsPlugin());
+      return Array.from(host.querySelectorAll('.setting-item-name')).map((el) => el.textContent ?? '');
+    };
+    expect(rowNames()).toContain('Vault path');
+    __setPlatformDesktop(false);
+    expect(rowNames()).not.toContain('Vault path');
+    expect(rowNames()).toContain('Daily note folder');
   });
 });

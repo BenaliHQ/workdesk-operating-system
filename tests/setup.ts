@@ -24,7 +24,17 @@ function createElImpl<K extends keyof HTMLElementTagNameMap>(
   if (opts?.attr) {
     for (const [k, v] of Object.entries(opts.attr)) el.setAttribute(k, v);
   }
-  if (!isDoc) (this as Element).appendChild(el);
+  // Obsidian 1.14.5 (`Node.prototype.createEl`) always appends to `this`,
+  // Documents included. A Document already has its <html> root, so the DOM
+  // spec rejects a second element child with HierarchyRequestError. Mirror
+  // that here rather than silently skipping the append.
+  if (isDoc) {
+    throw new DOMException(
+      "Failed to execute 'appendChild' on 'Node': Only one element on document allowed.",
+      'HierarchyRequestError',
+    );
+  }
+  (this as Element).appendChild(el);
   return el;
 }
 
