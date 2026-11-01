@@ -6,6 +6,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.11.2] — 2026-11-01
+
 ### Fixed
 
 - **"Hide non-Workdesk ribbon icons" now works on iPad.** On mobile,
